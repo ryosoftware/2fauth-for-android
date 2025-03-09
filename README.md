@@ -12,6 +12,16 @@ Read the 2FA accounts for a user (identified by the server URL location and an a
 
 Protection level: PIN password and fingerprint access.
 
+# CERTIFICATE SIGNATURE VERIFICATION
+
+The SHA-256 digest of the certificate used to sign the app is as follows, and remains constant regardless of the version:
+
+`730d15ddea95e04a3d8201a577dfb7c5490dbf0f489f33de8061651067cd2582`
+
+The app signature certification can be checked by the following command:
+
+`apksigner verify --verbose --print-certs app-release.apk | grep "Signer #1 certificate SHA-256 digest"`
+
 # OPEN SOURCE LIBRARIES WE USE
 
 We generate the OTP codes using the JAVA library from <A HREF="https://github.com/BastiaanJansen/otp-java">Bastiaan Jansen</A>.
