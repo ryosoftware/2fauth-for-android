@@ -1,0 +1,295 @@
+package com.twofauth.android;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+
+import android.os.Build;
+import android.os.Bundle;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.format.DateUtils;
+import android.view.View;
+
+import androidx.biometric.BiometricPrompt;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import com.twofauth.android.main_activity.AuthenticWithBiometrics;
+import com.twofauth.android.main_activity.AuthenticWithPin;
+import com.twofauth.android.main_activity.DataFilterer;
+import com.twofauth.android.main_activity.DataLoader;
+import com.twofauth.android.main_activity.ListUtils;
+import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
+
+import com.twofauth.android.main_activity.MainActivityRecyclerAdapter;
+import com.twofauth.android.main_activity.FabButtonShowOrHide;
+import com.twofauth.android.preferences_activity.MainPreferencesFragment;
+
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
+    private static final long SYNC_BUTTON_ROTATION_DURATION = (long) (2.5f * DateUtils.SECOND_IN_MILLIS);
+    private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
+    private final MainActivityRecyclerAdapter mAdapter = new MainActivityRecyclerAdapter(false);;
+    private boolean mLoadingData = false;
+    private final List<JSONObject> mItems = new ArrayList<JSONObject>();
+    private String mActiveGroup = null;
+    private final ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this);
+    private String mStartedActivityForResult;
+    private boolean mUnlocked = false;
+    private final RotateAnimation mRotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);;
+    private boolean mRotatingFab = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (Constants.getDefaultSharedPreferences(this).getBoolean(Constants.DISABLE_SCREENSHOTS_KEY, getResources().getBoolean(R.bool.disable_screenshots_default))) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        }
+        setContentView(R.layout.main_activity);
+        final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.recycler_view);
+        recycler_view.setLayoutManager(new LinearLayoutManager(this));
+        recycler_view.setAdapter(mAdapter);
+        ((SimpleItemAnimator) recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
+        ((FloatingActionButton) findViewById(R.id.sync_server_data)).setOnClickListener(this);
+        ((FloatingActionButton) findViewById(R.id.open_app_settings)).setOnClickListener(this);
+        new FabButtonShowOrHide((RecyclerView) findViewById(R.id.recycler_view), new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) });
+        ((EditText) findViewById(R.id.filter_text)).addTextChangedListener(this);
+        mRotateAnimation.setDuration(SYNC_BUTTON_ROTATION_DURATION);
+        mRotateAnimation.setInterpolator(new LinearInterpolator());
+        mRotateAnimation.setRepeatCount(Animation.INFINITE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mReceiver.enable(this);
+        setSyncDataButtonAvailability();
+        loadData();
+        unlock();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mReceiver.disable(this);
+        mUnlocked = false;
+        mAdapter.onPause();
+        findViewById(R.id.filters).setVisibility(View.GONE);
+    }
+
+    private void onAuthenticationSucceeded() {
+        mAdapter.onResume();
+        findViewById(R.id.filters).setVisibility(mItems == null ? View.GONE : View.VISIBLE);
+        mUnlocked = true;
+    }
+
+    public void onBiometricAuthenticationSucceeded() {
+        onAuthenticationSucceeded();
+    }
+
+    public void onPinAuthenticationSucceeded() {
+        onAuthenticationSucceeded();
+    }
+
+    public void onAuthenticationError() {
+        finish();
+    }
+
+    public void onBiometricAuthenticationError(final int error_code) {
+        if (error_code == BiometricPrompt.ERROR_LOCKOUT) {
+            Constants.getDefaultSharedPreferences(this).edit().remove(Constants.FINGERPRINT_ACCESS_KEY).apply();
+        }
+        onAuthenticationError();
+    }
+
+    public void onPinAuthenticationError(final boolean cancelled) {
+        onAuthenticationError();
+    }
+
+    private void unlock() {
+        final SharedPreferences preferences = Constants.getDefaultSharedPreferences(this);
+        if (preferences.contains(Constants.PIN_ACCESS_KEY)) {
+            if ((preferences.getBoolean(Constants.FINGERPRINT_ACCESS_KEY, false)) && (AuthenticWithBiometrics.canUseBiometrics(this))) {
+                AuthenticWithBiometrics.authenticate(this, this);
+            }
+            else {
+                AuthenticWithPin.authenticate(this, this, Constants.getDefaultSharedPreferences(this).getString(Constants.PIN_ACCESS_KEY, null));
+            }
+        }
+        else {
+            onAuthenticationSucceeded();
+        }
+    }
+
+    private void startActivityForResult(@NotNull final Class<?> activity_class) {
+        mStartedActivityForResult = activity_class.getName();
+        mActivityResultLauncher.launch(new Intent(this, activity_class));
+    }
+
+    private void setActiveGroup(@NotNull final View view) {
+        final String current_active_group = ((TextView) view.findViewById(R.id.group)).getText().toString();
+        mActiveGroup = StringUtils.equals(mActiveGroup, current_active_group) ? null : current_active_group;
+        filterData();
+    }
+
+    @Override
+    public void onClick(@NotNull final View view) {
+        final int id = view.getId();
+        if (id == R.id.sync_server_data) {
+            MainService.startService(this);
+        }
+        else if (id == R.id.open_app_settings) {
+            startActivityForResult(PreferencesActivity.class);
+        }
+        else if (id == R.id.group) {
+            setActiveGroup(view);
+        }
+    }
+
+    @Override
+    public void beforeTextChanged(@NotNull final CharSequence string, final int start, final int count, final int after) {}
+
+    @Override
+    public void onTextChanged(@NotNull final CharSequence string, final int start, final int before, final int count) {}
+
+    @Override
+    public void afterTextChanged(@NotNull final Editable editable) {
+        filterData();
+    }
+
+    private void setSyncDataButtonAvailability() {
+        if (! isFinishedOrFinishing()) {
+            synchronized (mSynchronizationObject) {
+                final boolean syncing_or_loading_data = ((mLoadingData) || (MainService.isRunning(this)));
+                ((FloatingActionButton) findViewById(R.id.sync_server_data)).setEnabled(MainService.canSyncServerData(this) && (! syncing_or_loading_data));
+                if ((syncing_or_loading_data) && (! mRotatingFab)) {
+                    ((FloatingActionButton) findViewById(R.id.sync_server_data)).startAnimation(mRotateAnimation);
+                    mRotatingFab = true;
+                }
+                else if ((! syncing_or_loading_data) && (mRotatingFab)) {
+                    ((FloatingActionButton) findViewById(R.id.sync_server_data)).clearAnimation();
+                    mRotatingFab = false;
+                }
+            }
+        }
+    }
+
+    public void onServiceStarted() {
+        setSyncDataButtonAvailability();
+    }
+    public void onServiceFinished() {
+        setSyncDataButtonAvailability();
+    }
+    public void onDataSyncedFromServer() {
+        loadData();
+    }
+
+    private void loadData() {
+        synchronized (mSynchronizationObject) {
+            if (! mLoadingData) {
+                mLoadingData = true;
+                (new DataLoader(this, mAdapter, (ViewGroup) findViewById(R.id.groups_bar), this, this)).start();
+            }
+        }
+    }
+
+    public void onDataLoaded(final boolean success) {
+        if (! isFinishedOrFinishing()) {
+            synchronized (mSynchronizationObject) {
+                mLoadingData = false;
+                mActiveGroup = null;
+                if (success) {
+                    mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(R.id.empty_view));
+                    mActiveGroup = null;
+                    findViewById(R.id.filters).setVisibility((mItems.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
+                    ((EditText) findViewById(R.id.filter_text)).setText(null);
+                }
+                setSyncDataButtonAvailability();
+            }
+        }
+    }
+
+    @Override
+    public void onDataLoadError() {
+        onDataLoaded(false);
+    }
+
+    @Override
+    public void onDataLoadSuccess(@Nullable List<JSONObject> items) {
+        synchronized (mSynchronizationObject) {
+            ListUtils.setItems(mItems, items);
+            onDataLoaded(true);
+        }
+    }
+
+    private void filterData() {
+        synchronized (mSynchronizationObject) {
+            new DataFilterer(this, mAdapter, (ViewGroup) findViewById(R.id.groups_bar), mItems, mActiveGroup, ((EditText) findViewById(R.id.filter_text)).getText().toString(), this).start();
+        }
+    }
+
+    @Override
+    public void onDataFilterSuccess() {
+        synchronized (mSynchronizationObject) {
+            mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(((mActiveGroup != null) && (((EditText) findViewById(R.id.filter_text)).getText().toString().isEmpty())) ? R.id.empty_view : R.id.recycler_view));
+        }
+    }
+    @Override
+    public void onDataFilterError() {}
+
+    @Override
+    public void onActivityResult(@NotNull final ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            if ((PreferencesActivity.class.getName().equals(mStartedActivityForResult)) && (! isFinishedOrFinishing())) {
+                final Intent intent = result.getData();
+                if (intent != null) {
+                    final List<String> changed_settings = intent.getStringArrayListExtra(MainPreferencesFragment.EXTRA_CHANGED_SETTINGS);
+                    if (changed_settings != null) {
+                        if ((changed_settings.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY)) || (changed_settings.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY))) {
+                            synchronized (mSynchronizationObject) {
+                                mItems.clear();
+                                mAdapter.setItems(mItems);
+                                findViewById(R.id.filters).setVisibility(View.GONE);
+                                setSyncDataButtonAvailability();
+                            }
+                            if ((MainService.canSyncServerData(this)) && (! MainService.isRunning(this))) {
+                                MainService.startService(this);
+                            }
+                        }
+                        mAdapter.onOptionsChanged();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void processOnBackPressed() {
+        finish();
+    }
+}

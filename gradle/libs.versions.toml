@@ -1,0 +1,37 @@
+[versions]
+
+agp = "8.7.3"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+appcompat = "1.7.0"
+material = "1.12.0"
+constraintlayout = "2.2.0"
+navigationFragment = "2.8.3"
+navigationUi = "2.8.3"
+androidxPreference = "1.2.1"
+recyclerView = "1.2.0"
+cardView = "1.0.0"
+bastiaanJansenOtp = "2.1.0"
+androidxBiometric = "1.4.0-alpha02"
+gson = "2.12.1"
+
+[libraries]
+
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
+navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
+androidx-preferences = { group = "androidx.preference", name = "preference", version.ref = "androidxPreference" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "androidxBiometric" }
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerView" }
+cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardView" }
+bastiaanjansen-otp = { group = "com.github.bastiaanjansen", name = "otp-java", version.ref = "bastiaanJansenOtp" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+[plugins]
+
+android-application = { id = "com.android.application", version.ref = "agp" }
+

@@ -1,0 +1,13 @@
+<resources>
+
+    <bool name="ungroup_otp_code_default">true</bool>
+
+    <bool name="disable_screenshots_default">true</bool>
+
+    <bool name="minimize_app_after_copy_to_clipboard_default">true</bool>
+
+    <bool name="hide_otp_codes_automatically_default">true</bool>
+
+    <bool name="display_account_group_default">true</bool>
+
+</resources>

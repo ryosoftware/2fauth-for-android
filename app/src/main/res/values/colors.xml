@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <color name="ic_launcher_background">#FF530066</color>
+
+    <color name="accent">#FFEADDFF</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="gray">#FF49454F</color>
+    <color name="light_blue">#FF6768B0</color>
+    <color name="light_red">#FFB06769</color>
+
+    <color name="otp_hidden">@color/gray</color>
+    <color name="otp_visible_normal">@color/light_blue</color>
+    <color name="otp_visible_last_seconds">@color/light_red</color>
+
+    <color name="edit_text_background">#FFFFFFFF</color>
+
+</resources>

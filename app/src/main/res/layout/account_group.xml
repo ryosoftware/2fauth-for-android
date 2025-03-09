@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/group"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:paddingTop="10dp"
+    android:paddingStart="16dp"
+    android:paddingBottom="10dp"
+    android:paddingEnd="16dp"
+    android:maxLines="1"
+    android:textColor="?android:textColorSecondary"
+    android:background="@drawable/border_frame_transparent"
+    style="@style/Base.TextAppearance.AppCompat.Body2" />

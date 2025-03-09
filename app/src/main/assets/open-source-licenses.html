@@ -1,0 +1,140 @@
+<HTML>
+    <HEAD>
+        <STYLE>
+
+            :root {
+                --body-background-color: #F8F9F9;
+                --body-font-color: black;
+                --body-font-light-color: #808B96;
+                --info-background-color: #D5D8DC;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --body-background-color: #010409;
+                    --body-font-color: white;
+                    --body-font-light-color: #808B96;
+                    --info-background-color: #151B23;
+                }
+            }
+
+            body {
+                background-color: var(--body-background-color);
+                color: var(--body-font-color);
+            }
+
+            a {
+                color: var(--body-font-color);
+            }
+
+            .head {
+                margin-left: 20px;
+                margin-bottom: 40px;
+            }
+
+            .box {
+                border: 1px solid var(--body-font-light-color);
+                padding: 20px;
+                margin: 0px 20px 40px 20px;
+            }
+
+            .header {
+            }
+
+            .header-icon {
+                display: inline-block;
+                vertical-align: text-top;
+                border-radius: 50%;
+            }
+
+            .header-text {
+                display: inline-block;
+                margin-left: 10px;
+                vertical-align: text-top;
+            }
+
+            .info {
+                background-color: var(--info-background-color);
+                margin-top: 20px;
+                padding: 20px;
+            }
+
+            .app {
+                font-weight: bold;
+            }
+
+            .developer {
+                color: var(--body-font-light-color);
+            }
+
+            .info-title {
+                margin-top: 10px;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .license-title {
+                margin-top: 40px;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .license-notice {
+                margin-top: 40px;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+        </STYLE>
+    </HEAD>
+    <BODY>
+        <DIV CLASS = "head">
+            <H3>Open source licenses</H3>
+            <P>We thank all software developers who offer their applications, components and/or libraries for free and altruistically and we encourage you to actively contribute to their maintenance, according to your availability.</P>
+            <P>Specifically, in this app, we use the <I>open source</I> libraries and components listed below.</P>
+        </DIV>
+        <DIV CLASS = "box">
+            <DIV CLASS = "header">
+                <IMG CLASS = "header-icon" SRC = "https://avatars.githubusercontent.com/u/858858?s=40&v=4">
+                <DIV CLASS = "header-text">
+                    <SPAN CLASS = "app">FAuth</SPAN><BR>
+                    <SPAN CLASS = "developer">by Bubka</SPAN>
+                </DIV>
+            </DIV>
+            <DIV CLASS = "info">
+                <P CLASS = "info-title">Info</P>
+                <P>2FAuth is a web based self-hosted alternative to One Time Passcode (OTP) generators like Google Authenticator, designed for both mobile and desktop.</P>
+                <P><B>Bubka's 2FAuth is the core of our app, which we connect to in order to read 2FA accounts.</B></P>
+                <P><B>You will need to install this app on your computer (instructions are provided for installing it in a docker container) in order to use it.</B></P>
+                <P><A HREF = "https://github.com/Bubka/2FAuth">Read more...</A></P>
+                <P CLASS = "license-title">License</P>
+                <P>Bubka 2FAuth is distributed under the terms of the <A HREF = "https://www.gnu.org/licenses/agpl-3.0.html">AGPL-3.0 license</A></P>
+                <P CLASS = "license-notice">License notice</P>
+                <P>This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</P>
+                <P>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.</P>
+            </DIV>
+        </DIV>
+
+        <DIV CLASS = "box">
+            <DIV CLASS = "header">
+                <IMG CLASS = "header-icon" SRC = "https://avatars.githubusercontent.com/u/21118262?s=40&v=4">
+                <DIV CLASS = "header-text">
+                    <SPAN CLASS = "app">OTP-Java</SPAN><BR>
+                    <SPAN CLASS = "developer">by Bastiaan Jansen</SPAN>
+                </DIV>
+            </DIV>
+            <DIV CLASS = "info">
+                <P CLASS = "info-title">Info</P>
+                <P>A small and easy-to-use one-time password generator for Java implementing RFC 4226 (HOTP) and RFC 6238 (TOTP).</P>
+                <P><A HREF = "https://github.com/BastiaanJansen/otp-java">Read more...</A></P>
+                <P CLASS = "license-title">License</P>
+                <P>OTP-Java library is distributed under the terms of the <A HREF = "https://opensource.org/license/mit">MIT license</A></P>
+                <P CLASS = "license-notice">License notice</P>
+                <P>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</P>
+                <P>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</P>
+                <P>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</P>
+            </DIV>
+        </DIV>
+    </BODY>
+</HTML>
+

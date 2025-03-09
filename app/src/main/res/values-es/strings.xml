@@ -1,0 +1,122 @@
+<resources>
+
+    <string name="app_name">2FAuth</string>
+
+    <string name="app_version">Número de versión</string>
+
+    <string name="settings">Configuración</string>
+    <string name="action_settings">@string/settings</string>
+
+    <string name="sync_service_notifications_channel">Notificaciones del servicio de sincronización</string>
+
+    <string name="trying_to_load_2fa_codes">Tratando de leer los códigos 2FA</string>
+    <string name="trying_to_refresh_2fa_codes">Tratando de refrescar la lista de códigos 2FA</string>
+
+    <string name="no_2fa_codes">No hay cuentas 2FA</string>
+
+    <string name="server_location">URL del servidor</string>
+    <string name="server_location_dialog_title">@string/server_location</string>
+    <string name="server_location_dialog_message">Por favor, introduzca la dirección del servidor (incluyendo la parte correspondiente al protocolo http/https).\n\nEjemplo: https://demo.2fauth.app</string>
+    <string name="server_location_is_not_set">Server location is not set</string>
+
+    <string name="synced_accounts_data_and_server_token_removed_due_to_server_location_removed">Como ha eliminado la dirección del servidor, las cuentas previamente sincronizadas y el token de acceso se han eliminado consecuentemente</string>
+    <string name="synced_accounts_data_and_server_token_removed_due_to_server_location_changed">Como ha cambiado la dirección del servidor, las cuentas previamente sincronizadas y el token de acceso se han eliminado consecuentemente</string>
+    <string name="server_token_removed_due_to_server_location_removed">Como ha eliminado la dirección del servidor, el token de acceso se han eliminado consecuentemente</string>
+    <string name="server_token_removed_due_to_server_location_changed">Como ha cambiado la dirección del servidor, el token de acceso se han eliminado consecuentemente</string>
+
+    <string name="token_value">Token de acceso</string>
+    <string name="token_value_is_set_summary">Haga clic para actualizar el valor del token de acceso</string>
+    <string name="token_value_is_not_set_summary">Haga clic para introducir el valor del token de acceso</string>
+    <string name="token_value_dialog_title">@string/token_value</string>
+    <string name="token_value_dialog_message">Por favor, ingrese el valor del token.\n\nPara obtener un token, abra la URL del servidor en un navegador web, inicie sesión con su cuenta de usuario y acceda a los ajustes y luego a "Configuración de OAuth"; finalmente haga clic en "generar un token", copie el valor y péguelo aquí.</string>
+    <string name="token_unchanged">(sin cambios)</string>
+
+    <plurals name="number_of_accounts">
+        <item quantity="one">Se lista una única cuenta</item>
+        <item quantity="other">Se listan %1$d cuentas</item>
+        <item quantity="many">Se listan %1$d cuentas</item>
+    </plurals>
+
+    <string name="date_time">%1$s a las %2$s</string>
+
+    <string name="last_server_sync_data_time">Los datos se han sincronizado el %1$s</string>
+
+    <string name="sync_details">Detalles de sincronización</string>
+    <string name="click_to_sync_data">Haga clic para iniciar la sincronización</string>
+    <string name="last_sync_error">La última sincronización fue el %2$s, pero no se completó debido al siguiente error: %1$s.\n\n%3$s</string>
+
+    <plurals name="sync_details">
+        <item quantity="one">La última sincronización fue el %2$s y se leyeron los datos de una cuenta.\n\n%3$s</item>
+        <item quantity="other">La última sincronización fue el %2$s y se leyeron los datos de %1$d cuentas.\n\n%3$s</item>
+        <item quantity="many">La última sincronización fue el %2$s y se leyeron los datos de %21$d cuentas.\n\n%3$s</item>
+    </plurals>
+
+    <string name="appearance">Apariencia</string>
+
+    <string name="otp_code">Código OTP</string>
+
+    <string name="otp_type_is_unsupported">El algoritmo %1$s no está soportado</string>
+
+    <string name="ungroup_otp_codes">Desagrupar código 2FA</string>
+    <string name="ungroup_otp_codes_summary">Desagrupa los códigos para facilitar la lectura</string>
+
+    <string name="display_account_group">Mostrar el grupo</string>
+    <string name="display_account_group_summary">Se mostrará el grupo al que pertenece cada cuenta, si es el caso.</string>
+
+    <string name="security">Seguridad</string>
+
+    <string name="disable_screenshots">Desactivar capturas de pantalla</string>
+    <string name="disable_screenshots_summary">En la lista de cuentas no se permitirán capturas de pantalla</string>
+    <string name="change_will_be_applied_next_time_you_start_the_app">El cambio se hará efectivo la próxima vez que inicie la app</string>
+
+    <string name="minimize_app_after_copy_to_clipboard">Minimizar al copiar</string>
+    <string name="minimize_app_after_copy_to_clipboard_summary">Minimiza la app cuando un código OTP es copiado al portapapeles</string>
+
+    <string name="hide_otp_codes_automatically">Ocultar códigos OTP automáticamente</string>
+    <string name="hide_otp_codes_automatically_summary">Ocultar automáticamente el código OTP después de un ciclo de visualización completo (deberá presionar nuevamente para mostrar el siguiente)</string>
+
+    <string name="pin_access">PIN de acceso</string>
+    <string name="pin_access_summary">Configurar un código para acceder a la app</string>
+    <string name="pin_access_dialog_title">@string/pin_access</string>
+    <string name="pin_access_enter_current_pin">Por favor, introduzca el código de acceso</string>
+    <string name="pin_access_enter_new_pin">Por favor, introduzca el código con el que acceder a la app.El PIN debe tener entre 4 y 8 dígitos.\n\nNo podrá acceder a la app si lo olvida.</string>
+    <string name="pin_access_enter_new_pin_again">Por favor, introduzca el código de nuevo.\n\nRecuerde que no podrá acceder a la app si lo olvida.</string>
+    <string name="pin_is_not_valid">El código introducido no es válido</string>
+    <string name="pin_and_its_repeat_does_not_match">El código y su repetición no coinciden</string>
+    <string name="pin_has_been_set">Se ha configurado un código de acceso</string>
+    <string name="pin_has_been_removed">El código de acceso se ha eliminado</string>
+
+    <string name="fingerprint_access">Acceso con huella</string>
+    <string name="fingerprint_access_summary">Requerir la huella digital del usuario para acceder al aplicativo</string>
+    <string name="use_your_fingerprint_to_unlock_the_app">Verificación biométrica</string>
+    <string name="fingerprint_is_not_valid">No se ha podido validar su identidad</string>
+
+    <string name="others">Otros</string>
+
+    <string name="open_source_licenses">Licencias de código abierto</string>
+    <string name="open_source_licenses_summary">Haga clic para ver las licencias de código abierto de las librerías y componentes externos que utilizamos</string>
+
+    <string name="github_repo">Repositorio GitHub</string>
+    <string name="github_repo_summary">Abra el repositorio GitHub de la aplicación para obtener información sobre las últimas versiones, reportar errores o contribuir al desarrollo</string>
+
+    <string name="search">Escribe algo para filtrar&#8230;</string>
+
+    <string name="accept">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="ok">OK</string>
+
+    <string name="information">Información</string>
+
+    <string name="number_0">0</string>
+    <string name="number_1">1</string>
+    <string name="number_2">2</string>
+    <string name="number_3">3</string>
+    <string name="number_4">4</string>
+    <string name="number_5">5</string>
+    <string name="number_6">6</string>
+    <string name="number_7">7</string>
+    <string name="number_8">8</string>
+    <string name="number_9">9</string>
+    <string name="key_delete">\u232B</string>
+
+</resources>
