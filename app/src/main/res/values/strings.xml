@@ -63,14 +63,17 @@
     <string name="display_account_group">Display account group</string>
     <string name="display_account_group_summary">The name of the group to which the account belongs will be displayed, if applicable.</string>
 
+    <string name="show_copy_to_clipboard_button">Show Copy to Clipboard button</string>
+    <string name="show_copy_to_clipboard_button_summary">Displays a button to copy the currently displayed OTP code to the Clipboard.\n\nWhen an OTP code is visible you can always copy it by long clicking on it.</string>
+
+    <string name="minimize_app_after_copy_to_clipboard">Minimize after Copy to Clipboard</string>
+    <string name="minimize_app_after_copy_to_clipboard_summary">Minimizes the app when an OTP code is copied to the Clipboard</string>
+
     <string name="security">Security</string>
 
     <string name="disable_screenshots">Disable screenshots</string>
     <string name="disable_screenshots_summary">Do not allow to take screenshots from the accounts list</string>
     <string name="change_will_be_applied_next_time_you_start_the_app">The change will be applied the next time you start the app</string>
-
-    <string name="minimize_app_after_copy_to_clipboard">Minimize when copying</string>
-    <string name="minimize_app_after_copy_to_clipboard_summary">Minimizes the app after an OTP code is copied to the clipboard</string>
 
     <string name="hide_otp_codes_automatically">Hide OTP codes automatically</string>
     <string name="hide_otp_codes_automatically_summary">Automatically hide the OTP code after a complete display cycle (you must press it again to display the next one)</string>

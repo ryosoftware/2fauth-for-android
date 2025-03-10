@@ -133,6 +133,8 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(SYNC_DETAILS_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.UNGROUP_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISPLAY_ACCOUNT_GROUP_KEY).setOnPreferenceChangeListener(this);
+        findPreference(Constants.SHOW_COPY_TO_CLIPBOARD_BUTTON_KEY).setOnPreferenceChangeListener(this);
+        findPreference(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISABLE_SCREENSHOTS_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.HIDE_OTP_AUTOMATICALLY_KEY).setOnPreferenceChangeListener(this);
         findPreference(PIN_ACCESS_ENABLED_KEY).setOnPreferenceChangeListener(this);
@@ -238,12 +240,16 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             onSettingValueChanged(preference.getKey());
             return true;
         }
-        else if (Constants.DISABLE_SCREENSHOTS_KEY.equals(preference.getKey())) {
-            UiUtils.showMessageDialog(getActivity(), R.string.change_will_be_applied_next_time_you_start_the_app);
+        else if (Constants.SHOW_COPY_TO_CLIPBOARD_BUTTON_KEY.equals(preference.getKey())) {
             onSettingValueChanged(preference.getKey());
             return true;
         }
         else if (Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY.equals(preference.getKey())) {
+            onSettingValueChanged(preference.getKey());
+            return true;
+        }
+        else if (Constants.DISABLE_SCREENSHOTS_KEY.equals(preference.getKey())) {
+            UiUtils.showMessageDialog(getActivity(), R.string.change_will_be_applied_next_time_you_start_the_app);
             onSettingValueChanged(preference.getKey());
             return true;
         }

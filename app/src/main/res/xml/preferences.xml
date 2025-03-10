@@ -14,13 +14,15 @@
 
         <CheckBoxPreference android:key="display-account-group" android:title="@string/display_account_group" android:summary="@string/display_account_group_summary" android:defaultValue="@bool/display_account_group_default" />
 
+        <CheckBoxPreference android:key="show-copy-to-clipboard-button" android:title="@string/show_copy_to_clipboard_button" android:summary="@string/show_copy_to_clipboard_button_summary" android:defaultValue="@bool/show_copy_to_clipboard_button_default" />
+
+        <CheckBoxPreference android:key="minimize-app-after-copy-to-clipboard" android:title="@string/minimize_app_after_copy_to_clipboard" android:summary="@string/minimize_app_after_copy_to_clipboard_summary" android:defaultValue="@bool/minimize_app_after_copy_to_clipboard_default" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/security">
 
         <CheckBoxPreference android:key="disable-screenshots" android:title="@string/disable_screenshots" android:summary="@string/disable_screenshots_summary" android:defaultValue="@bool/disable_screenshots_default" />
-
-        <CheckBoxPreference android:key="minimize-app-after-copy-to-clipboard" android:title="@string/minimize_app_after_copy_to_clipboard" android:summary="@string/minimize_app_after_copy_to_clipboard_summary" android:defaultValue="@bool/minimize_app_after_copy_to_clipboard_default" />
 
         <CheckBoxPreference android:key="hide-otp-codes-automatically" android:title="@string/hide_otp_codes_automatically" android:summary="@string/hide_otp_codes_automatically_summary" android:defaultValue="@bool/hide_otp_codes_automatically_default" />
 

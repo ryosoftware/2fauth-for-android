@@ -64,14 +64,17 @@
     <string name="display_account_group">Mostrar el grupo</string>
     <string name="display_account_group_summary">Se mostrará el grupo al que pertenece cada cuenta, si es el caso.</string>
 
+    <string name="show_copy_to_clipboard_button">Botón de copiar al portapapeles</string>
+    <string name="show_copy_to_clipboard_button_summary">Muestra un botón para copiar en el portapapeles el código OTP que se está visualizando.\n\nCuando un código OTP es visible también lo puede copiar haciendo clic largo en el mismo.</string>
+
+    <string name="minimize_app_after_copy_to_clipboard">Minimizar al copiar</string>
+    <string name="minimize_app_after_copy_to_clipboard_summary">Minimiza la app cuando un código OTP es copiado al portapapeles</string>
+
     <string name="security">Seguridad</string>
 
     <string name="disable_screenshots">Desactivar capturas de pantalla</string>
     <string name="disable_screenshots_summary">En la lista de cuentas no se permitirán capturas de pantalla</string>
     <string name="change_will_be_applied_next_time_you_start_the_app">El cambio se hará efectivo la próxima vez que inicie la app</string>
-
-    <string name="minimize_app_after_copy_to_clipboard">Minimizar al copiar</string>
-    <string name="minimize_app_after_copy_to_clipboard_summary">Minimiza la app cuando un código OTP es copiado al portapapeles</string>
 
     <string name="hide_otp_codes_automatically">Ocultar códigos OTP automáticamente</string>
     <string name="hide_otp_codes_automatically_summary">Ocultar automáticamente el código OTP después de un ciclo de visualización completo (deberá presionar nuevamente para mostrar el siguiente)</string>

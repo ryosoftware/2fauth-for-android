@@ -10,4 +10,6 @@
 
     <bool name="display_account_group_default">true</bool>
 
+    <bool name="show_copy_to_clipboard_button_default">true</bool>
+
 </resources>
