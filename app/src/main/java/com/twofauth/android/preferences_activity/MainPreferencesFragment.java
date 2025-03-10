@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class MainPreferencesFragment extends PreferenceFragmentCompat implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener, EditTextPreference.OnBindEditTextListener, AuthenticWithPin.OnPinAuthenticationFinished, AuthenticWithPin.OnPinRequestFinished, AuthenticWithBiometrics.OnBiometricAuthenticationFinished {
+public class MainPreferencesFragment extends PreferenceFragmentCompat implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener, AuthenticWithPin.OnPinAuthenticationFinished, AuthenticWithPin.OnPinRequestFinished, AuthenticWithBiometrics.OnBiometricAuthenticationFinished {
     public static final String EXTRA_CHANGED_SETTINGS = "changes";
     private static final String SYNC_DETAILS_KEY = "sync-details";
     private static final String PIN_ACCESS_ENABLED_KEY = "pin-access-enabled";
@@ -111,11 +111,25 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
 
     private void initializePreferences(@NotNull final Context context) {
         final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
-        findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY).setSummary(preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, getString(R.string.server_location_is_not_set)));
-        findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY).setOnPreferenceChangeListener(this);
-        findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setSummary(preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.token_value_is_set_summary : R.string.token_value_is_not_set_summary);
-        ((EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY)).setOnBindEditTextListener(this);
-        findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setOnPreferenceChangeListener(this);
+        final EditTextPreference server_location = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY), server_token = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
+        server_location.setSummary(preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, getString(R.string.server_location_is_not_set)));
+        server_location.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            @Override
+            public void onBindEditText(@NonNull EditText edit_text) {
+                edit_text.setText(preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, null));
+                edit_text.setSelection(edit_text.getText().length());
+            }
+        });
+        server_location.setOnPreferenceChangeListener(this);
+
+        server_token.setSummary(preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.token_value_is_set_summary : R.string.token_value_is_not_set_summary);
+        server_token.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            public void onBindEditText(@NonNull final EditText edit_text) {
+                edit_text.setHint(Constants.getDefaultSharedPreferences(edit_text.getContext()).contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? getString(R.string.token_unchanged) : "");
+                edit_text.setText(null);
+            }
+        });
+        server_token.setOnPreferenceChangeListener(this);
         findPreference(SYNC_DETAILS_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.UNGROUP_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISPLAY_ACCOUNT_GROUP_KEY).setOnPreferenceChangeListener(this);
@@ -137,12 +151,6 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         super.onViewCreated(view, saved_instance_state);
         initializePreferences(view.getContext());
         setDivider(null);
-    }
-
-    @Override
-    public void onBindEditText(@NonNull final EditText edit_text) {
-        edit_text.setHint(Constants.getDefaultSharedPreferences(edit_text.getContext()).contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? getString(R.string.token_unchanged) : "");
-        edit_text.setText(null);
     }
 
     private void onSettingValueChanged(@NotNull final String[] keys) {
