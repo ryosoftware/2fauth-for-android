@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import org.jetbrains.annotations.NotNull;
+
 public class UiUtils {
     public static void showMessageDialog(@Nullable final Activity activity, final int message_id) {
         if ((message_id != 0) && (activity != null)) {
@@ -34,5 +36,9 @@ public class UiUtils {
                 Log.e(Constants.LOG_TAG_NAME, "Exception while trying to show a toast", e);
             }
         }
+    }
+
+    public static int getPixelsFromDp(@NotNull final Context context, final int dp) {
+        return (int) (dp * context.getResources().getDisplayMetrics().density);
     }
 }
