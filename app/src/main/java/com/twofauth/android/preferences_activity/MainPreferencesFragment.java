@@ -56,43 +56,50 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     public void onResume() {
         super.onResume();
         mReceiver.enable(getContext());
+        setSyncDetailsPreferenceState();
     }
 
     @Override
     public void onServiceStarted() {
-        if (isAdded()) {
-            findPreference(SYNC_DETAILS_KEY).setEnabled(false);
-        }
+        setSyncDetailsPreferenceState();
     }
 
     @Override
     public void onServiceFinished() {
-        if (isAdded()) {
-            final Context context = requireContext();
-            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
-            String last_sync_details = getString(R.string.click_to_sync_data);
-            if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY)) {
-                last_sync_details = getString(R.string.last_sync_error, preferences.getString(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY, null), StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY, 0)), last_sync_details);
-            }
-            else if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY)) {
-                final int number_of_accounts = preferences.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY, 0);
-                last_sync_details = getResources().getQuantityString(R.plurals.sync_details, number_of_accounts, number_of_accounts, StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, 0)), last_sync_details);
-            }
-            Preference sync_details_preference = findPreference(SYNC_DETAILS_KEY);
-            sync_details_preference.setEnabled(MainService.canSyncServerData(context) && (! MainService.isRunning(context)));
-            sync_details_preference.setSummary(last_sync_details);
-        }
+        setSyncDetailsPreferenceState();
     }
 
     @Override
     public void onDataSyncedFromServer() {}
+
+    private void setSyncDetailsPreferenceState() {
+        if (isAdded()) {
+            final Context context = requireContext();
+            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
+	        final boolean is_service_running = MainService.isRunning(context);
+  	        String last_sync_details = getString(R.string.sync_is_in_progress);
+	        if (! is_service_running) {
+                last_sync_details = getString(R.string.click_to_sync_data);
+                if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY)) {
+                    last_sync_details = getString(R.string.last_sync_error, preferences.getString(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY, null), StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY, 0)), last_sync_details);
+                }
+                else if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY)) {
+                    final int number_of_accounts = preferences.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY, 0);
+                    last_sync_details = getResources().getQuantityString(R.plurals.sync_details, number_of_accounts, number_of_accounts, StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, 0)), last_sync_details);
+                }
+            }
+            Preference sync_details_preference = findPreference(SYNC_DETAILS_KEY);
+            sync_details_preference.setEnabled(MainService.canSyncServerData(context) && (! is_service_running));
+            sync_details_preference.setSummary(last_sync_details);
+        }
+    }
 
     private void setDependenciesAvailability() {
         if (isAdded()) {
             final Context context = requireContext();
             final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
             findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setEnabled(preferences.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY));
-            onServiceFinished();
+            setSyncDetailsPreferenceState();
             ((CheckBoxPreference) findPreference(PIN_ACCESS_ENABLED_KEY)).setChecked(preferences.getBoolean(PIN_ACCESS_ENABLED_KEY, false));
             final CheckBoxPreference fingerprint_access_preference = (CheckBoxPreference) findPreference(Constants.FINGERPRINT_ACCESS_KEY);
             if (fingerprint_access_preference != null) {

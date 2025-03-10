@@ -42,6 +42,7 @@
 
     <string name="sync_details">Sync details</string>
     <string name="click_to_sync_data">Click to sync data</string>
+    <string name="sync_is_in_progress">Data synchronization is in progress</string>
     <string name="last_sync_error">Last synchronization was on %2$s but not completed due to the following error: %1$s.\n\n%3$s</string>
 
     <plurals name="sync_details">
