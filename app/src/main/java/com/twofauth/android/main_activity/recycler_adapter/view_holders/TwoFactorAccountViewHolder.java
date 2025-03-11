@@ -28,7 +28,6 @@ import com.google.android.material.button.MaterialButton;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
-import com.twofauth.android.main_activity.recycler_adapter.OnViewHolderClickListener;
 import com.twofauth.android.main_activity.recycler_adapter.TwoFactorAccountOptions;
 import com.twofauth.android.main_service.ServerDataLoader;
 
@@ -50,6 +49,10 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private static final String ALGORITHM_SHA1 = "sha1";
 
     private static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
+
+    public interface OnViewHolderClickListener {
+        public abstract void onClick(final int position);
+    }
 
     public static class Utils {
         public static Activity getActivity(@NotNull final View view) {

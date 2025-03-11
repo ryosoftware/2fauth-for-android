@@ -1,6 +1,7 @@
 package com.twofauth.android.main_activity;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.main_activity.recycler_adapter.MainActivityRecyclerAdapterHandler;
-import com.twofauth.android.main_activity.recycler_adapter.OnViewHolderClickListener;
+import com.twofauth.android.main_activity.recycler_adapter.view_holders.TwoFactorAccountViewHolder.OnViewHolderClickListener;
 import com.twofauth.android.main_activity.recycler_adapter.TwoFactorAccountOptions;
 import com.twofauth.android.main_activity.recycler_adapter.view_holders.TwoFactorAccountViewHolder;
 
@@ -148,14 +149,20 @@ public class MainActivityRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
     }
     public void onClick(int position) {
         synchronized (mSynchronizationObject) {
+            final Context context = mRecyclerView.getContext();
+            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
             final int older_active_account_position = mActiveAccountPosition;
             mActiveAccountPosition = (older_active_account_position == position) ? -1 : position;
             mHandler.removeRedrawItemEachTimeToTimeMessages();
             mHandler.sendRedrawItemsMessage(this, new int[] { older_active_account_position, mActiveAccountPosition });
             if (mActiveAccountPosition != -1) {
                 final JSONObject object = getItem(position);
-                Constants.getDefaultSharedPreferences(mRecyclerView.getContext()).edit().putLong(Constants.getTwoFactorAccountLastUseKey(object), System.currentTimeMillis()).apply();
-                mHandler.sendRedrawItemTimeToTimeMessage(this, position, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object));
+                preferences.edit().putLong(Constants.getTwoFactorAccountLastUseKey(object), System.currentTimeMillis()).apply();
+                mHandler.sendRedrawItemTimeToTimeMessage(this, mActiveAccountPosition, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object));
+            }
+            else if ((position != 0) && (preferences.getBoolean(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY, context.getResources().getBoolean(R.bool.sort_accounts_by_last_use_default)))) {
+                mItems.add(0, mItems.remove(position));
+                notifyItemMoved(position, 0);
             }
         }
     }
