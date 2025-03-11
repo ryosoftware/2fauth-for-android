@@ -124,7 +124,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
             if (! object.has(TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY)) {
                 object.put(TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY, null);
                 final File file = ServerDataLoader.getTwoFactorAuthIconPath(context, object);
-                if (file.exists()) {
+                if ((file != null) && (file.exists())) {
                     object.put(TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY, BitmapFactory.decodeFile(file.getPath()));
                 }
             }
@@ -172,7 +172,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mGroup.setVisibility(group.isEmpty() || (! options.isAccountGroupDisplayed()) ? View.GONE : View.VISIBLE);
         final Bitmap icon = getIcon(context, object);
         mIcon.setImageBitmap(icon);
-        mIcon.setVisibility(icon == null ? View.GONE : View.VISIBLE);
+        mIcon.setVisibility(icon == null ? View.INVISIBLE : View.VISIBLE);
         mOtp.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp) : otp);
         final int otp_color = context.getResources().getColor(millis_until_next_otp < 0 ? R.color.otp_hidden : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : R.color.otp_visible_normal, context.getTheme());
         final ColorStateList otp_color_state_list = ColorStateList.valueOf(otp_color);

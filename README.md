@@ -26,6 +26,8 @@ The app signature certification can be checked by the following command:
 
 We generate the OTP codes using the JAVA library from <A HREF="https://github.com/BastiaanJansen/otp-java">Bastiaan Jansen</A>.
 
+Because Bubka 2FA uses SVG icons by default and Android does not natively support that graphic format, we use <A HREF="https://github.com/homarr-labs/dashboard-icons">Dashboard Icons</A> to download icons that are in that format (to search for icons we use the 2FA account service name, in lowercase and with blank spaces replaced by dashes).
+
 # DONATE
 
 If you want, you can invite me to a coffee or a seafood platter
