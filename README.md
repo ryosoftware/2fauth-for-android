@@ -12,6 +12,10 @@ Read the 2FA accounts for a user (identified by the server URL location and an a
 
 Protection level: PIN password and fingerprint access.
 
+# SCREENSHOTS
+
+<IMG WIDTH="30%" SRC="assets/Screenshots/1.jpg"> <IMG WIDTH="30%" SRC="assets/Screenshots/2.jpg">
+
 # CERTIFICATE SIGNATURE VERIFICATION
 
 The SHA-256 digest of the certificate used to sign the app is as follows, and remains constant regardless of the version:
