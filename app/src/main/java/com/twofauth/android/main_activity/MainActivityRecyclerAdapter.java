@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.main_activity.recycler_adapter.MainActivityRecyclerAdapterHandler;
-import com.twofauth.android.main_activity.recycler_adapter.OnViewHolderClickListener;
+import com.twofauth.android.main_activity.recycler_adapter.view_holders.TwoFactorAccountViewHolder.OnViewHolderClickListener;
 import com.twofauth.android.main_activity.recycler_adapter.TwoFactorAccountOptions;
 import com.twofauth.android.main_activity.recycler_adapter.view_holders.TwoFactorAccountViewHolder;
 
