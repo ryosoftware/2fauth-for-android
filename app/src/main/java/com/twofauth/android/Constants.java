@@ -1,5 +1,6 @@
 package com.twofauth.android;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -7,6 +8,7 @@ import android.net.Uri;
 import androidx.preference.PreferenceManager;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 public class Constants {
     public static final String LOG_TAG_NAME = "2FAuth";
@@ -17,6 +19,8 @@ public class Constants {
     public static final int MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID = 1001;
 
     // App options
+
+    public static final String SORT_ACCOUNTS_BY_LAST_USE_KEY = "sort-accounts-by-last-use";
     public static final String UNGROUP_OTP_CODE_KEY = "ungroup-otp-code";
     public static final String DISPLAY_ACCOUNT_GROUP_KEY = "display-account-group";
 
@@ -39,6 +43,8 @@ public class Constants {
     public static final String TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY = "2fa-last-sync-error-time";
     public static final String TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY = "2fa-last-sync-error";
 
+    private static final String TWO_FACTOR_AUTH_ACCOUNT_LAST_USE_KEY_PREFIX = "2fa-last-use-";
+
     // 2FA Account fields
     public static final String TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY = "2fa-accounts";
     public static final String TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY = "2fa-accounts-size";
@@ -57,5 +63,10 @@ public class Constants {
 
     public static SharedPreferences getDefaultSharedPreferences(@NotNull final Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    @SuppressLint("DefaultLocale")
+    public static String getTwoFactorAccountLastUseKey(JSONObject object) {
+        return String.format("%s-%d", TWO_FACTOR_AUTH_ACCOUNT_LAST_USE_KEY_PREFIX, object.optInt(TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY));
     }
 }

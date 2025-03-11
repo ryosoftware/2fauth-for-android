@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.main_activity.recycler_adapter.MainActivityRecyclerAdapterHandler;
 import com.twofauth.android.main_activity.recycler_adapter.OnViewHolderClickListener;
@@ -20,6 +21,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class MainActivityRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnViewHolderClickListener {
     private static final int TYPE_2FA_AUTH_ACCOUNT = 1;
@@ -151,7 +153,9 @@ public class MainActivityRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             mHandler.removeRedrawItemEachTimeToTimeMessages();
             mHandler.sendRedrawItemsMessage(this, new int[] { older_active_account_position, mActiveAccountPosition });
             if (mActiveAccountPosition != -1) {
-                mHandler.sendRedrawItemTimeToTimeMessage(this, position, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(getItem(position)));
+                final JSONObject object = getItem(position);
+                Constants.getDefaultSharedPreferences(mRecyclerView.getContext()).edit().putLong(Constants.getTwoFactorAccountLastUseKey(object), System.currentTimeMillis()).apply();
+                mHandler.sendRedrawItemTimeToTimeMessage(this, position, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object));
             }
         }
     }
