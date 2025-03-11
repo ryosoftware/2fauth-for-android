@@ -39,7 +39,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.time.Duration;
 
-public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
     private static final String TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY = Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ICON_KEY + "_cached";
     private static final String TWO_FACTOR_AUTH_DATA_GENERATOR_KEY = Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_ALGORITHM_KEY + "_generator";
     private static final String OTP_TYPE_TOTP_VALUE = "totp";
@@ -62,6 +62,31 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
             }
             return null;
         }
+
+        public static void copyToClipboard(@NotNull final View view, @NotNull final String value, final boolean is_sensitive, final boolean finish_activity) {
+            final Context context = view.getContext();
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null) {
+                ClipData clip = ClipData.newPlainText(context.getString(R.string.otp_code), value);
+                if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) && (is_sensitive)) {
+                    PersistableBundle bundle = new PersistableBundle();
+                    bundle.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
+                    clip.getDescription().setExtras(bundle);
+                }
+                if (finish_activity) {
+                    clipboard.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
+                        @Override
+                        public void onPrimaryClipChanged() {
+                            final Activity activity = getActivity(view);
+                            if (activity != null) {
+                                activity.finish();
+                            }
+                        }
+                    });
+                }
+                clipboard.setPrimaryClip(clip);
+            }
+        }
     }
 
     private final OnViewHolderClickListener mOnClickListener;
@@ -81,6 +106,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         super(parent);
         mOnClickListener = on_click_listener;
         parent.setOnClickListener(this);
+        parent.setOnLongClickListener(this);
         mService = (TextView) parent.findViewById(R.id.service);
         mAccount = (TextView) parent.findViewById(R.id.account);
         mGroup = (TextView) parent.findViewById(R.id.group);
@@ -98,7 +124,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
             if (! object.has(TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY)) {
                 object.put(TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY, null);
                 final File file = ServerDataLoader.getTwoFactorAuthIconPath(context, object);
-                if (file.exists()) {
+                if ((file != null) && (file.exists())) {
                     object.put(TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY, BitmapFactory.decodeFile(file.getPath()));
                 }
             }
@@ -146,50 +172,45 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mGroup.setVisibility(group.isEmpty() || (! options.isAccountGroupDisplayed()) ? View.GONE : View.VISIBLE);
         final Bitmap icon = getIcon(context, object);
         mIcon.setImageBitmap(icon);
-        mIcon.setVisibility(icon == null ? View.GONE : View.VISIBLE);
+        mIcon.setVisibility(icon == null ? View.INVISIBLE : View.VISIBLE);
         mOtp.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp) : otp);
         final int otp_color = context.getResources().getColor(millis_until_next_otp < 0 ? R.color.otp_hidden : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : R.color.otp_visible_normal, context.getTheme());
         final ColorStateList otp_color_state_list = ColorStateList.valueOf(otp_color);
         mOtp.setTextColor(otp_color);
+        mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);
         mOtpTime.setProgress(millis_until_next_otp >= 0 ? (int) (millis_until_next_otp / (10 * object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_PERIOD_KEY, 1))) : 0);
         mOtpTime.setProgressTintList(otp_color_state_list);
-        mOtpTime.setVisibility(show_otp && (millis_until_next_otp > 0) ? View.VISIBLE : View.GONE);
+        mOtpTime.setVisibility(millis_until_next_otp >= 0 ? View.VISIBLE : View.GONE);
         mOtpCopyToClipboard.setBackgroundTintList(otp_color_state_list);
-        mOtpCopyToClipboard.setVisibility(show_otp && (millis_until_next_otp > 0) ? View.VISIBLE : View.GONE);
-        mOtpCopyToClipboard.setTag(otp);
+        mOtpCopyToClipboard.setVisibility(millis_until_next_otp >= 0 && options.isShowCopyToClipboardButtonDisplayed() ? View.VISIBLE : View.GONE);
         mOtpContainer.setVisibility(otp != null ? View.VISIBLE : View.GONE);
         mOtpTypeUnsupported.setVisibility(otp == null ? View.VISIBLE : View.GONE);
         mOtpTypeUnsupported.setText(context.getString(R.string.otp_type_is_unsupported, object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY).toUpperCase()));
     }
 
-    private void copyToClipboard(@NotNull final View view) {
-        final Context context = view.getContext();
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null) {
-            ClipData clip = ClipData.newPlainText(context.getString(R.string.otp_code), view.getTag().toString());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                PersistableBundle bundle = new PersistableBundle();
-                bundle.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
-                clip.getDescription().setExtras(bundle);
-            }
-            clipboard.setPrimaryClip(clip);
-            if (Constants.getDefaultSharedPreferences(context).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, context.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default))) {
-                final Activity activity = Utils.getActivity(view);
-                if (activity != null) {
-                    activity.finish();
-                }
-            }
-        }
-    }
-
-    public void onClick(@Nullable final View view) {
+    public void onClick(@NotNull final View view) {
         if (view.getId() == R.id.otp_copy_to_clipboard) {
-            copyToClipboard(view);
+            final Context context = view.getContext();
+            final boolean minimize_app_after_copy_to_clipboard = Constants.getDefaultSharedPreferences(context).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, context.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default));
+            Utils.copyToClipboard(view, mOtp.getTag().toString(), true, minimize_app_after_copy_to_clipboard);
+            if (minimize_app_after_copy_to_clipboard) {
+                return;
+            }
         }
-        else if (mOnClickListener != null) {
+        if (mOnClickListener != null) {
             mOnClickListener.onClick(getBindingAdapterPosition());
         }
     }
+
+    @Override
+    public boolean onLongClick(@NotNull final View view) {
+        if (mOtp.getTag() != null) {
+            onClick(mOtpCopyToClipboard);
+            return true;
+        }
+        return false;
+    }
+
     public static TwoFactorAccountViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
         return new TwoFactorAccountViewHolder(parent, on_click_listener);
     }

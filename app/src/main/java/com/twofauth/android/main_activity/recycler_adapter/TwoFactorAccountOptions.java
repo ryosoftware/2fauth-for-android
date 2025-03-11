@@ -14,12 +14,15 @@ public class TwoFactorAccountOptions {
     private final boolean mUngroupOtpCode;
     private final boolean mHideOtpAutomatically;
     private final boolean mDisplayAccountGroup;
+
+    private final boolean mShowCopyToClipboardButton;
     public TwoFactorAccountOptions(@NotNull final Context context) {
         final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
         final Resources resources = context.getResources();
         mUngroupOtpCode = preferences.getBoolean(Constants.UNGROUP_OTP_CODE_KEY, resources.getBoolean(R.bool.ungroup_otp_code_default));
         mHideOtpAutomatically = preferences.getBoolean(Constants.HIDE_OTP_AUTOMATICALLY_KEY, resources.getBoolean(R.bool.hide_otp_codes_automatically_default));
         mDisplayAccountGroup = preferences.getBoolean(Constants.DISPLAY_ACCOUNT_GROUP_KEY, resources.getBoolean(R.bool.display_account_group_default));
+        mShowCopyToClipboardButton = preferences.getBoolean(Constants.SHOW_COPY_TO_CLIPBOARD_BUTTON_KEY, resources.getBoolean(R.bool.show_copy_to_clipboard_button_default));
     }
 
     public boolean isUngroupOtpCodeEnabled() {
@@ -33,6 +36,8 @@ public class TwoFactorAccountOptions {
     public boolean isAccountGroupDisplayed() {
         return mDisplayAccountGroup;
     }
+
+    public boolean isShowCopyToClipboardButtonDisplayed() { return mShowCopyToClipboardButton; }
     public String ungroupOtp(@Nullable final String otp) {
         if ((isUngroupOtpCodeEnabled()) && (otp != null)) {
             final int first_part_length = (int) (otp.length() * 0.5f), last_part_length = otp.length() - first_part_length;

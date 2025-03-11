@@ -13,6 +13,7 @@ import com.twofauth.android.BaseActivity;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
+import com.twofauth.android.UiUtils;
 import com.twofauth.android.main_service.ServerDataLoader;
 
 import org.jetbrains.annotations.NotNull;
@@ -40,9 +41,6 @@ public class DataLoader extends Thread {
             mGroups = groups;
         }
 
-        private int getPixelsFromDp(@NotNull final Context context, final int dp) {
-            return (int) (dp * context.getResources().getDisplayMetrics().density);
-        }
         private void displayGroupsBar() {
             final int currently_added_groups = mGroupsBar.getChildCount(), newly_added_groups = (mGroups == null) ? 0 : mGroups.size();
             if (currently_added_groups > newly_added_groups) {
@@ -51,7 +49,7 @@ public class DataLoader extends Thread {
             if (newly_added_groups != 0) {
                 final Context context = mGroupsBar.getContext();
                 final LayoutInflater layout_inflater = LayoutInflater.from(context);
-                final int margin = getPixelsFromDp(context, 10);
+                final int margin = UiUtils.getPixelsFromDp(context, 10);
                 for (int i = 0; i < mGroups.size(); i ++) {
                     if (i >= currently_added_groups) {
                         final View view = layout_inflater.inflate(R.layout.account_group, mGroupsBar, false);

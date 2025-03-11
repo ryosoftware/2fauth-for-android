@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class Constants {
     public static final String LOG_TAG_NAME = "2FAuth";
 
-    public static final Uri GITHUB_REPO = Uri.parse("https://github.com/kslcsdalsadg/2FAuth-for-android");
+    public static final Uri GITHUB_REPO = Uri.parse("https://github.com/kslcsdalsadg/2fauth-for-android");
 
     public static final String MAIN_SERVICE_NOTIFICATION_CHANNEL = "main-service";
     public static final int MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID = 1001;
@@ -19,6 +19,8 @@ public class Constants {
     // App options
     public static final String UNGROUP_OTP_CODE_KEY = "ungroup-otp-code";
     public static final String DISPLAY_ACCOUNT_GROUP_KEY = "display-account-group";
+
+    public static final String SHOW_COPY_TO_CLIPBOARD_BUTTON_KEY = "show-copy-to-clipboard-button";
     public static final String DISABLE_SCREENSHOTS_KEY = "disable-screenshots";
 
     public static final String MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY = "minimize-app-after-copy-to-clipboard";

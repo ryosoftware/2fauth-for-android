@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class MainPreferencesFragment extends PreferenceFragmentCompat implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener, EditTextPreference.OnBindEditTextListener, AuthenticWithPin.OnPinAuthenticationFinished, AuthenticWithPin.OnPinRequestFinished, AuthenticWithBiometrics.OnBiometricAuthenticationFinished {
+public class MainPreferencesFragment extends PreferenceFragmentCompat implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener, AuthenticWithPin.OnPinAuthenticationFinished, AuthenticWithPin.OnPinRequestFinished, AuthenticWithBiometrics.OnBiometricAuthenticationFinished {
     public static final String EXTRA_CHANGED_SETTINGS = "changes";
     private static final String SYNC_DETAILS_KEY = "sync-details";
     private static final String PIN_ACCESS_ENABLED_KEY = "pin-access-enabled";
@@ -56,43 +56,50 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     public void onResume() {
         super.onResume();
         mReceiver.enable(getContext());
+        setSyncDetailsPreferenceState();
     }
 
     @Override
     public void onServiceStarted() {
-        if (isAdded()) {
-            findPreference(SYNC_DETAILS_KEY).setEnabled(false);
-        }
+        setSyncDetailsPreferenceState();
     }
 
     @Override
     public void onServiceFinished() {
-        if (isAdded()) {
-            final Context context = requireContext();
-            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
-            String last_sync_details = getString(R.string.click_to_sync_data);
-            if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY)) {
-                last_sync_details = getString(R.string.last_sync_error, preferences.getString(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY, null), StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY, 0)), last_sync_details);
-            }
-            else if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY)) {
-                final int number_of_accounts = preferences.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY, 0);
-                last_sync_details = getResources().getQuantityString(R.plurals.sync_details, number_of_accounts, number_of_accounts, StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, 0)), last_sync_details);
-            }
-            Preference sync_details_preference = findPreference(SYNC_DETAILS_KEY);
-            sync_details_preference.setEnabled(MainService.canSyncServerData(context) && (! MainService.isRunning(context)));
-            sync_details_preference.setSummary(last_sync_details);
-        }
+        setSyncDetailsPreferenceState();
     }
 
     @Override
     public void onDataSyncedFromServer() {}
+
+    private void setSyncDetailsPreferenceState() {
+        if (isAdded()) {
+            final Context context = requireContext();
+            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
+	        final boolean is_service_running = MainService.isRunning(context);
+  	        String last_sync_details = getString(R.string.sync_is_in_progress);
+	        if (! is_service_running) {
+                last_sync_details = getString(R.string.click_to_sync_data);
+                if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY)) {
+                    last_sync_details = getString(R.string.last_sync_error, preferences.getString(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY, null), StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY, 0)), last_sync_details);
+                }
+                else if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY)) {
+                    final int number_of_accounts = preferences.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY, 0);
+                    last_sync_details = getResources().getQuantityString(R.plurals.sync_details, number_of_accounts, number_of_accounts, StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, 0)), last_sync_details);
+                }
+            }
+            Preference sync_details_preference = findPreference(SYNC_DETAILS_KEY);
+            sync_details_preference.setEnabled(MainService.canSyncServerData(context) && (! is_service_running));
+            sync_details_preference.setSummary(last_sync_details);
+        }
+    }
 
     private void setDependenciesAvailability() {
         if (isAdded()) {
             final Context context = requireContext();
             final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
             findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setEnabled(preferences.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY));
-            onServiceFinished();
+            setSyncDetailsPreferenceState();
             ((CheckBoxPreference) findPreference(PIN_ACCESS_ENABLED_KEY)).setChecked(preferences.getBoolean(PIN_ACCESS_ENABLED_KEY, false));
             final CheckBoxPreference fingerprint_access_preference = (CheckBoxPreference) findPreference(Constants.FINGERPRINT_ACCESS_KEY);
             if (fingerprint_access_preference != null) {
@@ -104,14 +111,30 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
 
     private void initializePreferences(@NotNull final Context context) {
         final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
-        findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY).setSummary(preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, getString(R.string.server_location_is_not_set)));
-        findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY).setOnPreferenceChangeListener(this);
-        findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setSummary(preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.token_value_is_set_summary : R.string.token_value_is_not_set_summary);
-        ((EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY)).setOnBindEditTextListener(this);
-        findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setOnPreferenceChangeListener(this);
+        final EditTextPreference server_location = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY), server_token = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
+        server_location.setSummary(preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, getString(R.string.server_location_is_not_set)));
+        server_location.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            @Override
+            public void onBindEditText(@NonNull EditText edit_text) {
+                edit_text.setText(preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, null));
+                edit_text.setSelection(edit_text.getText().length());
+            }
+        });
+        server_location.setOnPreferenceChangeListener(this);
+
+        server_token.setSummary(preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.token_value_is_set_summary : R.string.token_value_is_not_set_summary);
+        server_token.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            public void onBindEditText(@NonNull final EditText edit_text) {
+                edit_text.setHint(Constants.getDefaultSharedPreferences(edit_text.getContext()).contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? getString(R.string.token_unchanged) : "");
+                edit_text.setText(null);
+            }
+        });
+        server_token.setOnPreferenceChangeListener(this);
         findPreference(SYNC_DETAILS_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.UNGROUP_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISPLAY_ACCOUNT_GROUP_KEY).setOnPreferenceChangeListener(this);
+        findPreference(Constants.SHOW_COPY_TO_CLIPBOARD_BUTTON_KEY).setOnPreferenceChangeListener(this);
+        findPreference(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISABLE_SCREENSHOTS_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.HIDE_OTP_AUTOMATICALLY_KEY).setOnPreferenceChangeListener(this);
         findPreference(PIN_ACCESS_ENABLED_KEY).setOnPreferenceChangeListener(this);
@@ -130,12 +153,6 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         super.onViewCreated(view, saved_instance_state);
         initializePreferences(view.getContext());
         setDivider(null);
-    }
-
-    @Override
-    public void onBindEditText(@NonNull final EditText edit_text) {
-        edit_text.setHint(Constants.getDefaultSharedPreferences(edit_text.getContext()).contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? getString(R.string.token_unchanged) : "");
-        edit_text.setText(null);
     }
 
     private void onSettingValueChanged(@NotNull final String[] keys) {
@@ -223,12 +240,16 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             onSettingValueChanged(preference.getKey());
             return true;
         }
-        else if (Constants.DISABLE_SCREENSHOTS_KEY.equals(preference.getKey())) {
-            UiUtils.showMessageDialog(getActivity(), R.string.change_will_be_applied_next_time_you_start_the_app);
+        else if (Constants.SHOW_COPY_TO_CLIPBOARD_BUTTON_KEY.equals(preference.getKey())) {
             onSettingValueChanged(preference.getKey());
             return true;
         }
         else if (Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY.equals(preference.getKey())) {
+            onSettingValueChanged(preference.getKey());
+            return true;
+        }
+        else if (Constants.DISABLE_SCREENSHOTS_KEY.equals(preference.getKey())) {
+            UiUtils.showMessageDialog(getActivity(), R.string.change_will_be_applied_next_time_you_start_the_app);
             onSettingValueChanged(preference.getKey());
             return true;
         }
