@@ -115,20 +115,22 @@ public class ServerDataLoader extends Thread
 
     private void saveTwoFactorAuthIcon(@NotNull final JSONObject object) throws Exception {
         final String server_icon_file = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ICON_KEY, "");
-        if ((server_icon_file.isEmpty()) || (server_icon_file.toLowerCase().endsWith(".svg"))) {
-            final String service = object.getString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY);
-            final DashBoardIconsUtils.Mode[] modes = new DashBoardIconsUtils.Mode[] { DashBoardIconsUtils.Mode.DARK_MODE, DashBoardIconsUtils.Mode.LIGHT_MODE, null };
-            for (DashBoardIconsUtils.Mode mode : modes) {
-                final HttpURLConnection connection = DashBoardIconsUtils.getIcon(service, mode);
+        final boolean is_server_icon_supported = ((! server_icon_file.isEmpty()) && (! server_icon_file.toLowerCase().endsWith(".svg")));
+        final DashBoardIconsUtils.Mode[] modes = new DashBoardIconsUtils.Mode[] { DashBoardIconsUtils.Mode.DARK_MODE, DashBoardIconsUtils.Mode.LIGHT_MODE, null };
+        for (DashBoardIconsUtils.Mode mode : modes) {
+            final File file = getTwoFactorAuthIconPath(mMainService, object, mode);
+            file.delete();
+            if (! is_server_icon_supported) {
+                final HttpURLConnection connection = DashBoardIconsUtils.getIcon(object.getString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY), mode);
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    HttpUtils.saveContent(connection, getTwoFactorAuthIconPath(mMainService, object, mode));
+                    HttpUtils.saveContent(connection, file);
                 }
             }
-        }
-        else {
-            final HttpURLConnection connection = getIconFromServer(object);
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                HttpUtils.saveContent(connection, getTwoFactorAuthIconPath(mMainService, object, null));
+            else if (mode == null) {
+                final HttpURLConnection connection = getIconFromServer(object);
+                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    HttpUtils.saveContent(connection, file);
+                }
             }
         }
     }
