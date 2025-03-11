@@ -10,6 +10,7 @@ import android.util.Log;
 import com.twofauth.android.Constants;
 import com.twofauth.android.JsonUtils;
 import com.twofauth.android.MainService;
+import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
 
 import org.jetbrains.annotations.NotNull;
@@ -184,7 +185,9 @@ public class ServerDataLoader extends Thread
                     }
                     for (Integer id : old_data.keySet()) {
                         if (! new_data.containsKey(id)) {
-                            removeTwoFactorAuthIcon(old_data.get(id));
+                            final JSONObject object = old_data.get(id);
+                            editor.remove(Constants.getTwoFactorAccountLastUseKey(object));
+                            removeTwoFactorAuthIcon(object);
                         }
                     }
                     editor.putString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, JsonUtils.JSonObjectsToString(new_data.values())).putInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY, new_data.size()).putLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, System.currentTimeMillis()).remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY).remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY).apply();
@@ -201,10 +204,18 @@ public class ServerDataLoader extends Thread
 
     public static List<JSONObject> getTwoFactorAuthCodes(@NotNull final Context context) throws Exception {
         final List<JSONObject> list = new ArrayList<JSONObject>(JsonUtils.StringToJsonMap(Constants.getDefaultSharedPreferences(context).getString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, null), Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY).values());
+        final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
+        final boolean sort_using_last_use = preferences.getBoolean(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY, context.getResources().getBoolean(R.bool.sort_accounts_by_last_use_default));
         list.sort(new Comparator<JSONObject>() {
             @Override
             public int compare(final JSONObject object1, final JSONObject object2) {
-                int result = StringUtils.compare(object1.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY), object2.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY), true);
+                if (sort_using_last_use) {
+                    final int result = Long.compare(preferences.getLong(Constants.getTwoFactorAccountLastUseKey(object1), 0), preferences.getLong(Constants.getTwoFactorAccountLastUseKey(object2), 0));
+                    if (result != 0) {
+                        return -result;
+                    }
+                }
+                final int result = StringUtils.compare(object1.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY), object2.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY), true);
                 return result == 0 ? StringUtils.compare(object1.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY), object2.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY), true) : result;
             }
         });

@@ -11,7 +11,7 @@ import java.util.Date;
 public class StringUtils {
     public static int compare(@Nullable final String string_1, @Nullable final String string_2, final boolean ignore_case) {
         if (string_1 == null) {
-            return (string_2 == null) ? 0 : 1;
+            return (string_2 == null) ? 0 : -1;
         }
         return ignore_case ? string_1.compareToIgnoreCase(string_2) : string_1.compareTo(string_2);
     }

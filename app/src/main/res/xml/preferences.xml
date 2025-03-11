@@ -10,6 +10,8 @@
 
     <PreferenceCategory android:title="@string/appearance">
 
+        <CheckBoxPreference android:key="sort-accounts-by-last-use" android:title="@string/sort_accounts_by_last_use" android:summary="@string/sort_accounts_by_last_use_summary" android:defaultValue="@bool/sort_accounts_by_last_use_default" />
+
         <CheckBoxPreference android:key="ungroup-otp-code" android:title="@string/ungroup_otp_codes" android:summary="@string/ungroup_otp_codes" android:defaultValue="@bool/ungroup_otp_code_default" />
 
         <CheckBoxPreference android:key="display-account-group" android:title="@string/display_account_group" android:summary="@string/display_account_group_summary" android:defaultValue="@bool/display_account_group_default" />

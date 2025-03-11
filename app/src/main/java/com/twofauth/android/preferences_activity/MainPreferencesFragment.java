@@ -131,6 +131,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         });
         server_token.setOnPreferenceChangeListener(this);
         findPreference(SYNC_DETAILS_KEY).setOnPreferenceClickListener(this);
+        findPreference(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.UNGROUP_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISPLAY_ACCOUNT_GROUP_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.SHOW_COPY_TO_CLIPBOARD_BUTTON_KEY).setOnPreferenceChangeListener(this);
@@ -231,6 +232,10 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                 setDependenciesAvailability();
                 return true;
             }
+        }
+        else if (Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY.equals(preference.getKey())) {
+            onSettingValueChanged(preference.getKey());
+            return true;
         }
         else if (Constants.UNGROUP_OTP_CODE_KEY.equals(preference.getKey())) {
             onSettingValueChanged(preference.getKey());

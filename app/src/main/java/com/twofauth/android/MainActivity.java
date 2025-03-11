@@ -281,6 +281,9 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
                                 MainService.startService(this);
                             }
                         }
+                        else if (changed_settings.contains(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY)) {
+                            loadData();
+                        }
                         mAdapter.onOptionsChanged();
                     }
                 }

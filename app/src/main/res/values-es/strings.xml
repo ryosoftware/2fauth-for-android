@@ -58,6 +58,9 @@
 
     <string name="otp_type_is_unsupported">El algoritmo %1$s no está soportado</string>
 
+    <string name="sort_accounts_by_last_use">Ordenar cuentas por el último uso</string>
+    <string name="sort_accounts_by_last_use_summary">Ordenar las cuentas por último uso (momento en el que se visualizón por última vez un código OTP) en lugar de ordenarlas por nombre de servicio</string>
+
     <string name="ungroup_otp_codes">Desagrupar código 2FA</string>
     <string name="ungroup_otp_codes_summary">Desagrupa los códigos para facilitar la lectura</string>
 
