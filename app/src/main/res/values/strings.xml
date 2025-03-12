@@ -61,6 +61,9 @@
     <string name="sort_accounts_by_last_use">Sort accounts by usage</string>
     <string name="sort_accounts_by_last_use_summary">Sort accounts by usage (list first the last accounts for which an OTP code has been displayed) instead of just sorting by service name</string>
 
+    <string name="reset_accounts_last_use_data">Reset accounts usage</string>
+    <string name="reset_accounts_last_use_data_summary">Removes last used data from accounts and sorting is reset</string>
+
     <string name="ungroup_otp_codes">Ungroup 2FA codes</string>
     <string name="ungroup_otp_codes_summary">Ungroup codes for better reading</string>
 

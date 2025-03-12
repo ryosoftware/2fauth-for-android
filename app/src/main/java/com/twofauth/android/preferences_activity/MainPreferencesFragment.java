@@ -32,7 +32,9 @@ import java.util.ArrayList;
 
 public class MainPreferencesFragment extends PreferenceFragmentCompat implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener, AuthenticWithPin.OnPinAuthenticationFinished, AuthenticWithPin.OnPinRequestFinished, AuthenticWithBiometrics.OnBiometricAuthenticationFinished {
     public static final String EXTRA_CHANGED_SETTINGS = "changes";
+
     private static final String SYNC_DETAILS_KEY = "sync-details";
+    private static final String RESET_ACCOUNTS_LAST_USE_KEY = "reset-accounts-last-use-data";
     private static final String PIN_ACCESS_ENABLED_KEY = "pin-access-enabled";
     private static final String GITHUB_REPO_KEY = "github-repo";
     private static final String OPEN_SOURCE_LICENSES_KEY = "open-source-licenses";
@@ -133,6 +135,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         server_token.setOnPreferenceChangeListener(this);
         findPreference(SYNC_DETAILS_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY).setOnPreferenceChangeListener(this);
+        findPreference(RESET_ACCOUNTS_LAST_USE_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.UNGROUP_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISPLAY_ACCOUNT_GROUP_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.SHOW_COPY_TO_CLIPBOARD_BUTTON_KEY).setOnPreferenceChangeListener(this);
@@ -179,6 +182,10 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     public boolean onPreferenceClick(@NonNull final Preference preference) {
         if (SYNC_DETAILS_KEY.equals(preference.getKey())) {
             MainService.startService(getContext());
+        }
+        else if (RESET_ACCOUNTS_LAST_USE_KEY.equals(preference.getKey())) {
+            Constants.deleteTwoFactorAccountLastUseKeys(preference.getContext());
+            onSettingValueChanged(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY);
         }
         else if (GITHUB_REPO_KEY.equals(preference.getKey())) {
             HtmlActivity.openInWebBrowser(getActivity(), Constants.GITHUB_REPO);
