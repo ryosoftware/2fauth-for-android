@@ -270,7 +270,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
                 if (intent != null) {
                     final List<String> changed_settings = intent.getStringArrayListExtra(MainPreferencesFragment.EXTRA_CHANGED_SETTINGS);
                     if (changed_settings != null) {
-                        if (changed_settings.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY)) {
+                        if ((changed_settings.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY)) || (changed_settings.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY))) {
                             synchronized (mSynchronizationObject) {
                                 mItems.clear();
                                 mAdapter.setItems(null);

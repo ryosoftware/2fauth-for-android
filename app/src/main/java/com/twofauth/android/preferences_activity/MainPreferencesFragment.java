@@ -189,6 +189,17 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         return false;
     }
 
+    private void removeDownloadedData(@NotNull final SharedPreferences.Editor editor, @NotNull final String primary_key) {
+        if (! Constants.TWO_FACTOR_AUTH_TOKEN_KEY.equals(primary_key)) {
+            editor.remove(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
+        }
+        editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY);
+        editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY);
+        editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY);
+        editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY);
+        editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY);
+    }
+
     @Override
     public boolean onPreferenceChange(@NonNull final Preference preference, final Object new_value) {
         final Context context = preference.getContext();
@@ -206,12 +217,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                     editor.putString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, trimmed_new_value);
                     message_id = preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY) ? R.string.synced_accounts_data_and_server_token_removed_due_to_server_location_changed : preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.server_token_removed_due_to_server_location_changed : 0;
                 }
-                editor.remove(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
-                editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY);
-                editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY);
-                editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY);
-                editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY);
-                editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY);
+                removeDownloadedData(editor, Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY);
                 editor.apply();
                 findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY).setSummary(trimmed_new_value.isEmpty() ? getString(R.string.server_location_is_not_set) : trimmed_new_value);
                 findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setSummary(R.string.token_value_is_not_set_summary);
@@ -226,6 +232,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             if (! trimmed_new_value.isEmpty()) {
                 final SharedPreferences.Editor editor = Constants.getDefaultSharedPreferences(context).edit();
                 editor.putString(Constants.TWO_FACTOR_AUTH_TOKEN_KEY, trimmed_new_value);
+                removeDownloadedData(editor, Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
                 editor.apply();
                 findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setSummary(R.string.token_value_is_set_summary);
                 onSettingValueChanged(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
