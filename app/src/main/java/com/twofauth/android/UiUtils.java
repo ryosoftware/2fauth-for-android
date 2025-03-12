@@ -22,9 +22,29 @@ public class UiUtils {
                 alert_dialog_builder.create().show();
             }
             catch (Exception e) {
-                Log.e(Constants.LOG_TAG_NAME, "Exception while trying to show a dialog", e);
+                Log.e(Constants.LOG_TAG_NAME, "Exception while trying to show a message dialog", e);
             }
         }
+    }
+
+    public static void showConfirmDialog(@Nullable final Activity activity, final int message_id, @Nullable final DialogInterface.OnClickListener on_accept_button_click, @Nullable final DialogInterface.OnClickListener on_cancel_button_click) {
+        if ((message_id != 0) && (activity != null)) {
+            try {
+                final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
+                alert_dialog_builder.setTitle(R.string.confirmation);
+                alert_dialog_builder.setMessage(message_id);
+                alert_dialog_builder.setPositiveButton(R.string.accept, on_accept_button_click);
+                alert_dialog_builder.setNegativeButton(R.string.cancel, on_cancel_button_click);
+                alert_dialog_builder.create().show();
+            }
+            catch (Exception e) {
+                Log.e(Constants.LOG_TAG_NAME, "Exception while trying to show a confirmation dialog", e);
+            }
+        }
+    }
+
+    public static void showConfirmDialog(@Nullable final Activity activity, final int message_id, @Nullable final DialogInterface.OnClickListener on_accept_button_click) {
+        showConfirmDialog(activity, message_id, on_accept_button_click, null);
     }
 
     public static void showToast(@Nullable final Context context, final int message_id) {

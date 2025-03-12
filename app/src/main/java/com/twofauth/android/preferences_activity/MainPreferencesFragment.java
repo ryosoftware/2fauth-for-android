@@ -1,6 +1,7 @@
 package com.twofauth.android.preferences_activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -200,30 +201,45 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY);
     }
 
+    private void onServerLocationChanged(@NotNull final Context context, @NotNull final String location) {
+        final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
+        final SharedPreferences.Editor editor = preferences.edit();
+        int message_id;
+        if (location.isEmpty()) {
+            editor.remove(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY);
+            message_id = preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY) ? R.string.synced_accounts_data_and_server_token_removed_due_to_server_location_removed : preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.server_token_removed_due_to_server_location_removed : 0;
+        }
+        else {
+            editor.putString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, location);
+            message_id = preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY) ? R.string.synced_accounts_data_and_server_token_removed_due_to_server_location_changed : preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.server_token_removed_due_to_server_location_changed : 0;
+        }
+        removeDownloadedData(editor, Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY);
+        editor.apply();
+        onSettingValueChanged(new String[] { Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, Constants.TWO_FACTOR_AUTH_TOKEN_KEY });
+        if (isAdded()) {
+            findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY).setSummary(location.isEmpty() ? getString(R.string.server_location_is_not_set) : location);
+            findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setSummary(R.string.token_value_is_not_set_summary);
+            setDependenciesAvailability();
+            UiUtils.showMessageDialog(getActivity(), message_id);
+        }
+    }
+
     @Override
     public boolean onPreferenceChange(@NonNull final Preference preference, final Object new_value) {
         final Context context = preference.getContext();
         if (Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY.equals(preference.getKey())) {
-            SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
             final String trimmed_new_value = new_value.toString().trim();
-            if (! StringUtils.equals(trimmed_new_value, preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, ""), true)) {
-                final SharedPreferences.Editor editor = preferences.edit();
-                int message_id;
-                if (trimmed_new_value.isEmpty()) {
-                    editor.remove(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY);
-                    message_id = preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY) ? R.string.synced_accounts_data_and_server_token_removed_due_to_server_location_removed : preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.server_token_removed_due_to_server_location_removed : 0;
+            if (! StringUtils.equals(trimmed_new_value, Constants.getDefaultSharedPreferences(context).getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, ""), true)) {
+                if (trimmed_new_value.toLowerCase().startsWith("http:")) {
+                    UiUtils.showConfirmDialog(getActivity(), R.string.server_http_is_insecure_warning, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            onServerLocationChanged(context, trimmed_new_value);
+                        }
+                    });
+                    return false;
                 }
-                else {
-                    editor.putString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, trimmed_new_value);
-                    message_id = preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY) ? R.string.synced_accounts_data_and_server_token_removed_due_to_server_location_changed : preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.server_token_removed_due_to_server_location_changed : 0;
-                }
-                removeDownloadedData(editor, Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY);
-                editor.apply();
-                findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY).setSummary(trimmed_new_value.isEmpty() ? getString(R.string.server_location_is_not_set) : trimmed_new_value);
-                findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setSummary(R.string.token_value_is_not_set_summary);
-                onSettingValueChanged(new String[] { Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, Constants.TWO_FACTOR_AUTH_TOKEN_KEY });
-                setDependenciesAvailability();
-                UiUtils.showMessageDialog(getActivity(), message_id);
+                onServerLocationChanged(context, trimmed_new_value);
                 return true;
             }
         }

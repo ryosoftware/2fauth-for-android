@@ -18,6 +18,7 @@
     <string name="server_location_dialog_title">@string/server_location</string>
     <string name="server_location_dialog_message">Por favor, introduzca la dirección del servidor (incluyendo la parte correspondiente al protocolo http/https).\n\nEjemplo: https://demo.2fauth.app</string>
     <string name="server_location_is_not_set">Server location is not set</string>
+    <string name="server_http_is_insecure_warning">La ubicación del servidor que ha especificado no es segura.\n\nLe recomendamos encarecidamente que lo traslade a una ubicación segura (quizás tenga que instalar traefik, nginx-proxy o similar) excepto para realizar pruebas y si conoce los riesgos.</string>
 
     <string name="synced_accounts_data_and_server_token_removed_due_to_server_location_removed">Como ha eliminado la dirección del servidor, las cuentas previamente sincronizadas y el token de acceso se han eliminado consecuentemente</string>
     <string name="synced_accounts_data_and_server_token_removed_due_to_server_location_changed">Como ha cambiado la dirección del servidor, las cuentas previamente sincronizadas y el token de acceso se han eliminado consecuentemente</string>
@@ -113,6 +114,7 @@
     <string name="ok">OK</string>
 
     <string name="information">Información</string>
+    <string name="confirmation">Confirmación</string>
 
     <string name="number_0">0</string>
     <string name="number_1">1</string>
