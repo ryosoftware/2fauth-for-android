@@ -114,7 +114,6 @@ public class ServerDataLoader extends Thread
     }
     private String getTwoFactorAuthCodes(final boolean raise_exception_on_error) throws Exception {
         final HttpURLConnection connection = HttpUtils.get(new URL(GET_2FAUTH_CODES_LOCATION.replace("%SERVER%", mServer)), GET_TWO_FACTOR_AUTH_TOKEN.replace("%TOKEN%", mToken));
-        if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) throw new Exception(connection.getResponseMessage());
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             return HttpUtils.getContentString(connection);
         }
