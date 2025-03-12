@@ -18,19 +18,22 @@ android {
         release {
             isMinifyEnabled = false
             resValue("string", "app_version_value", "${defaultConfig.versionName} (build ${defaultConfig.versionCode})")
+            resValue("bool", "is_debug_version", "false");
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
             resValue("string", "app_version_value", "${defaultConfig.versionName} (build ${defaultConfig.versionCode}) (debug release)")
+            resValue("bool", "is_debug_version", "true");
         }
+    }
+
+    buildFeatures {
+        viewBinding = false
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        viewBinding = false
     }
 }
 

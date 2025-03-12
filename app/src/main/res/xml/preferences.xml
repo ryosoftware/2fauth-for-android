@@ -40,6 +40,8 @@
 
         <Preference android:key="github-repo" android:title="@string/github_repo" android:summary="@string/github_repo_summary" />
 
+        <CheckBoxPreference android:key="auto-updates-app" android:title="@string/auto_updates_app" android:summary="@string/auto_updates_app_summary" android:defaultValue="@bool/auto_updates_app_default" />
+
         <Preference android:key="open-source-licenses" android:title="@string/open_source_licenses" android:summary="@string/open_source_licenses_summary" />
 
         <Preference android:key="app-version" android:title="@string/app_version" android:summary="@string/app_version_value" />

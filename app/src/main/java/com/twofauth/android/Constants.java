@@ -34,6 +34,8 @@ public class Constants {
 
     public static final String FINGERPRINT_ACCESS_KEY = "fingerprint-access";
 
+    public static final String AUTO_UPDATES_APP_KEY = "auto-updates-app";
+
     // 2FA Server accounts data
     public static final String TWO_FACTOR_AUTH_SERVER_LOCATION_KEY = "server";
     public static final String TWO_FACTOR_AUTH_TOKEN_KEY = "token";

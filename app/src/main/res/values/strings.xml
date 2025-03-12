@@ -109,14 +109,19 @@
     <string name="github_repo">GitHub repo</string>
     <string name="github_repo_summary">Open the app\'s GitHub repository to get information about the latest releases, report bugs, or contribute to development</string>
 
+    <string name="auto_updates_app">Automatic updates</string>
+    <string name="auto_updates_app_summary">When you enter the app, it will connect to the repository to check for updates, downloading and installing them if necessary.</string>
+    <string name="there_is_an_update_version">There is an app update.\n\nDo you want to install now?</string>
+
     <string name="search">Enter a text to filter accounts&#8230;</string>
 
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="install_now">Install now</string>
 
     <string name="information">Information</string>
-    <string name="confirmation">Confirmation</string>
+    <string name="warning">Warning</string>
 
     <string name="number_0">0</string>
     <string name="number_1">1</string>

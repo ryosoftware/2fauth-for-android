@@ -149,6 +149,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             findPreference(Constants.FINGERPRINT_ACCESS_KEY).getParent().removePreference(findPreference(Constants.FINGERPRINT_ACCESS_KEY));
         }
         findPreference(GITHUB_REPO_KEY).setOnPreferenceClickListener(this);
+        findPreference(Constants.AUTO_UPDATES_APP_KEY).setOnPreferenceChangeListener(this);
         findPreference(OPEN_SOURCE_LICENSES_KEY).setOnPreferenceClickListener(this);
         setDependenciesAvailability();
     }
@@ -306,6 +307,10 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                 return true;
             }
             AuthenticWithBiometrics.authenticate(getActivity(), this);
+        }
+        else if (Constants.AUTO_UPDATES_APP_KEY.equals(preference.getKey())) {
+            onSettingValueChanged(preference.getKey());
+            return true;
         }
         return false;
     }

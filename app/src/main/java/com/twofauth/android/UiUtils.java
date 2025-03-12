@@ -27,13 +27,13 @@ public class UiUtils {
         }
     }
 
-    public static void showConfirmDialog(@Nullable final Activity activity, final int message_id, @Nullable final DialogInterface.OnClickListener on_accept_button_click, @Nullable final DialogInterface.OnClickListener on_cancel_button_click) {
+    public static void showConfirmDialog(@Nullable final Activity activity, final int message_id, final int accept_button_text_id, @Nullable final DialogInterface.OnClickListener on_accept_button_click, @Nullable final DialogInterface.OnClickListener on_cancel_button_click) {
         if ((message_id != 0) && (activity != null)) {
             try {
                 final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
-                alert_dialog_builder.setTitle(R.string.confirmation);
+                alert_dialog_builder.setTitle(R.string.warning);
                 alert_dialog_builder.setMessage(message_id);
-                alert_dialog_builder.setPositiveButton(R.string.accept, on_accept_button_click);
+                alert_dialog_builder.setPositiveButton(accept_button_text_id == 0 ? R.string.accept : accept_button_text_id, on_accept_button_click);
                 alert_dialog_builder.setNegativeButton(R.string.cancel, on_cancel_button_click);
                 alert_dialog_builder.create().show();
             }
@@ -43,8 +43,16 @@ public class UiUtils {
         }
     }
 
+    public static void showConfirmDialog(@Nullable final Activity activity, final int message_id, @Nullable final DialogInterface.OnClickListener on_accept_button_click, @Nullable final DialogInterface.OnClickListener on_cancel_button_click) {
+        showConfirmDialog(activity, message_id, 0, on_accept_button_click, on_cancel_button_click);
+    }
+
+    public static void showConfirmDialog(@Nullable final Activity activity, final int message_id, final int accept_button_text_id, @Nullable final DialogInterface.OnClickListener on_accept_button_click) {
+        showConfirmDialog(activity, message_id, accept_button_text_id, on_accept_button_click, null);
+    }
+
     public static void showConfirmDialog(@Nullable final Activity activity, final int message_id, @Nullable final DialogInterface.OnClickListener on_accept_button_click) {
-        showConfirmDialog(activity, message_id, on_accept_button_click, null);
+        showConfirmDialog(activity, message_id, 0, on_accept_button_click, null);
     }
 
     public static void showToast(@Nullable final Context context, final int message_id) {

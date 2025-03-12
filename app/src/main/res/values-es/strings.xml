@@ -110,14 +110,19 @@
     <string name="github_repo">Repositorio GitHub</string>
     <string name="github_repo_summary">Abra el repositorio GitHub de la aplicación para obtener información sobre las últimas versiones, reportar errores o contribuir al desarrollo</string>
 
+    <string name="auto_updates_app">Actualizaciones automáticas</string>
+    <string name="auto_updates_app_summary">Cuando inicie la app se conectará con el repositorio para comprobar si existen actualizaciones, procediendo a su descarga y a su instalación, si es el caso.</string>
+    <string name="there_is_an_update_version">Se ha encontrado una actualización de la apicación.\n\n¿Desea instalarla ahora?</string>
+
     <string name="search">Escribe algo para filtrar&#8230;</string>
 
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
     <string name="ok">OK</string>
+    <string name="install_now">Instalar ahora</string>
 
     <string name="information">Información</string>
-    <string name="confirmation">Confirmación</string>
+    <string name="warning">Atención</string>
 
     <string name="number_0">0</string>
     <string name="number_1">1</string>
