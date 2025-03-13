@@ -22,7 +22,7 @@ import java.util.List;
 public class DataFilterer extends Thread
 {
     public interface OnDataFilteredListener {
-        public abstract void onDataFilterSuccess();
+        public abstract void onDataFilterSuccess(boolean any_filter_applied);
         public abstract void onDataFilterError();
     }
 
@@ -63,7 +63,7 @@ public class DataFilterer extends Thread
             }
             finally {
                 if (mSuccess) {
-                    mListener.onDataFilterSuccess();
+                    mListener.onDataFilterSuccess((mActiveGroup != null) && (! mActiveGroup.isEmpty()) && (mFilter != null) && (! mFilter.isEmpty()));
                 }
                 else {
                     mListener.onDataFilterError();

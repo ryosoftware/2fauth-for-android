@@ -111,7 +111,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     private void onAuthenticationSucceeded() {
         mAdapter.onResume();
-        findViewById(R.id.filters).setVisibility(mItems == null ? View.GONE : View.VISIBLE);
+        findViewById(R.id.filters).setVisibility(mItems.isEmpty() ? View.GONE : View.VISIBLE);
         mUnlocked = true;
     }
 
@@ -211,10 +211,9 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     }
     public void onServiceFinished() {
         setSyncDataButtonAvailability();
-    }
-    public void onDataSyncedFromServer() {
         loadData();
     }
+    public void onDataSyncedFromServer() {}
 
     private void loadData() {
         synchronized (mSynchronizationObject) {
@@ -261,9 +260,9 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     }
 
     @Override
-    public void onDataFilterSuccess() {
+    public void onDataFilterSuccess(final boolean any_filter_applied) {
         synchronized (mSynchronizationObject) {
-            mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(((mActiveGroup != null) && (((EditText) findViewById(R.id.filter_text)).getText().toString().isEmpty())) ? R.id.empty_view : R.id.recycler_view));
+            mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(any_filter_applied ? R.id.recycler_view : R.id.empty_view ));
         }
     }
     @Override
@@ -305,12 +304,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
                     if (changed_settings != null) {
                         if ((changed_settings.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY)) || (changed_settings.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY))) {
                             if (! Constants.getDefaultSharedPreferences(this).contains(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY)) {
-                                synchronized (mSynchronizationObject) {
-                                    mItems.clear();
-                                    mAdapter.setItems(null);
-                                    findViewById(R.id.filters).setVisibility(View.GONE);
-                                    setSyncDataButtonAvailability();
-                                }
+                                onDataLoadSuccess(null);
                                 if ((MainService.canSyncServerData(this)) && (! MainService.isRunning(this))) {
                                     MainService.startService(this);
                                 }
