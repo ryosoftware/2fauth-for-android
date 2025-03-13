@@ -62,4 +62,15 @@ public class StringUtils {
         final Date date = new Date(time);
         return context.getString(R.string.date_time, date_format.format(date), time_format.format(date));
     }
+
+    public static int parseInt(@Nullable final String value, final int fallback) {
+        if (value != null) {
+            try {
+                return Integer.parseInt(value);
+            }
+            catch (Exception e) {
+            }
+        }
+        return fallback;
+    }
 }
