@@ -137,10 +137,10 @@ public class CheckForAppUpdates extends Thread {
         try {
             final SharedPreferences preferences = Constants.getDefaultSharedPreferences(mActivity);
             final JSONObject object = getLatestReleaseData(true);
-            final int last_available_app_version = parseAppVersionNumber(object.optString(APP_VERSION_ENTRY_NAME)), app_installed_version = parseAppVersionNumber(mActivity.getString(R.string.app_version_value));
+            final int last_available_app_version = parseAppVersionNumber(object.optString(APP_VERSION_ENTRY_NAME)), app_installed_version = parseAppVersionNumber(mActivity.getString(R.string.app_version_name_value));
             int last_downloaded_version = parseAppVersionNumber(preferences.getString(LAST_DOWNLOADED_APP_VERSION_KEY, null));
             apk_local_file = getApkLocalFile();
-            if ((last_downloaded_version <= app_installed_version) || (last_downloaded_version < last_available_app_version)) {
+            if ((last_downloaded_version != 0) && ((last_downloaded_version <= app_installed_version) || (last_downloaded_version < last_available_app_version))) {
                 apk_local_file.delete();
                 preferences.edit().remove(LAST_DOWNLOADED_APP_VERSION_KEY).apply();
                 last_downloaded_version = 0;

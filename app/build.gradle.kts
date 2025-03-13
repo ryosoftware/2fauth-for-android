@@ -10,19 +10,21 @@ android {
         applicationId = "com.twofauth.android"
         minSdk = 29
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.6"
+        versionCode = 8
+        versionName = "1.8"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            resValue("string", "app_version_value", "${defaultConfig.versionName} (build ${defaultConfig.versionCode})")
+            resValue("string", "app_version_name_value", "${defaultConfig.versionName}")
+            resValue("integer", "app_version_number_value", "${defaultConfig.versionCode}")
             resValue("bool", "is_debug_version", "false");
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
-            resValue("string", "app_version_value", "${defaultConfig.versionName} (build ${defaultConfig.versionCode}) (debug release)")
+            resValue("string", "app_version_name_value", "${defaultConfig.versionName}")
+            resValue("integer", "app_version_number_value", "${defaultConfig.versionCode}")
             resValue("bool", "is_debug_version", "true");
         }
     }
