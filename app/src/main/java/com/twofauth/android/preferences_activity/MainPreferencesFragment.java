@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -38,6 +39,8 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     private static final String PIN_ACCESS_ENABLED_KEY = "pin-access-enabled";
     private static final String GITHUB_REPO_KEY = "github-repo";
     private static final String OPEN_SOURCE_LICENSES_KEY = "open-source-licenses";
+    private static final String APP_VERSION_KEY = "app-version";
+
     private final Intent mIntent = new Intent();
 
     private final ArrayList<String> mChanges = new ArrayList<String>();
@@ -155,6 +158,12 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(GITHUB_REPO_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.AUTO_UPDATES_APP_KEY).setOnPreferenceChangeListener(this);
         findPreference(OPEN_SOURCE_LICENSES_KEY).setOnPreferenceClickListener(this);
+        final Resources resources = getResources();
+        String app_version = getString(R.string.app_build_version_number, getString(R.string.app_version_name_value), resources.getInteger(R.integer.app_version_number_value));
+        if (resources.getBoolean(R.bool.is_debug_version)) {
+            app_version = getString(R.string.app_version_is_debug_release, app_version);
+        }
+        findPreference(APP_VERSION_KEY).setSummary(app_version);
     }
 
     @Override

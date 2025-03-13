@@ -44,7 +44,7 @@
 
         <Preference android:key="open-source-licenses" android:title="@string/open_source_licenses" android:summary="@string/open_source_licenses_summary" />
 
-        <Preference android:key="app-version" android:title="@string/app_version" android:summary="@string/app_version_value" />
+        <Preference android:key="app-version" android:title="@string/app_version" />
 
     </PreferenceCategory>
 

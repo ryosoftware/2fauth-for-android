@@ -2,6 +2,8 @@
     <string name="app_name">2FAuth</string>
 
     <string name="app_version">App version</string>
+    <string name="app_build_version_number">%1$s (build number %2$d)</string>
+    <string name="app_version_is_debug_release">%1$s\n\nDevelopment version</string>
 
     <string name="settings">Settings</string>
     <string name="action_settings">@string/settings</string>
