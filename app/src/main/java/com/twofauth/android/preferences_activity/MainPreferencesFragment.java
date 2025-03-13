@@ -77,62 +77,66 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
 
     private void setSyncDetailsPreferenceState() {
         if (isAdded()) {
-            final Context context = requireContext();
-            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
-	        final boolean is_service_running = MainService.isRunning(context);
-  	        String last_sync_details = getString(R.string.sync_is_in_progress);
-	        if (! is_service_running) {
-                last_sync_details = getString(R.string.click_to_sync_data);
-                if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY)) {
-                    last_sync_details = getString(R.string.last_sync_error, preferences.getString(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY, null), StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY, 0)), last_sync_details);
+            final Context context = getContext();
+            if (context != null) {
+                final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
+                final boolean is_service_running = MainService.isRunning(context);
+                String last_sync_details = getString(R.string.sync_is_in_progress);
+                if (! is_service_running) {
+                    last_sync_details = getString(R.string.click_to_sync_data);
+                    if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY)) {
+                        last_sync_details = getString(R.string.last_sync_error, preferences.getString(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY, null), StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY, 0)), last_sync_details);
+                    }
+                    else if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY)) {
+                        final int number_of_accounts = preferences.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY, 0);
+                        last_sync_details = getResources().getQuantityString(R.plurals.sync_details, number_of_accounts, number_of_accounts, StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, 0)), last_sync_details);
+                    }
                 }
-                else if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY)) {
-                    final int number_of_accounts = preferences.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY, 0);
-                    last_sync_details = getResources().getQuantityString(R.plurals.sync_details, number_of_accounts, number_of_accounts, StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, 0)), last_sync_details);
-                }
+                Preference sync_details_preference = findPreference(SYNC_DETAILS_KEY);
+                sync_details_preference.setEnabled(MainService.canSyncServerData(context) && (! is_service_running));
+                sync_details_preference.setSummary(last_sync_details);
             }
-            Preference sync_details_preference = findPreference(SYNC_DETAILS_KEY);
-            sync_details_preference.setEnabled(MainService.canSyncServerData(context) && (! is_service_running));
-            sync_details_preference.setSummary(last_sync_details);
         }
     }
 
-    private void setDependenciesAvailability() {
+    private void setMutablePreferencesSummariesAndAvailability() {
         if (isAdded()) {
-            final Context context = requireContext();
-            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
-            findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setEnabled(preferences.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY));
-            setSyncDetailsPreferenceState();
-            ((CheckBoxPreference) findPreference(PIN_ACCESS_ENABLED_KEY)).setChecked(preferences.getBoolean(PIN_ACCESS_ENABLED_KEY, false));
-            final CheckBoxPreference fingerprint_access_preference = (CheckBoxPreference) findPreference(Constants.FINGERPRINT_ACCESS_KEY);
-            if (fingerprint_access_preference != null) {
-                fingerprint_access_preference.setEnabled(preferences.contains(Constants.PIN_ACCESS_KEY));
-                fingerprint_access_preference.setChecked(preferences.getBoolean(Constants.FINGERPRINT_ACCESS_KEY, false));
+            final Context context = getContext();
+            if (context != null) {
+                final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
+                final Preference server_location_preference = findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY), token_preference = findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
+                server_location_preference.setSummary(preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, getString(R.string.server_location_is_not_set)));
+                token_preference.setEnabled(preferences.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY));
+                token_preference.setSummary(preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.token_value_is_set_summary : R.string.token_value_is_not_set_summary);
+                setSyncDetailsPreferenceState();
+                ((CheckBoxPreference) findPreference(PIN_ACCESS_ENABLED_KEY)).setChecked(preferences.getBoolean(PIN_ACCESS_ENABLED_KEY, false));
+                final CheckBoxPreference fingerprint_access_preference = (CheckBoxPreference) findPreference(Constants.FINGERPRINT_ACCESS_KEY);
+                if (fingerprint_access_preference != null) {
+                    fingerprint_access_preference.setEnabled(preferences.contains(Constants.PIN_ACCESS_KEY));
+                    fingerprint_access_preference.setChecked(preferences.getBoolean(Constants.FINGERPRINT_ACCESS_KEY, false));
+                }
             }
         }
     }
 
-    private void initializePreferences(@NotNull final Context context) {
+    private void initializePreferencesListeners(@NotNull final Context context) {
         final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
-        final EditTextPreference server_location = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY), server_token = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
-        server_location.setSummary(preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, getString(R.string.server_location_is_not_set)));
-        server_location.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+        final EditTextPreference server_location_preference = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY), token_preference = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
+        server_location_preference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
             @Override
             public void onBindEditText(@NonNull EditText edit_text) {
                 edit_text.setText(preferences.getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, null));
                 edit_text.setSelection(edit_text.getText().length());
             }
         });
-        server_location.setOnPreferenceChangeListener(this);
-
-        server_token.setSummary(preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.token_value_is_set_summary : R.string.token_value_is_not_set_summary);
-        server_token.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+        server_location_preference.setOnPreferenceChangeListener(this);
+        token_preference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
             public void onBindEditText(@NonNull final EditText edit_text) {
                 edit_text.setHint(Constants.getDefaultSharedPreferences(edit_text.getContext()).contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? getString(R.string.token_unchanged) : "");
                 edit_text.setText(null);
             }
         });
-        server_token.setOnPreferenceChangeListener(this);
+        token_preference.setOnPreferenceChangeListener(this);
         findPreference(SYNC_DETAILS_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY).setOnPreferenceChangeListener(this);
         findPreference(RESET_ACCOUNTS_LAST_USE_KEY).setOnPreferenceClickListener(this);
@@ -151,13 +155,13 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(GITHUB_REPO_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.AUTO_UPDATES_APP_KEY).setOnPreferenceChangeListener(this);
         findPreference(OPEN_SOURCE_LICENSES_KEY).setOnPreferenceClickListener(this);
-        setDependenciesAvailability();
     }
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle saved_instance_state) {
         super.onViewCreated(view, saved_instance_state);
-        initializePreferences(view.getContext());
+        initializePreferencesListeners(view.getContext());
+        setMutablePreferencesSummariesAndAvailability();
         setDivider(null);
     }
 
@@ -198,37 +202,59 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         return false;
     }
 
-    private void removeDownloadedData(@NotNull final SharedPreferences.Editor editor, @NotNull final String primary_key) {
-        if (! Constants.TWO_FACTOR_AUTH_TOKEN_KEY.equals(primary_key)) {
-            editor.remove(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
+    private void removeDownloadedData(final int message_id) {
+        if (message_id == 0) {
+            final Context context = getContext();
+            if (context != null) {
+                SharedPreferences.Editor editor = Constants.getDefaultSharedPreferences(context).edit();
+                editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY);
+                editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY);
+                editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY);
+                editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY);
+                editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY);
+                editor.apply();
+                setSyncDetailsPreferenceState();
+            }
         }
-        editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY);
-        editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY);
-        editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY);
-        editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY);
-        editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY);
+        else {
+            UiUtils.showConfirmDialog(getActivity(), message_id, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    removeDownloadedData(0);
+                }
+            });
+        }
     }
 
     private void onServerLocationChanged(@NotNull final Context context, @NotNull final String location) {
         final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
         final SharedPreferences.Editor editor = preferences.edit();
-        int message_id;
+        final int message_id = preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? preferences.contains(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY) ? R.string.server_location_has_changed_and_token_defined_and_downloaded_data_exists : R.string.server_location_has_changed_and_token_defined_and_no_downloaded_data_exists : preferences.contains(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY) ? R.string.server_location_has_changed_and_token_not_defined_but_downloaded_data_exists : 0;
         if (location.isEmpty()) {
             editor.remove(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY);
-            message_id = preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY) ? R.string.synced_accounts_data_and_server_token_removed_due_to_server_location_removed : preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.server_token_removed_due_to_server_location_removed : 0;
         }
         else {
             editor.putString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, location);
-            message_id = preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY) ? R.string.synced_accounts_data_and_server_token_removed_due_to_server_location_changed : preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.server_token_removed_due_to_server_location_changed : 0;
         }
-        removeDownloadedData(editor, Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY);
+        editor.remove(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
         editor.apply();
+        setMutablePreferencesSummariesAndAvailability();
         onSettingValueChanged(new String[] { Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, Constants.TWO_FACTOR_AUTH_TOKEN_KEY });
-        if (isAdded()) {
-            findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY).setSummary(location.isEmpty() ? getString(R.string.server_location_is_not_set) : location);
-            findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setSummary(R.string.token_value_is_not_set_summary);
-            setDependenciesAvailability();
-            UiUtils.showMessageDialog(getActivity(), message_id);
+        removeDownloadedData(message_id);
+        if (message_id == 0) {
+            UiUtils.showToast(context, R.string.server_location_has_changed_and_token_not_defined_and_no_downloaded_data_exists);
+        }
+    }
+
+    private void onTokenChanged(@NotNull final Context context, @NotNull final String token) {
+        final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
+        final int message_id = preferences.contains(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY) ? R.string.token_has_changed_and_downloaded_data_exists : 0;
+        preferences.edit().putString(Constants.TWO_FACTOR_AUTH_TOKEN_KEY, token).apply();
+        onSettingValueChanged(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
+        setMutablePreferencesSummariesAndAvailability();
+        removeDownloadedData(message_id);
+        if (message_id == 0) {
+            UiUtils.showToast(context, R.string.token_has_changed_and_no_downloaded_data_exists);
         }
     }
 
@@ -254,13 +280,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         else if (Constants.TWO_FACTOR_AUTH_TOKEN_KEY.equals(preference.getKey())) {
             final String trimmed_new_value = new_value.toString().trim();
             if (! trimmed_new_value.isEmpty()) {
-                final SharedPreferences.Editor editor = Constants.getDefaultSharedPreferences(context).edit();
-                editor.putString(Constants.TWO_FACTOR_AUTH_TOKEN_KEY, trimmed_new_value);
-                removeDownloadedData(editor, Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
-                editor.apply();
-                findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY).setSummary(R.string.token_value_is_set_summary);
-                onSettingValueChanged(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
-                setDependenciesAvailability();
+                onTokenChanged(context, trimmed_new_value);
                 return true;
             }
         }
@@ -326,7 +346,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             editor.putBoolean(Constants.FINGERPRINT_ACCESS_KEY, false);
             editor.apply();
             UiUtils.showToast(context, R.string.pin_has_been_removed);
-            setDependenciesAvailability();
+            setMutablePreferencesSummariesAndAvailability();
             onSettingValueChanged(Constants.PIN_ACCESS_KEY);
         }
     }
@@ -348,7 +368,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             editor.apply();
             UiUtils.showToast(context, R.string.pin_has_been_set);
             onSettingValueChanged(Constants.PIN_ACCESS_KEY);
-            setDependenciesAvailability();
+            setMutablePreferencesSummariesAndAvailability();
         }
     }
 
@@ -363,7 +383,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             editor.putBoolean(Constants.FINGERPRINT_ACCESS_KEY, true);
             editor.apply();
             onSettingValueChanged(Constants.FINGERPRINT_ACCESS_KEY);
-            setDependenciesAvailability();
+            setMutablePreferencesSummariesAndAvailability();
         }
     }
 

@@ -304,14 +304,19 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
                     final List<String> changed_settings = intent.getStringArrayListExtra(MainPreferencesFragment.EXTRA_CHANGED_SETTINGS);
                     if (changed_settings != null) {
                         if ((changed_settings.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY)) || (changed_settings.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY))) {
-                            synchronized (mSynchronizationObject) {
-                                mItems.clear();
-                                mAdapter.setItems(null);
-                                findViewById(R.id.filters).setVisibility(View.GONE);
-                                setSyncDataButtonAvailability();
+                            if (! Constants.getDefaultSharedPreferences(this).contains(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY)) {
+                                synchronized (mSynchronizationObject) {
+                                    mItems.clear();
+                                    mAdapter.setItems(null);
+                                    findViewById(R.id.filters).setVisibility(View.GONE);
+                                    setSyncDataButtonAvailability();
+                                }
+                                if ((MainService.canSyncServerData(this)) && (! MainService.isRunning(this))) {
+                                    MainService.startService(this);
+                                }
                             }
-                            if ((MainService.canSyncServerData(this)) && (! MainService.isRunning(this))) {
-                                MainService.startService(this);
+                            else {
+                                loadData();
                             }
                         }
                         else if (changed_settings.contains(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY)) {
