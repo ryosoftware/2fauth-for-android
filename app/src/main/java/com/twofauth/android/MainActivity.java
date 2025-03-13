@@ -1,9 +1,11 @@
 package com.twofauth.android;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -15,9 +17,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 
 import androidx.biometric.BiometricPrompt;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
@@ -26,6 +30,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import com.twofauth.android.main_activity.AuthenticWithBiometrics;
 import com.twofauth.android.main_activity.AuthenticWithPin;
+import com.twofauth.android.main_activity.CheckForAppUpdates;
 import com.twofauth.android.main_activity.DataFilterer;
 import com.twofauth.android.main_activity.DataLoader;
 import com.twofauth.android.main_activity.ListUtils;
@@ -48,10 +53,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
+public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
     private static final long SYNC_BUTTON_ROTATION_DURATION = (long) (2.5f * DateUtils.SECOND_IN_MILLIS);
     private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
     private final MainActivityRecyclerAdapter mAdapter = new MainActivityRecyclerAdapter(false);;
@@ -82,6 +88,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         mRotateAnimation.setDuration(SYNC_BUTTON_ROTATION_DURATION);
         mRotateAnimation.setInterpolator(new LinearInterpolator());
         mRotateAnimation.setRepeatCount(Animation.INFINITE);
+        checkForAppUpdates();
     }
 
     @Override
@@ -104,7 +111,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     private void onAuthenticationSucceeded() {
         mAdapter.onResume();
-        findViewById(R.id.filters).setVisibility(mItems == null ? View.GONE : View.VISIBLE);
+        findViewById(R.id.filters).setVisibility(mItems.isEmpty() ? View.GONE : View.VISIBLE);
         mUnlocked = true;
     }
 
@@ -204,10 +211,9 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     }
     public void onServiceFinished() {
         setSyncDataButtonAvailability();
-    }
-    public void onDataSyncedFromServer() {
         loadData();
     }
+    public void onDataSyncedFromServer() {}
 
     private void loadData() {
         synchronized (mSynchronizationObject) {
@@ -254,13 +260,39 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     }
 
     @Override
-    public void onDataFilterSuccess() {
+    public void onDataFilterSuccess(final boolean any_filter_applied) {
         synchronized (mSynchronizationObject) {
-            mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(((mActiveGroup != null) && (((EditText) findViewById(R.id.filter_text)).getText().toString().isEmpty())) ? R.id.empty_view : R.id.recycler_view));
+            mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(any_filter_applied ? R.id.recycler_view : R.id.empty_view ));
         }
     }
     @Override
     public void onDataFilterError() {}
+
+    private void checkForAppUpdates() {
+        if (Constants.getDefaultSharedPreferences(this).getBoolean(Constants.AUTO_UPDATES_APP_KEY, getResources().getBoolean(R.bool.auto_updates_app_default))) {
+            new CheckForAppUpdates(this, this).start();
+        }
+    }
+    public void onCheckForUpdatesFinished(@Nullable final File apk_local_file)
+    {
+        if ((apk_local_file != null) && (! isFinishedOrFinishing())) {
+            UiUtils.showConfirmDialog(this, R.string.there_is_an_update_version, R.string.install_now, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(FileProvider.getUriForFile(getBaseContext(), getPackageName() + ".provider", apk_local_file), "application/vnd.android.package-archive");
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(intent);
+                    }
+                    catch (Exception e) {
+                        Log.d(Constants.LOG_TAG_NAME, "Exception while trying to install an app update", e);
+                    }
+                }
+            });
+        }
+    }
 
     @Override
     public void onActivityResult(@NotNull final ActivityResult result) {
@@ -270,15 +302,15 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
                 if (intent != null) {
                     final List<String> changed_settings = intent.getStringArrayListExtra(MainPreferencesFragment.EXTRA_CHANGED_SETTINGS);
                     if (changed_settings != null) {
-                        if (changed_settings.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY)) {
-                            synchronized (mSynchronizationObject) {
-                                mItems.clear();
-                                mAdapter.setItems(null);
-                                findViewById(R.id.filters).setVisibility(View.GONE);
-                                setSyncDataButtonAvailability();
+                        if ((changed_settings.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY)) || (changed_settings.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY))) {
+                            if (! Constants.getDefaultSharedPreferences(this).contains(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY)) {
+                                onDataLoadSuccess(null);
+                                if ((MainService.canSyncServerData(this)) && (! MainService.isRunning(this))) {
+                                    MainService.startService(this);
+                                }
                             }
-                            if ((MainService.canSyncServerData(this)) && (! MainService.isRunning(this))) {
-                                MainService.startService(this);
+                            else {
+                                loadData();
                             }
                         }
                         else if (changed_settings.contains(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY)) {

@@ -183,7 +183,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);
         mOtpTime.setProgress(millis_until_next_otp >= 0 ? (int) (millis_until_next_otp / (10 * object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_PERIOD_KEY, 1))) : 0);
         mOtpTime.setProgressTintList(otp_color_state_list);
-        mOtpTime.setVisibility(millis_until_next_otp >= 0 ? View.VISIBLE : View.GONE);
+        mOtpTime.setVisibility(millis_until_next_otp >= 0 ? View.VISIBLE : View.INVISIBLE);
         mOtpCopyToClipboard.setBackgroundTintList(otp_color_state_list);
         mOtpCopyToClipboard.setVisibility(millis_until_next_otp >= 0 && options.isShowCopyToClipboardButtonDisplayed() ? View.VISIBLE : View.GONE);
         mOtpContainer.setVisibility(otp != null ? View.VISIBLE : View.GONE);

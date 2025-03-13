@@ -34,6 +34,8 @@ public class Constants {
 
     public static final String FINGERPRINT_ACCESS_KEY = "fingerprint-access";
 
+    public static final String AUTO_UPDATES_APP_KEY = "auto-updates-app";
+
     // 2FA Server accounts data
     public static final String TWO_FACTOR_AUTH_SERVER_LOCATION_KEY = "server";
     public static final String TWO_FACTOR_AUTH_TOKEN_KEY = "token";
@@ -68,5 +70,21 @@ public class Constants {
     @SuppressLint("DefaultLocale")
     public static String getTwoFactorAccountLastUseKey(JSONObject object) {
         return String.format("%s-%d", TWO_FACTOR_AUTH_ACCOUNT_LAST_USE_KEY_PREFIX, object.optInt(TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY));
+    }
+
+    public static void deleteTwoFactorAccountLastUseKeys(@NotNull final Context context) {
+        final SharedPreferences preferences = getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = null;
+        for (final String key : preferences.getAll().keySet()) {
+            if (key.startsWith(TWO_FACTOR_AUTH_ACCOUNT_LAST_USE_KEY_PREFIX)) {
+                if (editor == null) {
+		    editor = preferences.edit();
+		}
+		editor.remove(key);
+	    }
+	}
+        if (editor != null) {
+            editor.apply();
+        }
     }
 }

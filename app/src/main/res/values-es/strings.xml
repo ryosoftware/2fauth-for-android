@@ -18,11 +18,12 @@
     <string name="server_location_dialog_title">@string/server_location</string>
     <string name="server_location_dialog_message">Por favor, introduzca la dirección del servidor (incluyendo la parte correspondiente al protocolo http/https).\n\nEjemplo: https://demo.2fauth.app</string>
     <string name="server_location_is_not_set">Server location is not set</string>
+    <string name="server_http_is_insecure_warning">La ubicación del servidor que ha especificado no es segura.\n\nLe recomendamos encarecidamente que lo traslade a una ubicación segura (quizás tenga que instalar traefik, nginx-proxy o similar) excepto para realizar pruebas y si conoce los riesgos.</string>
 
-    <string name="synced_accounts_data_and_server_token_removed_due_to_server_location_removed">Como ha eliminado la dirección del servidor, las cuentas previamente sincronizadas y el token de acceso se han eliminado consecuentemente</string>
-    <string name="synced_accounts_data_and_server_token_removed_due_to_server_location_changed">Como ha cambiado la dirección del servidor, las cuentas previamente sincronizadas y el token de acceso se han eliminado consecuentemente</string>
-    <string name="server_token_removed_due_to_server_location_removed">Como ha eliminado la dirección del servidor, el token de acceso se han eliminado consecuentemente</string>
-    <string name="server_token_removed_due_to_server_location_changed">Como ha cambiado la dirección del servidor, el token de acceso se han eliminado consecuentemente</string>
+    <string name="server_location_has_changed_and_token_defined_and_downloaded_data_exists">Al cambiar la ubicación del servidor se eliminó también, por su seguridad, el token de acceso.\n\nAdicionalmente, le recomendamos que elimine de la app los datos de las cuentas que se hubieran descargado anteriormente.\n\n¿Desea eliminar los datos ahora?</string>
+    <string name="server_location_has_changed_and_token_not_defined_but_downloaded_data_exists">Al cambiar la ubicación del servidor le recomendamos que elimine de la app los datos de las cuentas que se hubieran descargado anteriormente.\n\n¿Desea eliminar los datos ahora?</string>
+    <string name="server_location_has_changed_and_token_defined_and_no_downloaded_data_exists">Al cambiar la ubicación del servidor se eliminó también, por su seguridad, el token de acceso</string>
+    <string name="server_location_has_changed_and_token_not_defined_and_no_downloaded_data_exists">La ubicación del servidor se ha actualizado</string>
 
     <string name="token_value">Token de acceso</string>
     <string name="token_value_is_set_summary">Haga clic para actualizar el valor del token de acceso</string>
@@ -30,6 +31,9 @@
     <string name="token_value_dialog_title">@string/token_value</string>
     <string name="token_value_dialog_message">Por favor, ingrese el valor del token.\n\nPara obtener un token, abra la URL del servidor en un navegador web, inicie sesión con su cuenta de usuario y acceda a los ajustes y luego a "Configuración de OAuth"; finalmente haga clic en "generar un token", copie el valor y péguelo aquí.</string>
     <string name="token_unchanged">(sin cambios)</string>
+
+    <string name="token_has_changed_and_downloaded_data_exists">El token de acceso al servidor se ha actualizado.\n\nAdicionalmente, le recomendamos que elimine de la app los datos de las cuentas que se hubieran descargado anteriormente.\n\n¿Desea eliminar los datos ahora?</string>
+    <string name="token_has_changed_and_no_downloaded_data_exists">El token de acceso al servidor se ha actualizado</string>
 
     <plurals name="number_of_accounts">
         <item quantity="one">Se lista una única cuenta</item>
@@ -60,6 +64,9 @@
 
     <string name="sort_accounts_by_last_use">Ordenar cuentas según uso</string>
     <string name="sort_accounts_by_last_use_summary">Ordenar las cuentas según el uso (primero las últimas cuentas para las que se ha mostrado un código OTP) en lugar de ordenarlas simplemente por el nombre de servicio</string>
+
+    <string name="reset_accounts_last_use_data">Resetear datos de uso</string>
+    <string name="reset_accounts_last_use_data_summary">Elimina los datos de uso de las cuentas y la ordenación se reinicia</string>
 
     <string name="ungroup_otp_codes">Desagrupar código 2FA</string>
     <string name="ungroup_otp_codes_summary">Desagrupa los códigos para facilitar la lectura</string>
@@ -106,13 +113,19 @@
     <string name="github_repo">Repositorio GitHub</string>
     <string name="github_repo_summary">Abra el repositorio GitHub de la aplicación para obtener información sobre las últimas versiones, reportar errores o contribuir al desarrollo</string>
 
+    <string name="auto_updates_app">Actualizaciones automáticas</string>
+    <string name="auto_updates_app_summary">Cuando inicie la app se conectará con el repositorio para comprobar si existen actualizaciones, procediendo a su descarga y a su instalación, si es el caso.</string>
+    <string name="there_is_an_update_version">Se ha encontrado una actualización de la apicación.\n\n¿Desea instalarla ahora?</string>
+
     <string name="search">Escribe algo para filtrar&#8230;</string>
 
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
     <string name="ok">OK</string>
+    <string name="install_now">Instalar ahora</string>
 
     <string name="information">Información</string>
+    <string name="warning">Atención</string>
 
     <string name="number_0">0</string>
     <string name="number_1">1</string>

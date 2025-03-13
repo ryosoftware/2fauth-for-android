@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.twofauth.android.Constants;
 import com.twofauth.android.JsonUtils;
+import com.twofauth.android.HttpUtils;
 import com.twofauth.android.MainService;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
@@ -17,12 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -36,50 +32,6 @@ public class ServerDataLoader extends Thread
     private static final String GET_2FAUTH_GROUPS_LOCATION = "%SERVER%/api/v1/groups";
     private static final String GET_2FAUTH_ICON_LOCATION = "%SERVER%/storage/icons/%FILE%";
     private static final String GET_TWO_FACTOR_AUTH_TOKEN = "Bearer %TOKEN%";
-
-    private static class HttpUtils {
-        public static HttpURLConnection get(@NotNull final URL url, @Nullable final String authorization) throws Exception {
-            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Cache-Control", "no-cache");
-            connection.setDefaultUseCaches(false);
-            connection.setUseCaches(false);
-            connection.setInstanceFollowRedirects(true);
-            if (authorization != null) {
-                connection.setRequestProperty("Authorization", authorization);
-            }
-            connection.connect();
-            return connection;
-        }
-
-        private static HttpURLConnection get(@NotNull final URL url) throws Exception {
-            return get(url, null);
-        }
-
-        public static String getContentString(@NotNull final HttpURLConnection connection) throws Exception {
-            try (final BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                final StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = in.readLine()) != null) {
-                    response.append(line);
-                }
-                return response.toString();
-            }
-        }
-
-        public static void saveContent(@NotNull final HttpURLConnection connection, @NotNull final File file) throws Exception {
-            int count;
-            try (final InputStream in = connection.getInputStream()) {
-                file.getParentFile().mkdirs();
-                try (final OutputStream out = new FileOutputStream(file)) {
-                    final byte[] bytes = new byte[4096];
-                    while ((count = in.read(bytes)) >= 0) {
-                        out.write(bytes, 0, count);
-                    }
-                }
-            }
-        }
-    }
 
     private static class DashBoardIconsUtils {
         private static final String BASE_LOCATION = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/%SERVICE%.png";
@@ -162,7 +114,6 @@ public class ServerDataLoader extends Thread
     }
     private String getTwoFactorAuthCodes(final boolean raise_exception_on_error) throws Exception {
         final HttpURLConnection connection = HttpUtils.get(new URL(GET_2FAUTH_CODES_LOCATION.replace("%SERVER%", mServer)), GET_TWO_FACTOR_AUTH_TOKEN.replace("%TOKEN%", mToken));
-        if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) throw new Exception(connection.getResponseMessage());
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             return HttpUtils.getContentString(connection);
         }

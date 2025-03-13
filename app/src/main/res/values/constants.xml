@@ -14,4 +14,6 @@
 
     <bool name="show_copy_to_clipboard_button_default">true</bool>
 
+    <bool name="auto_updates_app_default">true</bool>
+
 </resources>

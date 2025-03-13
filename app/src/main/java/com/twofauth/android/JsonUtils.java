@@ -35,6 +35,10 @@ public class JsonUtils {
         return map;
     }
 
+    public static JSONObject StringToJsonObject(@Nullable final String data) throws Exception {
+        return (data == null) ? null : new JSONObject(data);
+    }
+
     private static JsonObject toJsonObject(@NotNull final JSONObject json_object) throws Exception {
         final JsonObject new_json_object = new JsonObject();
         final Iterator<String> iterator = json_object.keys();

@@ -39,6 +39,7 @@
                 android:maxLines="1"
                 android:drawableStart="@drawable/ic_editset_search"
                 android:drawablePadding="5dp"
+                android:inputType="text"
                 android:hint="@string/search"
                 android:background="@drawable/border_frame_transparent" />
 
@@ -69,12 +70,12 @@
         android:id="@+id/empty_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:gravity="center"
+        android:orientation="vertical"
         android:visibility="gone">
 
         <ImageView
