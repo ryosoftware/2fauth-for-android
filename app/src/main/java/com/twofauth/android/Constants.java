@@ -18,6 +18,8 @@ public class Constants {
     public static final String MAIN_SERVICE_NOTIFICATION_CHANNEL = "main-service";
     public static final int MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID = 1001;
 
+    public static final String LAST_APP_BACKGROUND_TIME_KEY = "last-app-background-time";
+
     // App options
 
     public static final String SORT_ACCOUNTS_BY_LAST_USE_KEY = "sort-accounts-by-last-use";
@@ -33,6 +35,8 @@ public class Constants {
     public static final String PIN_ACCESS_KEY = "pin-access";
 
     public static final String FINGERPRINT_ACCESS_KEY = "fingerprint-access";
+
+    public static final String VALIDATE_IDENTITY_WHEN_RETURNING_FROM_SETTING_KEY = "validate-identity-when-returning-from-settings";
 
     public static final String AUTO_UPDATES_APP_KEY = "auto-updates-app";
 
