@@ -59,7 +59,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
+    private static final String LAST_NOTIFIED_APP_UPDATED_VERSION_KEY = "last-notified-app-updated-version";
+    private static final String LAST_NOTIFIED_APP_UPDATED_TIME_KEY = "last-notified-app-updated-time";
+    private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
     private static final long SYNC_BUTTON_ROTATION_DURATION = (long) (2.5f * DateUtils.SECOND_IN_MILLIS);
+
     private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
     private final MainActivityRecyclerAdapter mAdapter = new MainActivityRecyclerAdapter(false);;
     private boolean mLoadingData = false;
@@ -280,24 +284,32 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
             new CheckForAppUpdates(this, this).start();
         }
     }
-    public void onCheckForUpdatesFinished(@Nullable final File apk_local_file)
+    public void onCheckForUpdatesFinished(@Nullable final File apk_local_file, @Nullable final String apk_local_file_version)
     {
         if ((apk_local_file != null) && (! isFinishedOrFinishing())) {
-            UiUtils.showConfirmDialog(this, R.string.there_is_an_update_version, R.string.install_now, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setDataAndType(FileProvider.getUriForFile(getBaseContext(), getPackageName() + ".provider", apk_local_file), "application/vnd.android.package-archive");
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        startActivity(intent);
+            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(this);
+            boolean update_will_be_notified = true;
+            if (apk_local_file_version.equals(preferences.getString(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, null))) {
+                update_will_be_notified = (preferences.getLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, 0) + NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL < System.currentTimeMillis());
+            }            
+            if (update_will_be_notified) {
+                preferences.edit().putString(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, apk_local_file_version).putLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, System.currentTimeMillis()).apply();
+                UiUtils.showConfirmDialog(this, getString(R.string.there_is_an_update_version, getString(R.string.app_version_name_value), apk_local_file_version), R.string.install_now, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setDataAndType(FileProvider.getUriForFile(getBaseContext(), getPackageName() + ".provider", apk_local_file), "application/vnd.android.package-archive");
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            startActivity(intent);
+                        }
+                        catch (Exception e) {
+                            Log.d(Constants.LOG_TAG_NAME, "Exception while trying to install an app update", e);
+                        }
                     }
-                    catch (Exception e) {
-                        Log.d(Constants.LOG_TAG_NAME, "Exception while trying to install an app update", e);
-                    }
-                }
-            });
+                });
+            }
         }
     }
 
