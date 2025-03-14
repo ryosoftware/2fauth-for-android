@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import com.twofauth.android.Main;
 import com.twofauth.android.main_activity.AuthenticWithBiometrics;
 import com.twofauth.android.main_activity.AuthenticWithPin;
 import com.twofauth.android.main_activity.CheckForAppUpdates;
@@ -139,21 +140,27 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     }
 
     private void unlock() {
-        final SharedPreferences preferences = Constants.getDefaultSharedPreferences(this);
-        if (preferences.contains(Constants.PIN_ACCESS_KEY)) {
-            if ((preferences.getBoolean(Constants.FINGERPRINT_ACCESS_KEY, false)) && (AuthenticWithBiometrics.canUseBiometrics(this))) {
-                AuthenticWithBiometrics.authenticate(this, this);
-            }
-            else {
-                AuthenticWithPin.authenticate(this, this, Constants.getDefaultSharedPreferences(this).getString(Constants.PIN_ACCESS_KEY, null));
-            }
+        if (mUnlocked) {
+            onAuthenticationSucceeded();
         }
         else {
-            onAuthenticationSucceeded();
+            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(this);
+            if (preferences.contains(Constants.PIN_ACCESS_KEY)) {
+                if ((preferences.getBoolean(Constants.FINGERPRINT_ACCESS_KEY, false)) && (AuthenticWithBiometrics.canUseBiometrics(this))) {
+                    AuthenticWithBiometrics.authenticate(this, this);
+                }
+                else {
+                    AuthenticWithPin.authenticate(this, this, Constants.getDefaultSharedPreferences(this).getString(Constants.PIN_ACCESS_KEY, null));
+                }
+            }
+            else {
+                onAuthenticationSucceeded();
+            }
         }
     }
 
     private void startActivityForResult(@NotNull final Class<?> activity_class) {
+        Main.getInstance().startObservingIfAppBackgrounded();
         mStartedActivityForResult = activity_class.getName();
         mActivityResultLauncher.launch(new Intent(this, activity_class));
     }
@@ -321,6 +328,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
                 }
             }
         }
+        mUnlocked = ! Main.getInstance().stopObservingIfAppBackgrounded();
     }
 
     @Override
