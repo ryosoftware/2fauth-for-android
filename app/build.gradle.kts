@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.androidx.preferences)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.lifecycle)
     implementation(libs.recyclerview)
     implementation(libs.cardview)
     implementation(libs.bastiaanjansen.otp)
