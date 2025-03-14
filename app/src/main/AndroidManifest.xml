@@ -34,6 +34,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:configChanges="orientation|keyboardHidden|screenLayout|screenSize"
             android:theme="@style/Theme.AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
