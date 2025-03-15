@@ -59,7 +59,9 @@ public class DataLoader extends Thread {
                         view.setOnClickListener(mOnGroupButtonClickListener);
                         mGroupsBar.addView(view);
                     }
-                    ((TextView) mGroupsBar.getChildAt(i).findViewById(R.id.group)).setText(mGroups.get(i));
+                    final View view = mGroupsBar.getChildAt(i);
+                    ((TextView) view.findViewById(R.id.group)).setText(mGroups.get(i));
+                    view.setSelected(false);
                 }
             }
             mGroupsBar.setVisibility(newly_added_groups == 0 ? View.GONE : View.VISIBLE);

@@ -1,15 +1,11 @@
 package com.twofauth.android.main_activity;
 
-import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.appcompat.content.res.AppCompatResources;
 
 import com.twofauth.android.BaseActivity;
 import com.twofauth.android.Constants;
@@ -46,8 +42,8 @@ public class DataFilterer extends Thread
             for (int i = 0; i < mGroupsBar.getChildCount(); i ++) {
                 final View group_view = mGroupsBar.getChildAt(i), group_textview = group_view.findViewById(R.id.group);
                 final boolean is_active = ((TextView) group_textview).getText().toString().equals(mActiveGroup);
-                group_view.setBackground(is_active ? AppCompatResources.getDrawable(mActivity, R.drawable.border_frame_solid) : AppCompatResources.getDrawable(mActivity, R.drawable.border_frame_transparent));
                 ((TextView) group_textview).setTextColor(is_active ? active_text_color : not_active_textcolor);
+                group_view.setSelected(is_active);
             }
         }
 

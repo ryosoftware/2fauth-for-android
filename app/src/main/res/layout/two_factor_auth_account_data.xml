@@ -39,7 +39,8 @@
                 android:id="@+id/account"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
                 android:maxLines="1"
                 android:textColor="?android:textColorSecondary"
                 style="@style/Base.TextAppearance.AppCompat.Body1" />

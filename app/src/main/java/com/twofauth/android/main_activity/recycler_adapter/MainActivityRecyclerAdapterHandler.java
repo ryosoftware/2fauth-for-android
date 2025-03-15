@@ -9,8 +9,7 @@ import com.twofauth.android.main_activity.MainActivityRecyclerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 public class MainActivityRecyclerAdapterHandler extends Handler {
-    public static final int REDRAW_ITEMS = 1;
-    public static final int REDRAW_ITEM_EACH_TIME_TO_TIME = 2;
+    public static final int REDRAW_ITEM_EACH_TIME_TO_TIME = 1;
 
     private static class MainActivityRecyclerAdapterHandlerObject {
         public final MainActivityRecyclerAdapter adapter;
@@ -46,15 +45,7 @@ public class MainActivityRecyclerAdapterHandler extends Handler {
     }
 
     public void handleMessage(@NotNull final Message message) {
-        if (message.what == REDRAW_ITEMS) {
-            final MainActivityRecyclerAdapterHandlerForRedrawItems redraw_items_data = (MainActivityRecyclerAdapterHandlerForRedrawItems) message.obj;
-            for (int item_position : redraw_items_data.items) {
-                if (item_position != -1) {
-                    redraw_items_data.adapter.notifyItemChanged(item_position);
-                }
-            }
-        }
-        else if (message.what == REDRAW_ITEM_EACH_TIME_TO_TIME) {
+        if (message.what == REDRAW_ITEM_EACH_TIME_TO_TIME) {
             final MainActivityRecyclerAdapterHandlerForRedrawItemsTimeToTime redraw_item_data = (MainActivityRecyclerAdapterHandlerForRedrawItemsTimeToTime) message.obj;
             if ( SystemClock.elapsedRealtime() > redraw_item_data.endTime)  {
                 redraw_item_data.adapter.onClick(redraw_item_data.item);
@@ -66,14 +57,6 @@ public class MainActivityRecyclerAdapterHandler extends Handler {
         }
     }
 
-    private void sendRedrawItemsMessage(@NotNull final MainActivityRecyclerAdapterHandlerForRedrawItems redraw_items_data) {
-        sendMessage(obtainMessage(REDRAW_ITEMS, redraw_items_data));
-    }
-
-    public void sendRedrawItemsMessage(@NotNull final MainActivityRecyclerAdapter adapter, @NotNull final int[] items) {
-        sendRedrawItemsMessage(new MainActivityRecyclerAdapterHandlerForRedrawItems(adapter, items));
-    }
-
     private void sendRedrawItemTimeToTimeMessage(@NotNull final MainActivityRecyclerAdapterHandlerForRedrawItemsTimeToTime redraw_item_data) {
         sendMessage(obtainMessage(REDRAW_ITEM_EACH_TIME_TO_TIME, redraw_item_data));
 
@@ -82,16 +65,11 @@ public class MainActivityRecyclerAdapterHandler extends Handler {
         sendRedrawItemTimeToTimeMessage(new MainActivityRecyclerAdapterHandlerForRedrawItemsTimeToTime(adapter, item, SystemClock.elapsedRealtime() + time));
     }
 
-    public void removeRedrawItemsMessages() {
-        removeMessages(REDRAW_ITEMS);
-    }
-
     public void removeRedrawItemEachTimeToTimeMessages() {
         removeMessages(REDRAW_ITEM_EACH_TIME_TO_TIME);
     }
 
     public void removeAllMessages() {
-        removeRedrawItemsMessages();
         removeRedrawItemEachTimeToTimeMessages();
     }
 }

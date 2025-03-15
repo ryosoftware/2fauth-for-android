@@ -100,6 +100,7 @@ public class MainActivityRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
     public void setItems(final List<JSONObject> items) {
         synchronized (mSynchronizationObject) {
             mActiveAccountPosition = -1;
+            mHandler.removeAllMessages();
             ListUtils.setItems(mItems, items);
             updateViewsVisibility();
         }
@@ -147,23 +148,18 @@ public class MainActivityRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
         }
         notifyDataSetChanged();
     }
+
     public void onClick(int position) {
         synchronized (mSynchronizationObject) {
             final Context context = mRecyclerView.getContext();
             final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
             final int older_active_account_position = mActiveAccountPosition;
             mActiveAccountPosition = (older_active_account_position == position) ? -1 : position;
-            mHandler.removeRedrawItemEachTimeToTimeMessages();
-            //mHandler.sendRedrawItemsMessage(this, new int[] { older_active_account_position, mActiveAccountPosition });
             notifyDataSetChanged();
             if (mActiveAccountPosition != -1) {
                 final JSONObject object = getItem(position);
                 preferences.edit().putLong(Constants.getTwoFactorAccountLastUseKey(object), System.currentTimeMillis()).apply();
                 mHandler.sendRedrawItemTimeToTimeMessage(this, mActiveAccountPosition, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object));
-            }
-            else if ((position != 0) && (preferences.getBoolean(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY, context.getResources().getBoolean(R.bool.sort_accounts_by_last_use_default)))) {
-                mItems.add(0, mItems.remove(position));
-                notifyItemMoved(position, 0);
             }
         }
     }

@@ -14,6 +14,8 @@ import android.os.PersistableBundle;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -51,6 +53,8 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private static final float ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA = 1.0f;
     private static final float NOT_ACTIVE_ITEM_ALPHA = 0.4f;
 
+    private static final float OTP_BLINK_ITEM_VISIBLE_ALPHA = 1.0f;
+    private static final float OTP_BLINK_ITEM_NOT_VISIBLE_ALPHA = 0.3f;
     private static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
 
     public interface OnViewHolderClickListener {
@@ -106,6 +110,8 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private final ProgressBar mOtpTime;
     private final MaterialButton mOtpCopyToClipboard;
     private final TextView mOtpTypeUnsupported;
+
+    private Animation mAnimation = null;
 
     public TwoFactorAccountViewHolder(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
         super(parent);
@@ -168,6 +174,17 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return StringUtils.toHiddenString(object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_PASSWORD_LENGTH_KEY));
     }
 
+    private Animation getOtpAnimation() {
+        if (mAnimation == null) {
+            mAnimation = new AlphaAnimation(OTP_BLINK_ITEM_VISIBLE_ALPHA, OTP_BLINK_ITEM_NOT_VISIBLE_ALPHA);
+            mAnimation.setDuration(750);
+            mAnimation.setStartOffset(0);
+            mAnimation.setRepeatMode(Animation.REVERSE);
+            mAnimation.setRepeatCount(Animation.INFINITE);
+        }
+        return mAnimation;
+    }
+
     public void draw(@NotNull final Context context, @NotNull JSONObject object, final boolean show_otp, final boolean showing_other_otp, final TwoFactorAccountOptions options) {
         final String otp = isOtpSupported(object) ? show_otp ? getRevealedOtp(object) : getHiddenOtp(object) : null, group = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY);
         final long millis_until_next_otp = (show_otp && (otp != null)) ? getMillisUntilNextOtp(object) : -1;
@@ -183,6 +200,17 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         final ColorStateList otp_color_state_list = ColorStateList.valueOf(otp_color);
         mOtp.setTextColor(otp_color);
         mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);
+
+
+        Animation otp_animation = mOtp.getAnimation();
+        if ((otp_animation == null) && (millis_until_next_otp > 0) && (millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME)) {
+            mOtp.startAnimation(getOtpAnimation());
+        }
+        else if ((otp_animation != null) && ((millis_until_next_otp < 0) || (millis_until_next_otp > OTP_IS_ABOUT_TO_EXPIRE_TIME))) {
+            mOtp.clearAnimation();
+        }
+
+
         mOtpTime.setProgress(millis_until_next_otp >= 0 ? (int) (millis_until_next_otp / (10 * object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_PERIOD_KEY, 1))) : 0);
         mOtpTime.setProgressTintList(otp_color_state_list);
         mOtpTime.setVisibility(millis_until_next_otp >= 0 ? View.VISIBLE : View.INVISIBLE);
