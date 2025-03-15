@@ -120,7 +120,10 @@ public class DataLoader extends Thread {
         if (items != null) {
             for (JSONObject object : items) {
                 final String group = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY);
-                if ((! group.isEmpty()) && (! groups.contains(group))) {
+                if (Thread.interrupted()) {
+                    return null;
+                }
+                else if ((! group.isEmpty()) && (! groups.contains(group))) {
                     groups.add(group);
                 }
             }
@@ -147,7 +150,7 @@ public class DataLoader extends Thread {
             Log.e(Constants.LOG_TAG_NAME, "Exception while trying to display data", e);
         }
         finally {
-            if (! mActivity.isFinishedOrFinishing()) {
+            if ((! Thread.interrupted()) && (! mActivity.isFinishedOrFinishing())) {
                 mActivity.runOnUiThread(new DataLoaderDisplayer(success, items, groups));
             }
         }

@@ -64,9 +64,16 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
     private static final long SYNC_BUTTON_ROTATION_DURATION = (long) (2.5f * DateUtils.SECOND_IN_MILLIS);
 
+    private static class ThreadUtils {
+        public static void interrupt(@Nullable final Thread thread) {
+            if (thread != null) {
+                thread.interrupt();
+            }
+        }
+    }
     private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
     private final MainActivityRecyclerAdapter mAdapter = new MainActivityRecyclerAdapter(false);;
-    private boolean mLoadingData = false;
+    private Thread mDataLoader = null;
 
     private Thread mDataFilterer = null;
     private final List<JSONObject> mItems = new ArrayList<JSONObject>();
@@ -96,6 +103,17 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         mRotateAnimation.setInterpolator(new LinearInterpolator());
         mRotateAnimation.setRepeatCount(Animation.INFINITE);
         checkForAppUpdates();
+    }
+
+    @Override
+    public void onDestroy() {
+        synchronized (mSynchronizationObject) {
+            ThreadUtils.interrupt(mDataLoader);
+            mDataLoader = null;
+            ThreadUtils.interrupt(mDataFilterer);
+            mDataFilterer = null;
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -205,7 +223,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     private void setSyncDataButtonAvailability() {
         if (! isFinishedOrFinishing()) {
             synchronized (mSynchronizationObject) {
-                final boolean syncing_or_loading_data = ((mLoadingData) || (MainService.isRunning(this)));
+                final boolean syncing_or_loading_data = ((mDataLoader != null) || (MainService.isRunning(this)));
                 ((FloatingActionButton) findViewById(R.id.sync_server_data)).setEnabled(MainService.canSyncServerData(this) && (! syncing_or_loading_data));
                 if ((syncing_or_loading_data) && (! mRotatingFab)) {
                     ((FloatingActionButton) findViewById(R.id.sync_server_data)).startAnimation(mRotateAnimation);
@@ -230,9 +248,9 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     private void loadData() {
         synchronized (mSynchronizationObject) {
-            if (! mLoadingData) {
-                mLoadingData = true;
-                (new DataLoader(this, mAdapter, (ViewGroup) findViewById(R.id.groups_bar), this, this)).start();
+            if (mDataLoader == null) {
+                mDataLoader = new DataLoader(this, mAdapter, (ViewGroup) findViewById(R.id.groups_bar), this, this);
+                mDataLoader.start();
             }
         }
     }
@@ -240,10 +258,10 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     public void onDataLoaded(final boolean success) {
         if (! isFinishedOrFinishing()) {
             synchronized (mSynchronizationObject) {
-                mLoadingData = false;
+                mDataLoader = null;
                 if (success) {
                     mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(R.id.empty_view));
-                    mActiveGroup = mActiveGroup = null;
+                    mActiveGroup = null;
                     findViewById(R.id.filters).setVisibility((mItems.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
                     ((EditText) findViewById(R.id.filter_text)).setText(null);
                 }
@@ -267,9 +285,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     private void filterData() {
         synchronized (mSynchronizationObject) {
-            if (mDataFilterer != null) {
-                mDataFilterer.interrupt();
-            }
+            ThreadUtils.interrupt(mDataFilterer);
             mDataFilterer = new DataFilterer(this, mAdapter, (ViewGroup) findViewById(R.id.groups_bar), mItems, mActiveGroup, ((EditText) findViewById(R.id.filter_text)).getText().toString(), this);
             mDataFilterer.start();
         }
