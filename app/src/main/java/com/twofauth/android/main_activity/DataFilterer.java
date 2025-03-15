@@ -116,7 +116,10 @@ public class DataFilterer extends Thread
     private List<JSONObject> getItems() {
         List<JSONObject> items = new ArrayList<JSONObject>();
         for (JSONObject object : mItems) {
-            if (isVisible(object)) {
+            if (Thread.interrupted()) {
+                return null;
+            }
+            else if (isVisible(object)) {
                 items.add(object);
             }
         }
@@ -134,7 +137,7 @@ public class DataFilterer extends Thread
             Log.e(Constants.LOG_TAG_NAME, "Exception while trying to filter data", e);
         }
         finally {
-            if (! mActivity.isFinishedOrFinishing()) {
+            if ((! Thread.interrupted()) && (! mActivity.isFinishedOrFinishing())) {
                 mActivity.runOnUiThread(new DataFiltererDisplayer(success, items));
             }
         }

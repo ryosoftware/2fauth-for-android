@@ -67,6 +67,8 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
     private final MainActivityRecyclerAdapter mAdapter = new MainActivityRecyclerAdapter(false);;
     private boolean mLoadingData = false;
+
+    private Thread mDataFilterer = null;
     private final List<JSONObject> mItems = new ArrayList<JSONObject>();
     private String mActiveGroup = null;
     private final ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this);
@@ -239,10 +241,9 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         if (! isFinishedOrFinishing()) {
             synchronized (mSynchronizationObject) {
                 mLoadingData = false;
-                mActiveGroup = null;
                 if (success) {
                     mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(R.id.empty_view));
-                    mActiveGroup = null;
+                    mActiveGroup = mActiveGroup = null;
                     findViewById(R.id.filters).setVisibility((mItems.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
                     ((EditText) findViewById(R.id.filter_text)).setText(null);
                 }
@@ -266,7 +267,11 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     private void filterData() {
         synchronized (mSynchronizationObject) {
-            new DataFilterer(this, mAdapter, (ViewGroup) findViewById(R.id.groups_bar), mItems, mActiveGroup, ((EditText) findViewById(R.id.filter_text)).getText().toString(), this).start();
+            if (mDataFilterer != null) {
+                mDataFilterer.interrupt();
+            }
+            mDataFilterer = new DataFilterer(this, mAdapter, (ViewGroup) findViewById(R.id.groups_bar), mItems, mActiveGroup, ((EditText) findViewById(R.id.filter_text)).getText().toString(), this);
+            mDataFilterer.start();
         }
     }
 
@@ -274,6 +279,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     public void onDataFilterSuccess(final boolean any_filter_applied) {
         synchronized (mSynchronizationObject) {
             mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(any_filter_applied ? R.id.recycler_view : R.id.empty_view ));
+            mDataFilterer = null;
         }
     }
     @Override
