@@ -351,6 +351,19 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     @Override
     protected void processOnBackPressed() {
-        finish();
+        boolean do_filter_data_instead_of_finish = false;
+        synchronized (mSynchronizationObject) {
+            if ((mActiveGroup != null) || (! ((EditText) findViewById(R.id.filter_text)).getText().toString().isEmpty())) {
+                ((EditText) findViewById(R.id.filter_text)).setText(null);
+                mActiveGroup = null;
+                do_filter_data_instead_of_finish = true;
+            }
+        }
+        if (do_filter_data_instead_of_finish) {
+            filterData();
+        }
+        else {
+            finish();
+        }
     }
 }
