@@ -48,6 +48,9 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private static final String ALGORITHM_SHA224 = "sha224";
     private static final String ALGORITHM_SHA1 = "sha1";
 
+    private static final float ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA = 1.0f;
+    private static final float NOT_ACTIVE_ITEM_ALPHA = 0.4f;
+
     private static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
 
     public interface OnViewHolderClickListener {
@@ -93,7 +96,6 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     }
 
     private final OnViewHolderClickListener mOnClickListener;
-
     private final TextView mService;
     private final TextView mAccount;
     private final TextView mGroup;
@@ -166,7 +168,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return StringUtils.toHiddenString(object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_PASSWORD_LENGTH_KEY));
     }
 
-    public void draw(@NotNull final Context context, @NotNull JSONObject object, boolean show_otp, final TwoFactorAccountOptions options) {
+    public void draw(@NotNull final Context context, @NotNull JSONObject object, final boolean show_otp, final boolean showing_other_otp, final TwoFactorAccountOptions options) {
         final String otp = isOtpSupported(object) ? show_otp ? getRevealedOtp(object) : getHiddenOtp(object) : null, group = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY);
         final long millis_until_next_otp = (show_otp && (otp != null)) ? getMillisUntilNextOtp(object) : -1;
         mService.setText(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY));
@@ -189,6 +191,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mOtpContainer.setVisibility(otp != null ? View.VISIBLE : View.GONE);
         mOtpTypeUnsupported.setVisibility(otp == null ? View.VISIBLE : View.GONE);
         mOtpTypeUnsupported.setText(context.getString(R.string.otp_type_is_unsupported, object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY).toUpperCase()));
+        itemView.setAlpha(show_otp || (! showing_other_otp) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
     }
 
     public void onClick(@NotNull final View view) {

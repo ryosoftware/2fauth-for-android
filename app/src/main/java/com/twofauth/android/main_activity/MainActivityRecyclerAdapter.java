@@ -92,7 +92,7 @@ public class MainActivityRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
                 if (mTwoFactorAccountOptions == null) {
                     mTwoFactorAccountOptions = new TwoFactorAccountOptions(mRecyclerView.getContext());
                 }
-                ((TwoFactorAccountViewHolder) view_holder).draw(mRecyclerView.getContext(), object, mActiveAccountPosition == position, mTwoFactorAccountOptions);
+                ((TwoFactorAccountViewHolder) view_holder).draw(mRecyclerView.getContext(), object, mActiveAccountPosition == position, mActiveAccountPosition != -1, mTwoFactorAccountOptions);
             }
         }
     }
@@ -154,7 +154,8 @@ public class MainActivityRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             final int older_active_account_position = mActiveAccountPosition;
             mActiveAccountPosition = (older_active_account_position == position) ? -1 : position;
             mHandler.removeRedrawItemEachTimeToTimeMessages();
-            mHandler.sendRedrawItemsMessage(this, new int[] { older_active_account_position, mActiveAccountPosition });
+            //mHandler.sendRedrawItemsMessage(this, new int[] { older_active_account_position, mActiveAccountPosition });
+            notifyDataSetChanged();
             if (mActiveAccountPosition != -1) {
                 final JSONObject object = getItem(position);
                 preferences.edit().putLong(Constants.getTwoFactorAccountLastUseKey(object), System.currentTimeMillis()).apply();
