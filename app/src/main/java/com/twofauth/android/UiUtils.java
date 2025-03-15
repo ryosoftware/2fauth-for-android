@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.TypedArray;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -85,5 +87,13 @@ public class UiUtils {
 
     public static int getPixelsFromDp(@NotNull final Context context, final int dp) {
         return (int) (dp * context.getResources().getDisplayMetrics().density);
+    }
+
+    public static int getSystemColor(@NotNull final Context context, final int resource_id) {
+        TypedValue typed_value = new TypedValue();
+        context.getTheme().resolveAttribute(resource_id, typed_value, true);
+        try (TypedArray typed_array = context.obtainStyledAttributes(typed_value.data, new int[] { resource_id })) {
+            return typed_array.getColor(0, -1);
+        }
     }
 }

@@ -2,7 +2,8 @@
 
 <resources>
 
-    <color name="accent">#FF4F378B</color>
+    <color name="accent_background">#FF4F378B</color>
+    <color name="accent_foreground">@color/white</color>
 
     <color name="light_blue">#FFBABFFC</color>
     <color name="light_red">#FFFCBABF</color>
