@@ -72,7 +72,7 @@ public class DataFilterer extends Thread
             }
             finally {
                 if (mSuccess) {
-                    mListener.onDataFilterSuccess((mActiveGroup != null) && (! mActiveGroup.isEmpty()) && (mFilter != null) && (! mFilter.isEmpty()));
+                    mListener.onDataFilterSuccess((! StringUtils.isEmptyOrNull(mActiveGroup)) || (! StringUtils.isEmptyOrNull(mFilter)));
                 }
                 else {
                     mListener.onDataFilterError();
