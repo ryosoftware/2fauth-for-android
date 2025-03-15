@@ -69,6 +69,7 @@
 
     <string name="reset_accounts_last_use_data">Resetear datos de uso</string>
     <string name="reset_accounts_last_use_data_summary">Elimina los datos de uso de las cuentas y la ordenación se reinicia</string>
+    <string name="data_usage_has_been_deleted">Se han eliminado los datos de uso</string>
 
     <string name="ungroup_otp_codes">Desagrupar código 2FA</string>
     <string name="ungroup_otp_codes_summary">Desagrupa los códigos para facilitar la lectura</string>

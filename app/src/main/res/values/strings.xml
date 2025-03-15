@@ -68,6 +68,7 @@
 
     <string name="reset_accounts_last_use_data">Reset accounts usage</string>
     <string name="reset_accounts_last_use_data_summary">Removes last used data from accounts and sorting is reset</string>
+    <string name="data_usage_has_been_deleted">Usage data has been deleted</string>
 
     <string name="ungroup_otp_codes">Ungroup 2FA codes</string>
     <string name="ungroup_otp_codes_summary">Ungroup codes for better reading</string>
