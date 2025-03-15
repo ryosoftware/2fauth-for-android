@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.view.View;
 
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
@@ -92,7 +94,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         }
         setContentView(R.layout.main_activity);
         final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.recycler_view);
-        recycler_view.setLayoutManager(new LinearLayoutManager(this));
+        recycler_view.setLayoutManager(new GridLayoutManager(this, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2));
         recycler_view.setAdapter(mAdapter);
         ((SimpleItemAnimator) recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
         ((FloatingActionButton) findViewById(R.id.sync_server_data)).setOnClickListener(this);
@@ -132,6 +134,13 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         mUnlocked = false;
         mAdapter.onPause();
         findViewById(R.id.filters).setVisibility(View.GONE);
+    }
+
+    public void onConfigurationChanged(Configuration new_config) {
+        super.onConfigurationChanged(new_config);
+        final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.recycler_view);
+        ((GridLayoutManager) recycler_view.getLayoutManager()).setSpanCount(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2);
+        recycler_view.getAdapter().notifyDataSetChanged();
     }
 
     private void onAuthenticationSucceeded() {
