@@ -3,7 +3,6 @@ package com.twofauth.android.main_activity;
 import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 
@@ -29,29 +28,18 @@ public class DataFilterer extends Thread
 
     private class DataFiltererDisplayer implements Runnable, BaseActivity.SynchronizedCallback {
         private boolean mSuccess;
-        private final List<JSONObject> mItems;
+        private final List<JSONObject> mAccounts;
 
-        DataFiltererDisplayer(final boolean success, @Nullable List<JSONObject> items) {
+        DataFiltererDisplayer(final boolean success, @Nullable List<JSONObject> accounts) {
             mSuccess = success;
-            mItems = items;
-        }
-
-        private void displayGroupsBar() {
-            final Resources resources = mActivity.getResources();
-            final int active_text_color = resources.getColor(R.color.accent_foreground, mActivity.getTheme()), not_active_textcolor = UiUtils.getSystemColor(mActivity, android.R.attr.textColorSecondary);
-            for (int i = 0; i < mGroupsBar.getChildCount(); i ++) {
-                final View group_view = mGroupsBar.getChildAt(i), group_textview = group_view.findViewById(R.id.group);
-                final boolean is_active = ((TextView) group_textview).getText().toString().equals(mActiveGroup);
-                ((TextView) group_textview).setTextColor(is_active ? active_text_color : not_active_textcolor);
-                group_view.setSelected(is_active);
-            }
+            mAccounts = accounts;
         }
 
         @Override
         public Object synchronizedCode(Object object)
         {
-            mAdapter.setItems(mItems);
-            displayGroupsBar();
+            mAccountsListAdapter.setItems(mAccounts);
+            mGroupsListAdapter.setActiveGroup(mActiveGroup);
             return null;
         }
 
@@ -68,7 +56,7 @@ public class DataFilterer extends Thread
             }
             finally {
                 if (mSuccess) {
-                    mListener.onDataFilterSuccess((! StringUtils.isEmptyOrNull(mActiveGroup)) || (! StringUtils.isEmptyOrNull(mFilter)));
+                    mListener.onDataFilterSuccess((! StringUtils.isEmptyOrNull(mActiveGroup)) || (! StringUtils.isEmptyOrNull(mText)));
                 }
                 else {
                     mListener.onDataFilterError();
@@ -77,34 +65,35 @@ public class DataFilterer extends Thread
         }
     }
     private final BaseActivity mActivity;
-    private final AccountsListAdapter mAdapter;
-    private final ViewGroup mGroupsBar;
+    private final AccountsListAdapter mAccountsListAdapter;
 
-    private final List<JSONObject> mItems;
+    private final GroupsListAdapter mGroupsListAdapter;
+
+    private final List<JSONObject> mAccounts;
     private final String mActiveGroup;
 
-    private final String mFilter;
+    private final String mText;
 
     private final OnDataFilteredListener mListener;
 
-    public DataFilterer(@NotNull final BaseActivity activity, @NotNull final AccountsListAdapter adapter, @NotNull final ViewGroup groups_bar, @NotNull final List<JSONObject> items, @Nullable final String active_group, @Nullable final String filter, @NotNull final OnDataFilteredListener listener) {
+    public DataFilterer(@NotNull final BaseActivity activity, @NotNull final AccountsListAdapter accounts_list_adapter, @NotNull final GroupsListAdapter groups_list_adapter, @NotNull final List<JSONObject> accounts, @Nullable final String active_group, @Nullable final String text, @NotNull final OnDataFilteredListener listener) {
         mActivity = activity;
-        mAdapter = adapter;
-        mGroupsBar = groups_bar;
-        mItems = items;
+        mAccountsListAdapter = accounts_list_adapter;
+        mGroupsListAdapter = groups_list_adapter;
+        mAccounts = accounts;
         mActiveGroup = active_group;
-        mFilter = filter;
+        mText = text;
         mListener = listener;
     }
 
     private boolean isVisible(JSONObject object) {
         if ((mActiveGroup == null) || (mActiveGroup.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY)))) {
-            if ((mFilter != null) && (! mFilter.isEmpty())) {
+            if ((mText != null) && (! mText.isEmpty())) {
                 boolean in = false;
-                if (StringUtils.in(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY, ""), mFilter, true)) {
+                if (StringUtils.in(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY, ""), mText, true)) {
                     in = true;
                 }
-                else if (StringUtils.in(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY, ""), mFilter, true)) {
+                else if (StringUtils.in(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY, ""), mText, true)) {
                     in = true;
                 }
                 return in;
@@ -113,9 +102,9 @@ public class DataFilterer extends Thread
         }
         return false;
     }
-    private List<JSONObject> getItems() {
+    private List<JSONObject> getVisibleAccounts() {
         List<JSONObject> items = new ArrayList<JSONObject>();
-        for (JSONObject object : mItems) {
+        for (JSONObject object : mAccounts) {
             if (Thread.interrupted()) {
                 return null;
             }
@@ -128,9 +117,9 @@ public class DataFilterer extends Thread
 
     public void run() {
         boolean success = false;
-        List<JSONObject> items = null;
+        List<JSONObject> accounts = null;
         try {
-            items = getItems();
+            accounts = getVisibleAccounts();
             success = true;
         }
         catch (Exception e) {
@@ -138,7 +127,7 @@ public class DataFilterer extends Thread
         }
         finally {
             if ((! Thread.interrupted()) && (! mActivity.isFinishedOrFinishing())) {
-                mActivity.runOnUiThread(new DataFiltererDisplayer(success, items));
+                mActivity.runOnUiThread(new DataFiltererDisplayer(success, accounts));
             }
         }
     }

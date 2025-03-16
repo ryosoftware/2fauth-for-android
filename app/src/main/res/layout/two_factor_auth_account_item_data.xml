@@ -46,13 +46,16 @@
                 style="@style/Base.TextAppearance.AppCompat.Body1" />
 
             <include
+                android:id="@+id/group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 layout="@layout/account_group" />
 
             <LinearLayout
                 android:id="@+id/otp_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:orientation="vertical">
 
                 <RelativeLayout
@@ -75,7 +78,7 @@
                         android:layout_marginStart="50dp"
                         android:layout_gravity="center"
                         android:layout_alignParentEnd="true"
-                        app:cornerRadius="18dp"
+                        app:cornerRadius="12dp"
                         style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
                         app:icon="@drawable/ic_copy_to_clipboard"
                         app:iconGravity="textStart"
@@ -97,7 +100,6 @@
                 android:id="@+id/otp_type_unsupported"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:textColor="?android:textColorSecondary"
                 android:textStyle="italic"
                 style="@style/Base.TextAppearance.AppCompat.Body2" />

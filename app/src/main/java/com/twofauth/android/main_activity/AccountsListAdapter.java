@@ -78,7 +78,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public RecyclerView.ViewHolder onCreateViewHolder(@NotNull final ViewGroup parent, final int view_type) {
         final Context context = parent.getContext();
         if (view_type == TYPE_2FA_AUTH_ACCOUNT) {
-            return TwoFactorAccountViewHolder.newInstance(LayoutInflater.from(context).inflate(R.layout.two_factor_auth_account_data, parent, false), this);
+            return TwoFactorAccountViewHolder.newInstance(LayoutInflater.from(context).inflate(R.layout.two_factor_auth_account_item_data, parent, false), this);
         }
         throw new RuntimeException("There is no type that matches the type " + view_type + " + make sure your using types correctly");
     }
