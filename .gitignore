@@ -2,6 +2,7 @@
 
 .gradle
 local.properties
+version.propierties
 build/
 release/
 

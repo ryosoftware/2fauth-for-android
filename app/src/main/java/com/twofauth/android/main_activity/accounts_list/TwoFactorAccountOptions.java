@@ -1,4 +1,4 @@
-package com.twofauth.android.main_activity.recycler_adapter;
+package com.twofauth.android.main_activity.accounts_list;
 
 import android.content.Context;
 import android.content.SharedPreferences;

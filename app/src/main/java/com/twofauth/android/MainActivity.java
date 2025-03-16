@@ -5,8 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
-import android.net.Uri;
-import android.os.Build;
+import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -20,24 +20,26 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import com.twofauth.android.Main;
 import com.twofauth.android.main_activity.AuthenticWithBiometrics;
 import com.twofauth.android.main_activity.AuthenticWithPin;
 import com.twofauth.android.main_activity.CheckForAppUpdates;
 import com.twofauth.android.main_activity.DataFilterer;
 import com.twofauth.android.main_activity.DataLoader;
+import com.twofauth.android.main_activity.GroupsListAdapter;
 import com.twofauth.android.main_activity.ListUtils;
 import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
 
-import com.twofauth.android.main_activity.MainActivityRecyclerAdapter;
+import com.twofauth.android.main_activity.AccountsListAdapter;
 import com.twofauth.android.main_activity.FabButtonShowOrHide;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 
@@ -48,7 +50,6 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,11 +59,26 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
+public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, GroupsListAdapter.onSelectedGroupChanges, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
+    private static final String LAST_NOTIFIED_APP_UPDATED_VERSION_KEY = "last-notified-app-updated-version";
+    private static final String LAST_NOTIFIED_APP_UPDATED_TIME_KEY = "last-notified-app-updated-time";
+    private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
     private static final long SYNC_BUTTON_ROTATION_DURATION = (long) (2.5f * DateUtils.SECOND_IN_MILLIS);
+
+    private static class ThreadUtils {
+        public static void interrupt(@Nullable final Thread thread) {
+            if (thread != null) {
+                thread.interrupt();
+            }
+        }
+    }
     private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
-    private final MainActivityRecyclerAdapter mAdapter = new MainActivityRecyclerAdapter(false);;
-    private boolean mLoadingData = false;
+    private final AccountsListAdapter mAccountsListAdapter = new AccountsListAdapter(false);;
+
+    private final GroupsListAdapter mGroupsListAdapter = new GroupsListAdapter(this);
+    private Thread mDataLoader = null;
+
+    private Thread mDataFilterer = null;
     private final List<JSONObject> mItems = new ArrayList<JSONObject>();
     private String mActiveGroup = null;
     private final ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this);
@@ -78,18 +94,40 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         }
         setContentView(R.layout.main_activity);
-        final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.recycler_view);
-        recycler_view.setLayoutManager(new LinearLayoutManager(this));
-        recycler_view.setAdapter(mAdapter);
-        ((SimpleItemAnimator) recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
+        final RecyclerView accounts_recycler_view = (RecyclerView) findViewById(R.id.accounts_list);
+        accounts_recycler_view.setLayoutManager(new GridLayoutManager(this, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2));
+        accounts_recycler_view.setAdapter(mAccountsListAdapter);
+        ((SimpleItemAnimator) accounts_recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
+        final RecyclerView groups_recycler_view = (RecyclerView) findViewById(R.id.groups_list);
+        groups_recycler_view.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        groups_recycler_view.setAdapter(mGroupsListAdapter);
+        ((SimpleItemAnimator) groups_recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
+        groups_recycler_view.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull final Rect out_rect, @NonNull final View view, @NonNull final RecyclerView parent, @NonNull final RecyclerView.State state) {
+                super.getItemOffsets(out_rect, view, parent, state);
+                out_rect.right = (parent.getChildAdapterPosition(view) == parent.getAdapter().getItemCount() - 1) ? 0 : UiUtils.getPixelsFromDp(getBaseContext(), 10);
+            }
+        });
         ((FloatingActionButton) findViewById(R.id.sync_server_data)).setOnClickListener(this);
         ((FloatingActionButton) findViewById(R.id.open_app_settings)).setOnClickListener(this);
-        new FabButtonShowOrHide((RecyclerView) findViewById(R.id.recycler_view), new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) });
+        new FabButtonShowOrHide((RecyclerView) findViewById(R.id.accounts_list), new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) });
         ((EditText) findViewById(R.id.filter_text)).addTextChangedListener(this);
         mRotateAnimation.setDuration(SYNC_BUTTON_ROTATION_DURATION);
         mRotateAnimation.setInterpolator(new LinearInterpolator());
         mRotateAnimation.setRepeatCount(Animation.INFINITE);
         checkForAppUpdates();
+    }
+
+    @Override
+    public void onDestroy() {
+        synchronized (mSynchronizationObject) {
+            ThreadUtils.interrupt(mDataLoader);
+            mDataLoader = null;
+            ThreadUtils.interrupt(mDataFilterer);
+            mDataFilterer = null;
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -106,12 +144,19 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         super.onPause();
         mReceiver.disable(this);
         mUnlocked = false;
-        mAdapter.onPause();
+        mAccountsListAdapter.onPause();
         findViewById(R.id.filters).setVisibility(View.GONE);
     }
 
+    public void onConfigurationChanged(Configuration new_config) {
+        super.onConfigurationChanged(new_config);
+        final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.accounts_list);
+        ((GridLayoutManager) recycler_view.getLayoutManager()).setSpanCount(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2);
+        recycler_view.getAdapter().notifyDataSetChanged();
+    }
+
     private void onAuthenticationSucceeded() {
-        mAdapter.onResume();
+        mAccountsListAdapter.onResume();
         findViewById(R.id.filters).setVisibility(mItems.isEmpty() ? View.GONE : View.VISIBLE);
         mUnlocked = true;
     }
@@ -165,12 +210,6 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         mActivityResultLauncher.launch(new Intent(this, activity_class));
     }
 
-    private void setActiveGroup(@NotNull final View view) {
-        final String current_active_group = ((TextView) view.findViewById(R.id.group)).getText().toString();
-        mActiveGroup = StringUtils.equals(mActiveGroup, current_active_group) ? null : current_active_group;
-        filterData();
-    }
-
     @Override
     public void onClick(@NotNull final View view) {
         final int id = view.getId();
@@ -179,9 +218,6 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         }
         else if (id == R.id.open_app_settings) {
             startActivityForResult(PreferencesActivity.class);
-        }
-        else if (id == R.id.group) {
-            setActiveGroup(view);
         }
     }
 
@@ -199,7 +235,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     private void setSyncDataButtonAvailability() {
         if (! isFinishedOrFinishing()) {
             synchronized (mSynchronizationObject) {
-                final boolean syncing_or_loading_data = ((mLoadingData) || (MainService.isRunning(this)));
+                final boolean syncing_or_loading_data = ((mDataLoader != null) || (MainService.isRunning(this)));
                 ((FloatingActionButton) findViewById(R.id.sync_server_data)).setEnabled(MainService.canSyncServerData(this) && (! syncing_or_loading_data));
                 if ((syncing_or_loading_data) && (! mRotatingFab)) {
                     ((FloatingActionButton) findViewById(R.id.sync_server_data)).startAnimation(mRotateAnimation);
@@ -224,9 +260,9 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     private void loadData() {
         synchronized (mSynchronizationObject) {
-            if (! mLoadingData) {
-                mLoadingData = true;
-                (new DataLoader(this, mAdapter, (ViewGroup) findViewById(R.id.groups_bar), this, this)).start();
+            if (mDataLoader == null) {
+                mDataLoader = new DataLoader(this, mAccountsListAdapter, mGroupsListAdapter, this);
+                mDataLoader.start();
             }
         }
     }
@@ -234,10 +270,9 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     public void onDataLoaded(final boolean success) {
         if (! isFinishedOrFinishing()) {
             synchronized (mSynchronizationObject) {
-                mLoadingData = false;
-                mActiveGroup = null;
+                mDataLoader = null;
                 if (success) {
-                    mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(R.id.empty_view));
+                    mAccountsListAdapter.setViews(findViewById(R.id.accounts_list), findViewById(R.id.empty_view));
                     mActiveGroup = null;
                     findViewById(R.id.filters).setVisibility((mItems.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
                     ((EditText) findViewById(R.id.filter_text)).setText(null);
@@ -262,42 +297,62 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     private void filterData() {
         synchronized (mSynchronizationObject) {
-            new DataFilterer(this, mAdapter, (ViewGroup) findViewById(R.id.groups_bar), mItems, mActiveGroup, ((EditText) findViewById(R.id.filter_text)).getText().toString(), this).start();
+            ThreadUtils.interrupt(mDataFilterer);
+            mDataFilterer = new DataFilterer(this, mAccountsListAdapter, mGroupsListAdapter, mItems, mActiveGroup, ((EditText) findViewById(R.id.filter_text)).getText().toString(), this);
+            mDataFilterer.start();
         }
     }
 
     @Override
     public void onDataFilterSuccess(final boolean any_filter_applied) {
         synchronized (mSynchronizationObject) {
-            mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(any_filter_applied ? R.id.recycler_view : R.id.empty_view ));
+            mAccountsListAdapter.setViews(findViewById(R.id.accounts_list), findViewById(any_filter_applied ? R.id.accounts_list : R.id.empty_view ));
+            mDataFilterer = null;
         }
     }
     @Override
     public void onDataFilterError() {}
+
+    public void onSelectedGroupChanges(@Nullable final String active_group, @Nullable final String previous_active_group) {
+        synchronized (mSynchronizationObject) {
+            if (! StringUtils.equals(mActiveGroup, active_group)) {
+                mActiveGroup = active_group;
+                filterData();
+            }
+        }
+    }
 
     private void checkForAppUpdates() {
         if (Constants.getDefaultSharedPreferences(this).getBoolean(Constants.AUTO_UPDATES_APP_KEY, getResources().getBoolean(R.bool.auto_updates_app_default))) {
             new CheckForAppUpdates(this, this).start();
         }
     }
-    public void onCheckForUpdatesFinished(@Nullable final File apk_local_file)
+    public void onCheckForUpdatesFinished(@Nullable final File apk_local_file, @Nullable final String apk_local_file_version)
     {
         if ((apk_local_file != null) && (! isFinishedOrFinishing())) {
-            UiUtils.showConfirmDialog(this, R.string.there_is_an_update_version, R.string.install_now, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setDataAndType(FileProvider.getUriForFile(getBaseContext(), getPackageName() + ".provider", apk_local_file), "application/vnd.android.package-archive");
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        startActivity(intent);
+            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(this);
+            boolean update_will_be_notified = true;
+            if (apk_local_file_version.equals(preferences.getString(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, null))) {
+                update_will_be_notified = (preferences.getLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, 0) + NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL < System.currentTimeMillis());
+            }            
+            if (update_will_be_notified) {
+                preferences.edit().putString(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, apk_local_file_version).putLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, System.currentTimeMillis()).apply();
+                UiUtils.showConfirmDialog(this, getString(R.string.there_is_an_update_version, getString(R.string.app_version_name_value), apk_local_file_version), R.string.install_now, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setDataAndType(FileProvider.getUriForFile(getBaseContext(), getPackageName() + ".provider", apk_local_file), "application/vnd.android.package-archive");
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            startActivity(intent);
+                        }
+                        catch (Exception e) {
+                            Log.d(Constants.LOG_TAG_NAME, "Exception while trying to install an app update", e);
+                        }
                     }
-                    catch (Exception e) {
-                        Log.d(Constants.LOG_TAG_NAME, "Exception while trying to install an app update", e);
-                    }
-                }
-            });
+                });
+            }
         }
     }
 
@@ -323,7 +378,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
                         else if (changed_settings.contains(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY)) {
                             loadData();
                         }
-                        mAdapter.onOptionsChanged();
+                        mAccountsListAdapter.onOptionsChanged();
                     }
                 }
             }
@@ -333,6 +388,19 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     @Override
     protected void processOnBackPressed() {
-        finish();
+        boolean do_filter_data_instead_of_finish = false;
+        synchronized (mSynchronizationObject) {
+            if ((mActiveGroup != null) || (! ((EditText) findViewById(R.id.filter_text)).getText().toString().isEmpty())) {
+                ((EditText) findViewById(R.id.filter_text)).setText(null);
+                mActiveGroup = null;
+                do_filter_data_instead_of_finish = true;
+            }
+        }
+        if (do_filter_data_instead_of_finish) {
+            filterData();
+        }
+        else {
+            finish();
+        }
     }
 }

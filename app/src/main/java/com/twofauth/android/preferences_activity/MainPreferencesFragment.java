@@ -194,18 +194,20 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     }
     @Override
     public boolean onPreferenceClick(@NonNull final Preference preference) {
+        final Context context = preference.getContext();
         if (SYNC_DETAILS_KEY.equals(preference.getKey())) {
-            MainService.startService(getContext());
+            MainService.startService(context);
         }
         else if (RESET_ACCOUNTS_LAST_USE_KEY.equals(preference.getKey())) {
-            Constants.deleteTwoFactorAccountLastUseKeys(preference.getContext());
+            Constants.deleteTwoFactorAccountLastUseKeys(context);
+            UiUtils.showToast(context, R.string.data_usage_has_been_deleted);
             onSettingValueChanged(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY);
         }
         else if (GITHUB_REPO_KEY.equals(preference.getKey())) {
             HtmlActivity.openInWebBrowser(getActivity(), Constants.GITHUB_REPO);
         }
         else if (OPEN_SOURCE_LICENSES_KEY.equals(preference.getKey())) {
-            startActivity(new Intent(getContext(), HtmlActivity.class).putExtra(HtmlActivity.EXTRA_FILE_PATHNAME, "file:///android_asset/open-source-licenses.html"));
+            startActivity(new Intent(context, HtmlActivity.class).putExtra(HtmlActivity.EXTRA_FILE_PATHNAME, "file:///android_asset/open-source-licenses.html"));
             return true;
         }
         return false;

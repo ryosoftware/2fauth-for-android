@@ -68,6 +68,7 @@
 
     <string name="reset_accounts_last_use_data">Reset accounts usage</string>
     <string name="reset_accounts_last_use_data_summary">Removes last used data from accounts and sorting is reset</string>
+    <string name="data_usage_has_been_deleted">Usage data has been deleted</string>
 
     <string name="ungroup_otp_codes">Ungroup 2FA codes</string>
     <string name="ungroup_otp_codes_summary">Ungroup codes for better reading</string>
@@ -116,7 +117,7 @@
 
     <string name="auto_updates_app">Automatic updates</string>
     <string name="auto_updates_app_summary">When you enter the app, it will connect to the repository to check for updates, downloading and installing them if necessary.</string>
-    <string name="there_is_an_update_version">There is an app update.\n\nDo you want to install now?</string>
+    <string name="there_is_an_update_version">You\'re using version %1$s of the app, but version %2$s has already been released. Would you like to update now?</string>
 
     <string name="search">Enter a text to filter accounts&#8230;</string>
 

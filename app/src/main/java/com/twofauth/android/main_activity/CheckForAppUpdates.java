@@ -41,7 +41,7 @@ public class CheckForAppUpdates extends Thread {
     private static final String APK_NAME = "app-release.apk";
 
     public interface OnCheckForUpdatesListener {
-        public abstract void onCheckForUpdatesFinished(@Nullable final File apk_local_file);
+        public abstract void onCheckForUpdatesFinished(@Nullable File apk_local_file, @Nullable String app_local_file_version);
     }
 
     private static class FileUtilities {
@@ -59,13 +59,15 @@ public class CheckForAppUpdates extends Thread {
     }
     private class CheckForUpdatesFinishedNotifier implements Runnable {
         private final File mFile;
+        private final String mVersion;
 
-        CheckForUpdatesFinishedNotifier(@Nullable final File file) {
+        CheckForUpdatesFinishedNotifier(@Nullable final File file, @Nullable final String version) {
             mFile = file;
+            mVersion = version;
         }
 
         public void run() {
-            mListener.onCheckForUpdatesFinished(mFile);
+            mListener.onCheckForUpdatesFinished(mFile, mVersion);
         }
     }
 
@@ -133,11 +135,13 @@ public class CheckForAppUpdates extends Thread {
 
     public void run() {
         File apk_local_file = null;
+        String apk_local_file_version = null;
         boolean there_is_an_app_update = false;
         try {
             final SharedPreferences preferences = Constants.getDefaultSharedPreferences(mActivity);
             final JSONObject object = getLatestReleaseData(true);
-            final int last_available_app_version = parseAppVersionNumber(object.optString(APP_VERSION_ENTRY_NAME)), app_installed_version = parseAppVersionNumber(mActivity.getString(R.string.app_version_name_value));
+            apk_local_file_version = object.optString(APP_VERSION_ENTRY_NAME);
+            final int last_available_app_version = parseAppVersionNumber(apk_local_file_version), app_installed_version = parseAppVersionNumber(mActivity.getString(R.string.app_version_name_value));
             int last_downloaded_version = parseAppVersionNumber(preferences.getString(LAST_DOWNLOADED_APP_VERSION_KEY, null));
             apk_local_file = getApkLocalFile();
             if ((last_downloaded_version != 0) && ((last_downloaded_version <= app_installed_version) || (last_downloaded_version < last_available_app_version))) {
@@ -150,7 +154,7 @@ public class CheckForAppUpdates extends Thread {
                 if (! there_is_an_app_update) {
                     final JSONObject apk_asset = getLatestApkFileData(object);
                     if ((apk_asset != null) && (downloadLatestApkFileData(apk_asset, apk_local_file))) {
-                        preferences.edit().putString(LAST_DOWNLOADED_APP_VERSION_KEY, object.optString(APP_VERSION_ENTRY_NAME)).apply();
+                        preferences.edit().putString(LAST_DOWNLOADED_APP_VERSION_KEY, apk_local_file_version).apply();
                         there_is_an_app_update = true;
                     }
                 }
@@ -161,7 +165,7 @@ public class CheckForAppUpdates extends Thread {
         }
         finally {
             if (! mActivity.isFinishedOrFinishing()) {
-                mActivity.runOnUiThread(new CheckForUpdatesFinishedNotifier(there_is_an_app_update ? apk_local_file : null));
+                mActivity.runOnUiThread(new CheckForUpdatesFinishedNotifier(there_is_an_app_update ? apk_local_file : null, there_is_an_app_update ? apk_local_file_version : null));
             }
         }
     }

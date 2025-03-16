@@ -69,6 +69,7 @@
 
     <string name="reset_accounts_last_use_data">Resetear datos de uso</string>
     <string name="reset_accounts_last_use_data_summary">Elimina los datos de uso de las cuentas y la ordenación se reinicia</string>
+    <string name="data_usage_has_been_deleted">Se han eliminado los datos de uso</string>
 
     <string name="ungroup_otp_codes">Desagrupar código 2FA</string>
     <string name="ungroup_otp_codes_summary">Desagrupa los códigos para facilitar la lectura</string>
@@ -117,7 +118,7 @@
 
     <string name="auto_updates_app">Actualizaciones automáticas</string>
     <string name="auto_updates_app_summary">Cuando inicie la app se conectará con el repositorio para comprobar si existen actualizaciones, procediendo a su descarga y a su instalación, si es el caso.</string>
-    <string name="there_is_an_update_version">Se ha encontrado una actualización de la apicación.\n\n¿Desea instalarla ahora?</string>
+    <string name="there_is_an_update_version">Está usando la versión %1$s de la aplicación, pero la versión %2$s ya está disponible.\n\n¿Desea actualizar ahora?</string>
 
     <string name="search">Escribe algo para filtrar&#8230;</string>
 

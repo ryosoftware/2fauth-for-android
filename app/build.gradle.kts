@@ -2,6 +2,29 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+import java.util.Properties;
+import java.io.FileNotFoundException;
+import java.io.File;
+
+fun increaseVersionCode(): Int {
+    val properties = Properties()
+    val file = File("version.propierties")
+    if (file.exists()) {
+        file.inputStream().use {
+            properties.load(it)
+        }
+        val new_version_code = properties["VERSION_CODE"].toString().toInt() + 1
+        properties["VERSION_CODE"] = new_version_code.toString()
+        file.writer().use {
+            properties.store(it, null)
+        }
+        return new_version_code
+    } 
+    else {
+        throw FileNotFoundException("File 'version.propierties' not found")
+    }
+}
+
 android {
     namespace = "com.twofauth.android"
     compileSdk = 35
@@ -10,8 +33,8 @@ android {
         applicationId = "com.twofauth.android"
         minSdk = 29
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.9"
+        versionCode = increaseVersionCode()
+        versionName = "1.10"
     }
 
     buildTypes {
@@ -53,3 +76,4 @@ dependencies {
     implementation(libs.bastiaanjansen.otp)
     implementation(libs.gson)
 }
+

@@ -7,31 +7,30 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/not_empty_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:orientation="vertical">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/filters"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
+            android:layout_alignParentTop="true"
             android:orientation="vertical"
             android:visibility="gone">
 
             <EditText
                 android:id="@+id/filter_text"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:layout_marginBottom="10dp"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
                 android:paddingTop="5dp"
@@ -43,28 +42,26 @@
                 android:hint="@string/search"
                 android:background="@drawable/border_frame_transparent" />
 
-            <HorizontalScrollView
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/groups_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:id="@+id/groups_bar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-
-            </HorizontalScrollView>
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="10dp" />
 
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
+            android:id="@+id/accounts_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/filters"
+            android:layout_alignWithParentIfMissing="true"
             android:visibility="gone" />
-
-    </LinearLayout>
+        
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/empty_view"

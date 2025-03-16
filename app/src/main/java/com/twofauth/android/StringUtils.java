@@ -63,6 +63,10 @@ public class StringUtils {
         return context.getString(R.string.date_time, date_format.format(date), time_format.format(date));
     }
 
+    public static boolean isEmptyOrNull(@Nullable final String string) {
+        return ((string == null) || (string.isEmpty()));
+    }
+
     public static int parseInt(@Nullable final String value, final int fallback) {
         if (value != null) {
             try {
