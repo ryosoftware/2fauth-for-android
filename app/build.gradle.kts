@@ -2,21 +2,21 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-import java.util.Properties
+import java.util.Properties;
 import java.io.FileNotFoundException;
-import java.io.File
+import java.io.File;
 
 fun increaseVersionCode(): Int {
-    val propierties = Properties()
+    val properties = Properties()
     val file = File("version.propierties")
     if (file.exists()) {
         file.inputStream().use {
-            propierties.load(it)
+            properties.load(it)
         }
-        val new_version_code = propierties["VERSION_CODE"].toString().toInt() + 1
-        propierties["VERSION_CODE"] = new_version_code.toString()
+        val new_version_code = properties["VERSION_CODE"].toString().toInt() + 1
+        properties["VERSION_CODE"] = new_version_code.toString()
         file.writer().use {
-            propierties.store(it, null)
+            properties.store(it, null)
         }
         return new_version_code
     } 
@@ -34,7 +34,7 @@ android {
         minSdk = 29
         targetSdk = 35
         versionCode = increaseVersionCode()
-        versionName = "1.9"
+        versionName = "1.10"
     }
 
     buildTypes {
