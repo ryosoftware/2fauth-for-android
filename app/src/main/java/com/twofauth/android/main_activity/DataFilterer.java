@@ -77,7 +77,7 @@ public class DataFilterer extends Thread
         }
     }
     private final BaseActivity mActivity;
-    private final MainActivityRecyclerAdapter mAdapter;
+    private final AccountsListAdapter mAdapter;
     private final ViewGroup mGroupsBar;
 
     private final List<JSONObject> mItems;
@@ -87,7 +87,7 @@ public class DataFilterer extends Thread
 
     private final OnDataFilteredListener mListener;
 
-    public DataFilterer(@NotNull final BaseActivity activity, @NotNull final MainActivityRecyclerAdapter adapter, @NotNull final ViewGroup groups_bar, @NotNull final List<JSONObject> items, @Nullable final String active_group, @Nullable final String filter, @NotNull final OnDataFilteredListener listener) {
+    public DataFilterer(@NotNull final BaseActivity activity, @NotNull final AccountsListAdapter adapter, @NotNull final ViewGroup groups_bar, @NotNull final List<JSONObject> items, @Nullable final String active_group, @Nullable final String filter, @NotNull final OnDataFilteredListener listener) {
         mActivity = activity;
         mAdapter = adapter;
         mGroupsBar = groups_bar;

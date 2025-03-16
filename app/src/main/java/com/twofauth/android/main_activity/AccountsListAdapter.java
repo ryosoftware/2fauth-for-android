@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
-import com.twofauth.android.main_activity.recycler_adapter.MainActivityRecyclerAdapterHandler;
-import com.twofauth.android.main_activity.recycler_adapter.view_holders.TwoFactorAccountViewHolder.OnViewHolderClickListener;
-import com.twofauth.android.main_activity.recycler_adapter.TwoFactorAccountOptions;
-import com.twofauth.android.main_activity.recycler_adapter.view_holders.TwoFactorAccountViewHolder;
+import com.twofauth.android.main_activity.accounts_list.MainActivityRecyclerAdapterHandler;
+import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountViewHolder.OnViewHolderClickListener;
+import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountOptions;
+import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountViewHolder;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,9 +22,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentSkipListMap;
 
-public class MainActivityRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnViewHolderClickListener {
+public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnViewHolderClickListener {
     private static final int TYPE_2FA_AUTH_ACCOUNT = 1;
     private static final MainActivityRecyclerAdapterHandler mHandler = new MainActivityRecyclerAdapterHandler();
 
@@ -39,20 +38,20 @@ public class MainActivityRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
     private int mActiveAccountPosition = -1;
     private boolean mResumed = false;
 
-    public MainActivityRecyclerAdapter(final boolean resumed) {
+    public AccountsListAdapter(final boolean resumed) {
         mResumed = resumed;
     }
 
-    public MainActivityRecyclerAdapter() {
+    public AccountsListAdapter() {
         this(false);
     }
 
-    public MainActivityRecyclerAdapter(@Nullable final List<JSONObject> items, final boolean resumed) {
+    public AccountsListAdapter(@Nullable final List<JSONObject> items, final boolean resumed) {
         this(resumed);
         setItems(items);
     }
 
-    public MainActivityRecyclerAdapter(@Nullable final List<JSONObject> items) {
+    public AccountsListAdapter(@Nullable final List<JSONObject> items) {
         this(items, false);
     }
 

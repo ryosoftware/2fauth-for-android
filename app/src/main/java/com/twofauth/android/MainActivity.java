@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 import android.content.res.Configuration;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -24,13 +22,11 @@ import android.view.View;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import com.twofauth.android.Main;
 import com.twofauth.android.main_activity.AuthenticWithBiometrics;
 import com.twofauth.android.main_activity.AuthenticWithPin;
 import com.twofauth.android.main_activity.CheckForAppUpdates;
@@ -39,7 +35,7 @@ import com.twofauth.android.main_activity.DataLoader;
 import com.twofauth.android.main_activity.ListUtils;
 import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
 
-import com.twofauth.android.main_activity.MainActivityRecyclerAdapter;
+import com.twofauth.android.main_activity.AccountsListAdapter;
 import com.twofauth.android.main_activity.FabButtonShowOrHide;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 
@@ -50,7 +46,6 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -74,7 +69,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         }
     }
     private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
-    private final MainActivityRecyclerAdapter mAdapter = new MainActivityRecyclerAdapter(false);;
+    private final AccountsListAdapter mAdapter = new AccountsListAdapter(false);;
     private Thread mDataLoader = null;
 
     private Thread mDataFilterer = null;
@@ -93,13 +88,13 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         }
         setContentView(R.layout.main_activity);
-        final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.recycler_view);
+        final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.accounts_list);
         recycler_view.setLayoutManager(new GridLayoutManager(this, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2));
         recycler_view.setAdapter(mAdapter);
         ((SimpleItemAnimator) recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
         ((FloatingActionButton) findViewById(R.id.sync_server_data)).setOnClickListener(this);
         ((FloatingActionButton) findViewById(R.id.open_app_settings)).setOnClickListener(this);
-        new FabButtonShowOrHide((RecyclerView) findViewById(R.id.recycler_view), new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) });
+        new FabButtonShowOrHide((RecyclerView) findViewById(R.id.accounts_list), new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) });
         ((EditText) findViewById(R.id.filter_text)).addTextChangedListener(this);
         mRotateAnimation.setDuration(SYNC_BUTTON_ROTATION_DURATION);
         mRotateAnimation.setInterpolator(new LinearInterpolator());
@@ -138,7 +133,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     public void onConfigurationChanged(Configuration new_config) {
         super.onConfigurationChanged(new_config);
-        final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.recycler_view);
+        final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.accounts_list);
         ((GridLayoutManager) recycler_view.getLayoutManager()).setSpanCount(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2);
         recycler_view.getAdapter().notifyDataSetChanged();
     }
@@ -269,7 +264,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
             synchronized (mSynchronizationObject) {
                 mDataLoader = null;
                 if (success) {
-                    mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(R.id.empty_view));
+                    mAdapter.setViews(findViewById(R.id.accounts_list), findViewById(R.id.empty_view));
                     mActiveGroup = null;
                     findViewById(R.id.filters).setVisibility((mItems.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
                     ((EditText) findViewById(R.id.filter_text)).setText(null);
@@ -303,7 +298,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     @Override
     public void onDataFilterSuccess(final boolean any_filter_applied) {
         synchronized (mSynchronizationObject) {
-            mAdapter.setViews(findViewById(R.id.recycler_view), findViewById(any_filter_applied ? R.id.recycler_view : R.id.empty_view ));
+            mAdapter.setViews(findViewById(R.id.accounts_list), findViewById(any_filter_applied ? R.id.accounts_list : R.id.empty_view ));
             mDataFilterer = null;
         }
     }

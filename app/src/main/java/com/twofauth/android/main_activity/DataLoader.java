@@ -99,7 +99,7 @@ public class DataLoader extends Thread {
 
     private final BaseActivity mActivity;
 
-    private final MainActivityRecyclerAdapter mAdapter;
+    private final AccountsListAdapter mAdapter;
 
     private final ViewGroup mGroupsBar;
 
@@ -107,7 +107,7 @@ public class DataLoader extends Thread {
 
     private final OnDataLoadListener mListener;
 
-    public DataLoader(@NotNull final BaseActivity activity, @NotNull final MainActivityRecyclerAdapter adapter, @NotNull final ViewGroup groups_bar, @NotNull final View.OnClickListener on_group_button_click_listener, @NotNull OnDataLoadListener listener) {
+    public DataLoader(@NotNull final BaseActivity activity, @NotNull final AccountsListAdapter adapter, @NotNull final ViewGroup groups_bar, @NotNull final View.OnClickListener on_group_button_click_listener, @NotNull OnDataLoadListener listener) {
         mActivity = activity;
         mAdapter = adapter;
         mGroupsBar = groups_bar;

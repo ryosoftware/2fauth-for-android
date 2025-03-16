@@ -1,10 +1,10 @@
-package com.twofauth.android.main_activity.recycler_adapter;
+package com.twofauth.android.main_activity.accounts_list;
 
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 
-import com.twofauth.android.main_activity.MainActivityRecyclerAdapter;
+import com.twofauth.android.main_activity.AccountsListAdapter;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -12,9 +12,9 @@ public class MainActivityRecyclerAdapterHandler extends Handler {
     public static final int REDRAW_ITEM_EACH_TIME_TO_TIME = 1;
 
     private static class MainActivityRecyclerAdapterHandlerObject {
-        public final MainActivityRecyclerAdapter adapter;
+        public final AccountsListAdapter adapter;
 
-        MainActivityRecyclerAdapterHandlerObject(@NotNull final MainActivityRecyclerAdapter _adapter) {
+        MainActivityRecyclerAdapterHandlerObject(@NotNull final AccountsListAdapter _adapter) {
             adapter = _adapter;
         }
     }
@@ -22,7 +22,7 @@ public class MainActivityRecyclerAdapterHandler extends Handler {
     private static class MainActivityRecyclerAdapterHandlerForRedrawItems extends MainActivityRecyclerAdapterHandlerObject {
         public final int[] items;
 
-        MainActivityRecyclerAdapterHandlerForRedrawItems(@NotNull final MainActivityRecyclerAdapter _adapter, @NotNull final int[] _items) {
+        MainActivityRecyclerAdapterHandlerForRedrawItems(@NotNull final AccountsListAdapter _adapter, @NotNull final int[] _items) {
             super(_adapter);
             System.arraycopy(_items, 0, items = new int[_items.length], 0, _items.length);
         }
@@ -33,7 +33,7 @@ public class MainActivityRecyclerAdapterHandler extends Handler {
 
         public long endTime;
 
-        MainActivityRecyclerAdapterHandlerForRedrawItemsTimeToTime(@NotNull final MainActivityRecyclerAdapter _adapter, final int _item, final long end_time) {
+        MainActivityRecyclerAdapterHandlerForRedrawItemsTimeToTime(@NotNull final AccountsListAdapter _adapter, final int _item, final long end_time) {
             super(_adapter);
             item = _item;
             endTime = end_time;
@@ -61,7 +61,7 @@ public class MainActivityRecyclerAdapterHandler extends Handler {
         sendMessage(obtainMessage(REDRAW_ITEM_EACH_TIME_TO_TIME, redraw_item_data));
 
     }
-    public void sendRedrawItemTimeToTimeMessage(@NotNull final MainActivityRecyclerAdapter adapter, final int item, final long time) {
+    public void sendRedrawItemTimeToTimeMessage(@NotNull final AccountsListAdapter adapter, final int item, final long time) {
         sendRedrawItemTimeToTimeMessage(new MainActivityRecyclerAdapterHandlerForRedrawItemsTimeToTime(adapter, item, SystemClock.elapsedRealtime() + time));
     }
 

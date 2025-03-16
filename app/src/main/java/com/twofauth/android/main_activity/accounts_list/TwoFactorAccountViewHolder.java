@@ -1,4 +1,4 @@
-package com.twofauth.android.main_activity.recycler_adapter.view_holders;
+package com.twofauth.android.main_activity.accounts_list;
 
 import android.app.Activity;
 import android.content.ClipData;
@@ -16,12 +16,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bastiaanjansen.otp.HMACAlgorithm;
@@ -30,7 +28,6 @@ import com.google.android.material.button.MaterialButton;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
-import com.twofauth.android.main_activity.recycler_adapter.TwoFactorAccountOptions;
 import com.twofauth.android.main_service.ServerDataLoader;
 
 import org.jetbrains.annotations.NotNull;
@@ -245,10 +242,6 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return false;
     }
 
-    public static TwoFactorAccountViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
-        return new TwoFactorAccountViewHolder(parent, on_click_listener);
-    }
-
     private static Object initializeOtpGenerator(@NotNull final JSONObject object) {
         try {
             if (! object.has(TWO_FACTOR_AUTH_DATA_GENERATOR_KEY)) {
@@ -275,5 +268,9 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
             }
         }
         return -1;
+    }
+
+    public static TwoFactorAccountViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
+        return new TwoFactorAccountViewHolder(parent, on_click_listener);
     }
 }
