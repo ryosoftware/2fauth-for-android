@@ -197,8 +197,6 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         final ColorStateList otp_color_state_list = ColorStateList.valueOf(otp_color);
         mOtp.setTextColor(otp_color);
         mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);
-
-
         Animation otp_animation = mOtp.getAnimation();
         if ((otp_animation == null) && (millis_until_next_otp > 0) && (millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME)) {
             mOtp.startAnimation(getOtpAnimation());
@@ -206,8 +204,6 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         else if ((otp_animation != null) && ((millis_until_next_otp < 0) || (millis_until_next_otp > OTP_IS_ABOUT_TO_EXPIRE_TIME))) {
             mOtp.clearAnimation();
         }
-
-
         mOtpTime.setProgress(millis_until_next_otp >= 0 ? (int) (millis_until_next_otp / (10 * object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_PERIOD_KEY, 1))) : 0);
         mOtpTime.setProgressTintList(otp_color_state_list);
         mOtpTime.setVisibility(millis_until_next_otp >= 0 ? View.VISIBLE : View.INVISIBLE);
