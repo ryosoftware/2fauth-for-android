@@ -1,16 +1,11 @@
 package com.twofauth.android.main_activity;
 
-import android.content.res.Resources;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 
 import com.twofauth.android.BaseActivity;
 import com.twofauth.android.Constants;
-import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
-import com.twofauth.android.UiUtils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
