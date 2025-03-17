@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.twofauth.android.Constants;
+import com.twofauth.android.ListUtils;
 import com.twofauth.android.R;
 import com.twofauth.android.main_activity.accounts_list.MainActivityRecyclerAdapterHandler;
 import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountViewHolder.OnViewHolderClickListener;

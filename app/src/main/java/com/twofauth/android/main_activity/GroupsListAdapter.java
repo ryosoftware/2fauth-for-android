@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.twofauth.android.ListUtils;
 import com.twofauth.android.R;
 import com.twofauth.android.main_activity.groups_list.GroupViewHolder;
 

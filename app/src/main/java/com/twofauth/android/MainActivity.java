@@ -36,7 +36,7 @@ import com.twofauth.android.main_activity.CheckForAppUpdates;
 import com.twofauth.android.main_activity.DataFilterer;
 import com.twofauth.android.main_activity.DataLoader;
 import com.twofauth.android.main_activity.GroupsListAdapter;
-import com.twofauth.android.main_activity.ListUtils;
+import com.twofauth.android.ListUtils;
 import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
 
 import com.twofauth.android.main_activity.AccountsListAdapter;
