@@ -101,11 +101,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private final TextView mAccount;
     private final TextView mGroup;
     private final ImageView mIcon;
-
-    private final View mOtpContainer;
     private final TextView mOtp;
-    private final ProgressBar mOtpTime;
-    private final MaterialButton mOtpCopyToClipboard;
     private final TextView mOtpTypeUnsupported;
 
     private Animation mAnimation = null;
@@ -119,11 +115,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mAccount = (TextView) parent.findViewById(R.id.account);
         mGroup = (TextView) parent.findViewById(R.id.group);
         mIcon = (ImageView) parent.findViewById(R.id.icon);
-        mOtpContainer = parent.findViewById(R.id.otp_container);
         mOtp = (TextView) parent.findViewById(R.id.otp);
-        mOtpTime = (ProgressBar) parent.findViewById(R.id.otp_time);
-        mOtpCopyToClipboard = (MaterialButton) parent.findViewById(R.id.otp_copy_to_clipboard);
-        mOtpCopyToClipboard.setOnClickListener(this);
         mOtpTypeUnsupported = (TextView) parent.findViewById(R.id.otp_type_unsupported);
     }
 
@@ -174,7 +166,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private Animation getOtpAnimation() {
         if (mAnimation == null) {
             mAnimation = new AlphaAnimation(OTP_BLINK_ITEM_VISIBLE_ALPHA, OTP_BLINK_ITEM_NOT_VISIBLE_ALPHA);
-            mAnimation.setDuration(750);
+            mAnimation.setDuration(500);
             mAnimation.setStartOffset(0);
             mAnimation.setRepeatMode(Animation.REVERSE);
             mAnimation.setRepeatCount(Animation.INFINITE);
@@ -204,26 +196,18 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         else if ((otp_animation != null) && ((millis_until_next_otp < 0) || (millis_until_next_otp > OTP_IS_ABOUT_TO_EXPIRE_TIME))) {
             mOtp.clearAnimation();
         }
-        mOtpTime.setProgress(millis_until_next_otp >= 0 ? (int) (millis_until_next_otp / (10 * object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_PERIOD_KEY, 1))) : 0);
-        mOtpTime.setProgressTintList(otp_color_state_list);
-        mOtpTime.setVisibility(millis_until_next_otp >= 0 ? View.VISIBLE : View.INVISIBLE);
-        mOtpCopyToClipboard.setBackgroundTintList(otp_color_state_list);
-        mOtpCopyToClipboard.setVisibility(millis_until_next_otp >= 0 && options.isShowCopyToClipboardButtonDisplayed() ? View.VISIBLE : View.GONE);
-        mOtpContainer.setVisibility(otp != null ? View.VISIBLE : View.GONE);
         mOtpTypeUnsupported.setVisibility(otp == null ? View.VISIBLE : View.GONE);
         mOtpTypeUnsupported.setText(context.getString(R.string.otp_type_is_unsupported, object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY).toUpperCase()));
         itemView.setAlpha(show_otp || (! showing_other_otp) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
     }
 
+    public void copyToClipboard(@NotNull final View view) {
+        final Context context = view.getContext();
+        final boolean minimize_app_after_copy_to_clipboard = Constants.getDefaultSharedPreferences(context).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, context.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default));
+        Utils.copyToClipboard(view, mOtp.getTag().toString(), true, minimize_app_after_copy_to_clipboard);
+    }
+
     public void onClick(@NotNull final View view) {
-        if (view.getId() == R.id.otp_copy_to_clipboard) {
-            final Context context = view.getContext();
-            final boolean minimize_app_after_copy_to_clipboard = Constants.getDefaultSharedPreferences(context).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, context.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default));
-            Utils.copyToClipboard(view, mOtp.getTag().toString(), true, minimize_app_after_copy_to_clipboard);
-            if (minimize_app_after_copy_to_clipboard) {
-                return;
-            }
-        }
         if (mOnClickListener != null) {
             mOnClickListener.onClick(getBindingAdapterPosition());
         }
@@ -232,7 +216,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     @Override
     public boolean onLongClick(@NotNull final View view) {
         if (mOtp.getTag() != null) {
-            onClick(mOtpCopyToClipboard);
+            copyToClipboard(view);
             return true;
         }
         return false;
