@@ -33,6 +33,15 @@ public class ServerDataLoader extends Thread
     private static final String GET_2FAUTH_ICON_LOCATION = "%SERVER%/storage/icons/%FILE%";
     private static final String GET_TWO_FACTOR_AUTH_TOKEN = "Bearer %TOKEN%";
 
+    public static class TwoAuthLoadedData {
+        public final List<JSONObject> accounts;
+        public final boolean alphaSorted;
+
+        public TwoAuthLoadedData(@Nullable final List<JSONObject> _accounts, final boolean alpha_sorted) {
+            accounts = _accounts;
+            alphaSorted = alpha_sorted;
+        }
+    }
     private static class DashBoardIconsUtils {
         private static final String BASE_LOCATION = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/%SERVICE%.png";
         public static final String DARK_MODE = "dark";
@@ -155,7 +164,7 @@ public class ServerDataLoader extends Thread
         mMainService.stopSelf();
     }
 
-    public static List<JSONObject> getTwoFactorAuthCodes(@NotNull final Context context) throws Exception {
+    public static TwoAuthLoadedData getTwoFactorAuthCodes(@NotNull final Context context) throws Exception {
         final List<JSONObject> list = new ArrayList<JSONObject>(JsonUtils.StringToJsonMap(Constants.getDefaultSharedPreferences(context).getString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, null), Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY).values());
         final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
         final boolean sort_using_last_use = preferences.getBoolean(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY, context.getResources().getBoolean(R.bool.sort_accounts_by_last_use_default));
@@ -172,7 +181,7 @@ public class ServerDataLoader extends Thread
                 return result == 0 ? StringUtils.compare(object1.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY), object2.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY), true) : result;
             }
         });
-        return list;
+        return new TwoAuthLoadedData(list, ! sort_using_last_use);
     }
 
     public static long getTwoFactorAuthCodesLastLoadTime(@NotNull final Context context) {
