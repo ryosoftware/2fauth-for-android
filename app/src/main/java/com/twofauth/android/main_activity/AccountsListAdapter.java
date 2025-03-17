@@ -1,7 +1,9 @@
 package com.twofauth.android.main_activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.twofauth.android.Constants;
 import com.twofauth.android.ListUtils;
 import com.twofauth.android.R;
-import com.twofauth.android.main_activity.accounts_list.MainActivityRecyclerAdapterHandler;
+import com.twofauth.android.RepeatingEvents;
+import com.twofauth.android.RepeatingEvents.OnTick;
 import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountViewHolder.OnViewHolderClickListener;
 import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountOptions;
 import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountViewHolder;
@@ -24,20 +27,19 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnViewHolderClickListener {
+public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnViewHolderClickListener, OnTick {
     private static final int TYPE_2FA_AUTH_ACCOUNT = 1;
-    private static final MainActivityRecyclerAdapterHandler mHandler = new MainActivityRecyclerAdapterHandler();
-
-    private TwoFactorAccountOptions mTwoFactorAccountOptions = null;
-
-    private final List<JSONObject> mItems = new ArrayList<JSONObject>();
 
     private final Object mSynchronizationObject = new Object();
+    private TwoFactorAccountOptions mTwoFactorAccountOptions = null;
+    private final List<JSONObject> mItems = new ArrayList<JSONObject>();
     private RecyclerView mRecyclerView = null;
     private View mNotEmptyView = null;
     private View mEmptyView = null;
     private int mActiveAccountPosition = -1;
     private boolean mResumed = false;
+
+    private final int mRepeatingEventsIdentifier = RepeatingEvents.obtainIdentifier();
 
     public AccountsListAdapter(final boolean resumed) {
         mResumed = resumed;
@@ -97,10 +99,11 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setItems(final List<JSONObject> items) {
         synchronized (mSynchronizationObject) {
             mActiveAccountPosition = -1;
-            mHandler.removeAllMessages();
+            RepeatingEvents.cancel(mRepeatingEventsIdentifier);
             ListUtils.setItems(mItems, items);
             updateViewsVisibility();
         }
@@ -142,6 +145,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void onOptionsChanged() {
         synchronized (mSynchronizationObject) {
             mTwoFactorAccountOptions = null;
@@ -149,24 +153,45 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         notifyDataSetChanged();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void onClick(int position) {
         synchronized (mSynchronizationObject) {
             final Context context = mRecyclerView.getContext();
             final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
             final int older_active_account_position = mActiveAccountPosition;
             mActiveAccountPosition = (older_active_account_position == position) ? -1 : position;
-            notifyDataSetChanged();
-            if (mActiveAccountPosition != -1) {
+            if ((older_active_account_position != -1) && (mActiveAccountPosition != -1)) {
+                notifyItemChanged(older_active_account_position);
+            }
+            else {
+                notifyDataSetChanged();
+            }
+            if (mActiveAccountPosition == -1) {
+                RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+            }
+            else {
                 final JSONObject object = getItem(position);
                 preferences.edit().putLong(Constants.getTwoFactorAccountLastUseKey(object), System.currentTimeMillis()).apply();
-                mHandler.sendRedrawItemTimeToTimeMessage(this, mActiveAccountPosition, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object));
+                RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object), object);
             }
         }
     }
 
+    public void onTick(final int identifier, final long start_time, final long end_time, final long elapsed_time, @NotNull final Object object) {
+        synchronized (mSynchronizationObject) {
+            if (mActiveAccountPosition != -1) {
+                if (start_time + elapsed_time < end_time) {
+                    notifyItemChanged(mActiveAccountPosition);
+                }
+                else {
+                    onClick(-1);
+                }
+            }
+        }
+    }
     public void onPause() {
         synchronized (mSynchronizationObject) {
-            mHandler.removeAllMessages();
+            RepeatingEvents.cancel(mRepeatingEventsIdentifier);
             mResumed = false;
             updateViewsVisibility();
         }
