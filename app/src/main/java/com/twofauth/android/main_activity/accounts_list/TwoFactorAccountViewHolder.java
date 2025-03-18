@@ -52,7 +52,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
 
     private static final float OTP_BLINK_ITEM_VISIBLE_ALPHA = 1.0f;
     private static final float OTP_BLINK_ITEM_NOT_VISIBLE_ALPHA = 0.3f;
-    private static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
+    public static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
 
     public interface OnViewHolderClickListener {
         public abstract void onClick(final int position);
@@ -137,16 +137,6 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
 
     private boolean isOtpSupported(@NotNull final JSONObject object) {
         return OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY));
-    }
-
-    private long getMillisUntilNextOtp(@NotNull final JSONObject object) {
-        Object generator = initializeOtpGenerator(object);
-        if (generator != null) {
-            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
-                return ((TOTPGenerator) generator).durationUntilNextTimeWindow().toMillis();
-            }
-        }
-        return -1;
     }
 
     private String getRevealedOtp(@NotNull final JSONObject object) {
@@ -238,6 +228,26 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
             Log.e(Constants.LOG_TAG_NAME, "Exception while instancing OTP generator", e);
         }
         return object.opt(TWO_FACTOR_AUTH_DATA_GENERATOR_KEY);
+    }
+
+    public static long getOtpMillis(@NotNull final JSONObject object) {
+        Object generator = initializeOtpGenerator(object);
+        if (generator != null) {
+            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+                return ((TOTPGenerator) generator).getPeriod().toMillis();
+            }
+        }
+        return -1;
+    }
+
+    public static long getMillisUntilNextOtp(@NotNull final JSONObject object) {
+        Object generator = initializeOtpGenerator(object);
+        if (generator != null) {
+            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+                return ((TOTPGenerator) generator).durationUntilNextTimeWindow().toMillis();
+            }
+        }
+        return -1;
     }
 
     public static long getMillisUntilNextOtpCompleteCycle(@NotNull final JSONObject object) {

@@ -30,9 +30,17 @@ import java.util.List;
 public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnViewHolderClickListener, OnTick {
     private static final int TYPE_2FA_AUTH_ACCOUNT = 1;
 
+    public interface OnOtpCodeVisibleStateChanged {
+        public abstract void onOtpCodeBecomesVisible();
+        public abstract void onOtpCodeShowAnimated(long interval_until_current_otp_cycle_ends, long cycle_time, boolean current_otp_cycle_ending);
+        public abstract void onOtpCodeHidden();
+    }
+
     private final Object mSynchronizationObject = new Object();
     private TwoFactorAccountOptions mTwoFactorAccountOptions = null;
     private final List<JSONObject> mItems = new ArrayList<JSONObject>();
+
+    private final OnOtpCodeVisibleStateChanged mOnOtpCodeVisibleStateChanged;
     private RecyclerView mRecyclerView = null;
     private View mNotEmptyView = null;
     private View mEmptyView = null;
@@ -41,21 +49,22 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private final int mRepeatingEventsIdentifier = RepeatingEvents.obtainIdentifier();
 
-    public AccountsListAdapter(final boolean resumed) {
+    public AccountsListAdapter(@NotNull final OnOtpCodeVisibleStateChanged on_otp_visible_state_changes, final boolean resumed) {
+        mOnOtpCodeVisibleStateChanged = on_otp_visible_state_changes;
         mResumed = resumed;
     }
 
-    public AccountsListAdapter() {
-        this(false);
+    public AccountsListAdapter(@NotNull final OnOtpCodeVisibleStateChanged on_otp_visible_state_changes) {
+        this(on_otp_visible_state_changes, false);
     }
 
-    public AccountsListAdapter(@Nullable final List<JSONObject> items, final boolean resumed) {
-        this(resumed);
+    public AccountsListAdapter(@NotNull final OnOtpCodeVisibleStateChanged on_otp_visible_state_changes, @Nullable final List<JSONObject> items, final boolean resumed) {
+        this(on_otp_visible_state_changes, resumed);
         setItems(items);
     }
 
-    public AccountsListAdapter(@Nullable final List<JSONObject> items) {
-        this(items, false);
+    public AccountsListAdapter(@NotNull final OnOtpCodeVisibleStateChanged on_otp_visible_state_changes, @Nullable final List<JSONObject> items) {
+        this(on_otp_visible_state_changes, items, false);
     }
 
     @Override
@@ -72,7 +81,11 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         super.onDetachedFromRecyclerView(recycler_view);
         synchronized (mSynchronizationObject) {
             mRecyclerView = null;
-            mActiveAccountPosition = -1;
+            if (mActiveAccountPosition != -1) {
+                RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+                onOtpCodeHidden();
+                mActiveAccountPosition = -1;
+            }
         }
     }
 
@@ -102,8 +115,11 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @SuppressLint("NotifyDataSetChanged")
     public void setItems(final List<JSONObject> items) {
         synchronized (mSynchronizationObject) {
-            mActiveAccountPosition = -1;
-            RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+            if (mActiveAccountPosition != -1) {
+                RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+                onOtpCodeHidden();
+                mActiveAccountPosition = -1;
+            }
             ListUtils.setItems(mItems, items);
             updateViewsVisibility();
         }
@@ -153,6 +169,18 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         notifyDataSetChanged();
     }
 
+    private void onOtpCodeAnimated(final boolean becoming_visible, final JSONObject object) {
+        if (becoming_visible) {
+            mOnOtpCodeVisibleStateChanged.onOtpCodeBecomesVisible();
+        }
+        final long interval_until_current_otp_cycle_ends = TwoFactorAccountViewHolder.getMillisUntilNextOtp(object);
+        mOnOtpCodeVisibleStateChanged.onOtpCodeShowAnimated(interval_until_current_otp_cycle_ends, TwoFactorAccountViewHolder.getOtpMillis(object), interval_until_current_otp_cycle_ends <= TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME);
+    }
+
+    private void onOtpCodeHidden() {
+        mOnOtpCodeVisibleStateChanged.onOtpCodeHidden();
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     public void onClick(int position) {
         synchronized (mSynchronizationObject) {
@@ -168,10 +196,12 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             }
             if (mActiveAccountPosition == -1) {
                 RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+                onOtpCodeHidden();
             }
             else {
                 final JSONObject object = getItem(position);
                 preferences.edit().putLong(Constants.getTwoFactorAccountLastUseKey(object), System.currentTimeMillis()).apply();
+                onOtpCodeAnimated(older_active_account_position == -1, object);
                 RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object), object);
             }
         }
@@ -182,6 +212,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             if (mActiveAccountPosition != -1) {
                 if (start_time + elapsed_time < end_time) {
                     notifyItemChanged(mActiveAccountPosition);
+                    onOtpCodeAnimated(false, (JSONObject) object);
                 }
                 else {
                     onClick(-1);
@@ -191,14 +222,17 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
     public void onPause() {
         synchronized (mSynchronizationObject) {
-            RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+            if (mActiveAccountPosition != -1) {
+                RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+                onOtpCodeHidden();
+                mActiveAccountPosition = -1;
+            }
             mResumed = false;
             updateViewsVisibility();
         }
     }
     public void onResume() {
         synchronized (mSynchronizationObject) {
-            mActiveAccountPosition = -1;
             mResumed = true;
             updateViewsVisibility();
         }

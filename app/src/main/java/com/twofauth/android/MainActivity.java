@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -36,20 +37,18 @@ import com.twofauth.android.main_activity.CheckForAppUpdates;
 import com.twofauth.android.main_activity.DataFilterer;
 import com.twofauth.android.main_activity.DataLoader;
 import com.twofauth.android.main_activity.GroupsListAdapter;
-import com.twofauth.android.ListUtils;
 import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
 
 import com.twofauth.android.main_activity.AccountsListAdapter;
 import com.twofauth.android.main_activity.FabButtonShowOrHide;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,7 +58,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, GroupsListAdapter.onSelectedGroupChanges, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
+public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, AccountsListAdapter.OnOtpCodeVisibleStateChanged, GroupsListAdapter.onSelectedGroupChanges, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
     private static final String LAST_NOTIFIED_APP_UPDATED_VERSION_KEY = "last-notified-app-updated-version";
     private static final String LAST_NOTIFIED_APP_UPDATED_TIME_KEY = "last-notified-app-updated-time";
     private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
@@ -73,7 +72,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         }
     }
     private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
-    private final AccountsListAdapter mAccountsListAdapter = new AccountsListAdapter(false);;
+    private final AccountsListAdapter mAccountsListAdapter = new AccountsListAdapter(this, false);;
 
     private final GroupsListAdapter mGroupsListAdapter = new GroupsListAdapter(this);
     private Thread mDataLoader = null;
@@ -145,7 +144,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         mReceiver.disable(this);
         mUnlocked = false;
         mAccountsListAdapter.onPause();
-        findViewById(R.id.filters).setVisibility(View.GONE);
+        findViewById(R.id.accounts_list_header).setVisibility(View.GONE);
     }
 
     public void onConfigurationChanged(Configuration new_config) {
@@ -157,7 +156,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     private void onAuthenticationSucceeded() {
         mAccountsListAdapter.onResume();
-        findViewById(R.id.filters).setVisibility(mItems.isEmpty() ? View.GONE : View.VISIBLE);
+        findViewById(R.id.accounts_list_header).setVisibility(mItems.isEmpty() ? View.GONE : View.VISIBLE);
         mUnlocked = true;
     }
 
@@ -221,6 +220,20 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         }
     }
 
+    public void onOtpCodeBecomesVisible() {
+        findViewById(R.id.otp_time).setVisibility(View.VISIBLE);
+    }
+
+    public void onOtpCodeShowAnimated(final long interval_until_current_otp_cycle_ends, final long cycle_time, final boolean current_otp_cycle_ending) {
+        final ProgressBar otp_time = (ProgressBar) findViewById(R.id.otp_time);
+        otp_time.setProgress(Math.max(0, (int) ((100 * interval_until_current_otp_cycle_ends) / cycle_time)));
+        otp_time.setProgressTintList(ColorStateList.valueOf(getResources().getColor(current_otp_cycle_ending ? R.color.otp_visible_last_seconds : R.color.otp_visible_normal, getTheme())));
+    }
+
+    public void onOtpCodeHidden() {
+        findViewById(R.id.otp_time).setVisibility(View.INVISIBLE);
+    }
+
     @Override
     public void beforeTextChanged(@NotNull final CharSequence string, final int start, final int count, final int after) {}
 
@@ -274,7 +287,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
                 if (success) {
                     mAccountsListAdapter.setViews(findViewById(R.id.accounts_list), findViewById(R.id.empty_view));
                     mActiveGroup = null;
-                    findViewById(R.id.filters).setVisibility((mItems.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
+                    findViewById(R.id.accounts_list_header).setVisibility((mItems.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
                     ((EditText) findViewById(R.id.filter_text)).setText(null);
                 }
                 setSyncDataButtonAvailability();
