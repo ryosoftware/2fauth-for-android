@@ -13,38 +13,38 @@ import com.twofauth.android.UiUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class LetterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class IndexEntryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     public interface OnViewHolderClickListener {
-        public abstract void onClick(final int position);
+        public abstract void onClick(int position);
     }
-
-    private final TextView mGroup;
 
     private final OnViewHolderClickListener mOnClickListener;
 
-    public LetterViewHolder(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
+    private final TextView mLetter;
+
+    public IndexEntryViewHolder(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
         super(parent);
         mOnClickListener = on_click_listener;
         parent.setOnClickListener(this);
-        mGroup = (TextView) parent.findViewById(R.id.group);
+        mLetter = (TextView) parent.findViewById(R.id.letter);
     }
 
-    public void draw(@NotNull final Context context, @NotNull final String group, final boolean is_active) {
+    public void draw(@NotNull final Context context, final Character letter, final boolean is_active) {
         final Resources resources = context.getResources();
-        mGroup.setText(group);
-        mGroup.setTextColor(is_active ? resources.getColor(R.color.accent_foreground, context.getTheme()) : UiUtils.getSystemColor(context, android.R.attr.textColorSecondary));
-        mGroup.setSelected(is_active);
+        mLetter.setText(letter.toString().toUpperCase());
+        mLetter.setTextColor(is_active ? resources.getColor(R.color.accent_foreground, context.getTheme()) : UiUtils.getSystemColor(context, android.R.attr.textColorSecondary));
+        mLetter.setSelected(is_active);
     }
 
     @Override
     public void onClick(@NotNull final View view) {
-        if (mOnClickListener != null) {
-            mOnClickListener.onClick(getBindingAdapterPosition());
+        final int position = getBindingAdapterPosition();
+        if ((position != RecyclerView.NO_POSITION) && (mOnClickListener != null)) {
+            mOnClickListener.onClick(position);
         }
     }
 
-    public static LetterViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
-        return new LetterViewHolder(parent, on_click_listener);
+    public static IndexEntryViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
+        return new IndexEntryViewHolder(parent, on_click_listener);
     }
 }
-

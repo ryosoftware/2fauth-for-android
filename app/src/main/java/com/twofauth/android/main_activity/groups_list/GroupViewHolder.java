@@ -38,8 +38,9 @@ public class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     @Override
     public void onClick(@NotNull final View view) {
-        if (mOnClickListener != null) {
-            mOnClickListener.onClick(getBindingAdapterPosition());
+        final int position = getBindingAdapterPosition();
+        if ((position != RecyclerView.NO_POSITION) && (mOnClickListener != null)) {
+            mOnClickListener.onClick(position);
         }
     }
 

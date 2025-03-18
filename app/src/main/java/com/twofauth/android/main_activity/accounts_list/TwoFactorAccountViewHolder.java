@@ -17,14 +17,12 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bastiaanjansen.otp.HMACAlgorithm;
 import com.bastiaanjansen.otp.TOTPGenerator;
-import com.google.android.material.button.MaterialButton;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
@@ -192,8 +190,9 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     }
 
     public void onClick(@NotNull final View view) {
-        if (mOnClickListener != null) {
-            mOnClickListener.onClick(getBindingAdapterPosition());
+        final int position = getBindingAdapterPosition();
+        if ((position != RecyclerView.NO_POSITION) && (mOnClickListener != null)) {
+            mOnClickListener.onClick(position);
         }
     }
 
