@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.twofauth.android.ListUtils;
 import com.twofauth.android.R;
+import com.twofauth.android.RecyclerViewUtils;
 import com.twofauth.android.main_activity.groups_list.GroupViewHolder;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,14 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements GroupViewHolder.OnViewHolderClickListener {
-    private static final int NO_ONE_ACTIVE_GROUP = -1;
     private static final int GROUP = 1;
     private final List<String> mItems = new ArrayList<String>();
     private final OnSelectedGroupChanges mOnSelectedGroupChanges;
     private final Object mSynchronizationObject = new Object();
 
     private RecyclerView mRecyclerView = null;
-    private int mActiveGroupPosition = NO_ONE_ACTIVE_GROUP;
+    private int mActiveGroupPosition = RecyclerView.NO_POSITION;
 
     public interface OnSelectedGroupChanges {
         public abstract void onSelectedGroupChanges(final String selected_group, final String previous_selected_group);
@@ -61,10 +61,7 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NotNull final ViewGroup parent, final int view_type) {
         final Context context = parent.getContext();
-        if (view_type == GROUP) {
-            return GroupViewHolder.newInstance(LayoutInflater.from(context).inflate(R.layout.account_group_item_data, parent, false), this);
-        }
-        throw new RuntimeException("There is no type that matches the type " + view_type + " + make sure your using types correctly");
+        return GroupViewHolder.newInstance(LayoutInflater.from(context).inflate(R.layout.account_group_item_data, parent, false), this);
     }
 
     @Override
@@ -76,13 +73,12 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void setItems(@Nullable final List<String> items) {
         synchronized (mSynchronizationObject) {
-            mActiveGroupPosition = NO_ONE_ACTIVE_GROUP;
+            mActiveGroupPosition = RecyclerView.NO_POSITION;
             ListUtils.setItems(mItems, items);
         }
-        notifyDataSetChanged();
+        RecyclerViewUtils.notifyDataSetChanged(this, mRecyclerView);
     }
 
     private String getItem(final int position) {
@@ -107,21 +103,16 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         synchronized (mSynchronizationObject) {
             final Context context = mRecyclerView.getContext();
             final int older_active_group_position = mActiveGroupPosition;
-            mActiveGroupPosition = (older_active_group_position == position) ? NO_ONE_ACTIVE_GROUP : position;
-            if (older_active_group_position != NO_ONE_ACTIVE_GROUP) {
-                notifyItemChanged(older_active_group_position);
-            }
-            if (mActiveGroupPosition != NO_ONE_ACTIVE_GROUP) {
-                notifyItemChanged(mActiveGroupPosition);
-            }
-            mOnSelectedGroupChanges.onSelectedGroupChanges(mActiveGroupPosition == NO_ONE_ACTIVE_GROUP ? null : getItem(mActiveGroupPosition), older_active_group_position == NO_ONE_ACTIVE_GROUP ? null : getItem(older_active_group_position));
+            mActiveGroupPosition = (older_active_group_position == position) ? RecyclerView.NO_POSITION : position;
+            RecyclerViewUtils.notifyItemChanged(this, mRecyclerView, new int[] { older_active_group_position, mActiveGroupPosition });
+            mOnSelectedGroupChanges.onSelectedGroupChanges(mActiveGroupPosition == RecyclerView.NO_POSITION ? null : getItem(mActiveGroupPosition), older_active_group_position == RecyclerView.NO_POSITION ? null : getItem(older_active_group_position));
         }
     }
 
     public void setActiveGroup(@Nullable final String value) {
         synchronized (mSynchronizationObject) {
             int position = mItems.indexOf(value);
-            position = ((position >= 0) && (position < getItemCount())) ? position : NO_ONE_ACTIVE_GROUP;
+            position = ((position >= 0) && (position < getItemCount())) ? position : RecyclerView.NO_POSITION;
             if (mActiveGroupPosition != position) {
                 onClick(position);
             }
