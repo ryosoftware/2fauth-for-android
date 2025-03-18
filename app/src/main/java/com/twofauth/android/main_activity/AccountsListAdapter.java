@@ -31,6 +31,8 @@ import java.util.List;
 public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnViewHolderClickListener, OnTick {
     private static final int TYPE_2FA_AUTH_ACCOUNT = 1;
 
+    private static final int NO_ONE_ACTIVE_ACCOUNT = -1;
+
     public interface OnOtpCodeVisibleStateChanged {
         public abstract void onOtpCodeBecomesVisible();
         public abstract void onOtpCodeShowAnimated(long interval_until_current_otp_cycle_ends, long cycle_time, boolean current_otp_cycle_ending);
@@ -45,7 +47,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private RecyclerView mRecyclerView = null;
     private View mNotEmptyView = null;
     private View mEmptyView = null;
-    private int mActiveAccountPosition = -1;
+    private int mActiveAccountPosition = NO_ONE_ACTIVE_ACCOUNT;
     private boolean mResumed = false;
 
     private final int mRepeatingEventsIdentifier = RepeatingEvents.obtainIdentifier();
@@ -82,11 +84,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         super.onDetachedFromRecyclerView(recycler_view);
         synchronized (mSynchronizationObject) {
             mRecyclerView = null;
-            if (mActiveAccountPosition != -1) {
-                RepeatingEvents.cancel(mRepeatingEventsIdentifier);
-                onOtpCodeHidden();
-                mActiveAccountPosition = -1;
-            }
+            onOtpCodeHidden();
         }
     }
 
@@ -108,7 +106,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 if (mTwoFactorAccountOptions == null) {
                     mTwoFactorAccountOptions = new TwoFactorAccountOptions(mRecyclerView.getContext());
                 }
-                ((TwoFactorAccountViewHolder) view_holder).draw(mRecyclerView.getContext(), object, mActiveAccountPosition == position, mActiveAccountPosition != -1, mTwoFactorAccountOptions);
+                ((TwoFactorAccountViewHolder) view_holder).draw(mRecyclerView.getContext(), object, mActiveAccountPosition == position, mActiveAccountPosition != NO_ONE_ACTIVE_ACCOUNT, mTwoFactorAccountOptions);
             }
         }
     }
@@ -116,11 +114,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @SuppressLint("NotifyDataSetChanged")
     public void setItems(final List<JSONObject> items) {
         synchronized (mSynchronizationObject) {
-            if (mActiveAccountPosition != -1) {
-                RepeatingEvents.cancel(mRepeatingEventsIdentifier);
-                onOtpCodeHidden();
-                mActiveAccountPosition = -1;
-            }
+            onOtpCodeHidden();
             ListUtils.setItems(mItems, items);
             updateViewsVisibility();
         }
@@ -139,7 +133,9 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemCount() {
-        return mItems.size();
+        synchronized (mSynchronizationObject) {
+            return mItems.size();
+        }
     }
 
     private void updateViewsVisibility() {
@@ -179,7 +175,11 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     private void onOtpCodeHidden() {
-        mOnOtpCodeVisibleStateChanged.onOtpCodeHidden();
+        if (mActiveAccountPosition != NO_ONE_ACTIVE_ACCOUNT) {
+            RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+            mOnOtpCodeVisibleStateChanged.onOtpCodeHidden();
+            mActiveAccountPosition = NO_ONE_ACTIVE_ACCOUNT;
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -188,21 +188,21 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final Context context = mRecyclerView.getContext();
             final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
             final int older_active_account_position = mActiveAccountPosition;
-            mActiveAccountPosition = (older_active_account_position == position) ? -1 : position;
-            if ((older_active_account_position != -1) && (mActiveAccountPosition != -1)) {
+            mActiveAccountPosition = (older_active_account_position == position) ? NO_ONE_ACTIVE_ACCOUNT : position;
+            if ((older_active_account_position != NO_ONE_ACTIVE_ACCOUNT) && (mActiveAccountPosition != NO_ONE_ACTIVE_ACCOUNT)) {
                 notifyItemChanged(older_active_account_position);
             }
             else {
                 notifyDataSetChanged();
             }
-            if (mActiveAccountPosition == -1) {
-                RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+            if (mActiveAccountPosition == NO_ONE_ACTIVE_ACCOUNT) {
                 onOtpCodeHidden();
             }
             else {
                 final JSONObject object = getItem(position);
                 preferences.edit().putLong(Constants.getTwoFactorAccountLastUseKey(object), System.currentTimeMillis()).apply();
-                onOtpCodeAnimated(older_active_account_position == -1, object);
+                notifyItemChanged(mActiveAccountPosition);
+                onOtpCodeAnimated(older_active_account_position == NO_ONE_ACTIVE_ACCOUNT, object);
                 RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object), object);
             }
         }
@@ -210,23 +210,21 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public void onTick(final int identifier, final long start_time, final long end_time, final long elapsed_time, @NotNull final Object object) {
         synchronized (mSynchronizationObject) {
-            if (mActiveAccountPosition != -1) {
+            if (mActiveAccountPosition != NO_ONE_ACTIVE_ACCOUNT) {
                 if (start_time + elapsed_time < end_time) {
                     notifyItemChanged(mActiveAccountPosition);
                     onOtpCodeAnimated(false, (JSONObject) object);
                 }
                 else {
-                    onClick(-1);
+                    onClick(NO_ONE_ACTIVE_ACCOUNT);
                 }
             }
         }
     }
     public void onPause() {
         synchronized (mSynchronizationObject) {
-            if (mActiveAccountPosition != -1) {
-                RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+            if (mActiveAccountPosition != NO_ONE_ACTIVE_ACCOUNT) {
                 onOtpCodeHidden();
-                mActiveAccountPosition = -1;
             }
             mResumed = false;
             updateViewsVisibility();
@@ -241,7 +239,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public void copyActiveAccountOtpCodeToClipboard(final Activity activity) {
         synchronized (mSynchronizationObject) {
-            if (mActiveAccountPosition != -1) {
+            if (mActiveAccountPosition != NO_ONE_ACTIVE_ACCOUNT) {
                 TwoFactorAccountViewHolder.copyToClipboard(activity, getItem(mActiveAccountPosition));
             }
         }
