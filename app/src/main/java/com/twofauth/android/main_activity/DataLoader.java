@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DataLoader extends Thread {
     public interface OnDataLoadListener {
-        public abstract void onDataLoadSuccess(List<JSONObject> items);
+        public abstract void onDataLoadSuccess(TwoAuthLoadedData data);
         public abstract void onDataLoadError();
     }
 
@@ -56,7 +56,7 @@ public class DataLoader extends Thread {
             }
             finally {
                 if (mSuccess) {
-                    mListener.onDataLoadSuccess(mTwoAuthLoadedData == null ? null : mTwoAuthLoadedData.accounts);
+                    mListener.onDataLoadSuccess(mTwoAuthLoadedData);
                 }
                 else {
                     mListener.onDataLoadError();

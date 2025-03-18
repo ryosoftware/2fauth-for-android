@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -95,5 +96,23 @@ public class UiUtils {
         try (TypedArray typed_array = context.obtainStyledAttributes(typed_value.data, new int[] { resource_id })) {
             return typed_array.getColor(0, -1);
         }
+    }
+
+    public static int getWidth(@NotNull final View view) {
+        int width = view.getWidth();
+        if (width == 0) {
+            view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            width = view.getMeasuredWidth();
+        }
+        return width;
+    }
+
+    public static int getHeight(@NotNull final View view) {
+        int height = view.getHeight();
+        if (height == 0) {
+            view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            height = view.getMeasuredHeight();
+        }
+        return height;
     }
 }

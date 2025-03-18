@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import com.twofauth.android.main_activity.AccountsListIndexAdapter;
 import com.twofauth.android.main_activity.AuthenticWithBiometrics;
 import com.twofauth.android.main_activity.AuthenticWithPin;
 import com.twofauth.android.main_activity.CheckForAppUpdates;
@@ -42,13 +43,17 @@ import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastRecei
 
 import com.twofauth.android.main_activity.AccountsListAdapter;
 import com.twofauth.android.main_activity.FabButtonShowOrHide;
+import com.twofauth.android.main_service.ServerDataLoader;
+import com.twofauth.android.main_service.ServerDataLoader.TwoAuthLoadedData;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import org.jetbrains.annotations.NotNull;
@@ -59,7 +64,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, AccountsListAdapter.OnOtpCodeVisibleStateChanged, GroupsListAdapter.onSelectedGroupChanges, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
+public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, AccountsListAdapter.OnOtpCodeVisibleStateChanged, GroupsListAdapter.OnSelectedGroupChanges, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
     private static final String LAST_NOTIFIED_APP_UPDATED_VERSION_KEY = "last-notified-app-updated-version";
     private static final String LAST_NOTIFIED_APP_UPDATED_TIME_KEY = "last-notified-app-updated-time";
     private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
@@ -73,13 +78,15 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         }
     }
     private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
-    private final AccountsListAdapter mAccountsListAdapter = new AccountsListAdapter(this, false);;
+
+    private final AccountsListIndexAdapter mAccountsListIndexAdapter = new AccountsListIndexAdapter();
+    private final AccountsListAdapter mAccountsListAdapter = new AccountsListAdapter(this,  mAccountsListIndexAdapter, false);;
 
     private final GroupsListAdapter mGroupsListAdapter = new GroupsListAdapter(this);
     private Thread mDataLoader = null;
 
     private Thread mDataFilterer = null;
-    private final List<JSONObject> mItems = new ArrayList<JSONObject>();
+    private TwoAuthLoadedData mLoadedData = null;
     private String mActiveGroup = null;
     private final ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this);
     private String mStartedActivityForResult;
@@ -97,6 +104,10 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         }
         setContentView(R.layout.main_activity);
+        final RecyclerView accounts_index_recycler_view = (RecyclerView) findViewById(R.id.accounts_list_index);
+        accounts_index_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+        accounts_index_recycler_view.setAdapter(mAccountsListIndexAdapter);
+        ((SimpleItemAnimator) accounts_index_recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
         final RecyclerView accounts_recycler_view = (RecyclerView) findViewById(R.id.accounts_list);
         accounts_recycler_view.setLayoutManager(new GridLayoutManager(this, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2));
         accounts_recycler_view.setAdapter(mAccountsListAdapter);
@@ -138,6 +149,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     public void onResume() {
         super.onResume();
         mReceiver.enable(this);
+        setAccountsListIndexBounds();
         setSyncDataButtonAvailability();
         loadData();
         unlock();
@@ -151,20 +163,40 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         if (! isFinishedOrFinishing()) {
             mAccountsListAdapter.onPause();
             findViewById(R.id.accounts_list_header).setVisibility(View.GONE);
+            findViewById(R.id.accounts_list_index_container).setVisibility(View.GONE);
         }
     }
 
-    public void onConfigurationChanged(Configuration new_config) {
+    private void setAccountsListIndexVisibility() {
+        final boolean is_portrait = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
+        findViewById(R.id.accounts_list_index_container).setVisibility((mLoadedData == null) || (mLoadedData.accounts == null) || (mLoadedData.accounts.isEmpty()) || (! mLoadedData.alphaSorted) || (! mUnlocked) || (! is_portrait) ? View.GONE : View.VISIBLE);
+    }
+    private void setAccountsListIndexBounds() {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            final LinearLayout accounts_index_recycler_view_container = (LinearLayout) findViewById(R.id.accounts_list_index_container);
+            final ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) accounts_index_recycler_view_container.getLayoutParams();
+            final FloatingActionButton open_app_settings_button = (FloatingActionButton) findViewById(R.id.open_app_settings);
+            params.width = UiUtils.getWidth(open_app_settings_button);
+            params.setMargins(0, params.topMargin, params.rightMargin, UiUtils.getPixelsFromDp(this, 16) + 3 * (UiUtils.getHeight(open_app_settings_button) + Math.abs((int) open_app_settings_button.getTranslationY())));
+            accounts_index_recycler_view_container.setLayoutParams(params);
+        }
+        setAccountsListIndexVisibility();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void onConfigurationChanged(@NotNull final Configuration new_config) {
         super.onConfigurationChanged(new_config);
         final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.accounts_list);
-        ((GridLayoutManager) recycler_view.getLayoutManager()).setSpanCount(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2);
+        ((GridLayoutManager) recycler_view.getLayoutManager()).setSpanCount(new_config.orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2);
         recycler_view.getAdapter().notifyDataSetChanged();
+        setAccountsListIndexBounds();
     }
 
     private void onAuthenticationSucceeded() {
-        mAccountsListAdapter.onResume();
-        findViewById(R.id.accounts_list_header).setVisibility(mItems.isEmpty() ? View.GONE : View.VISIBLE);
         mUnlocked = true;
+        mAccountsListAdapter.onResume();
+        findViewById(R.id.accounts_list_header).setVisibility(((mLoadedData == null) || (mLoadedData.accounts == null) || mLoadedData.accounts.isEmpty()) ? View.GONE : View.VISIBLE);
+        setAccountsListIndexVisibility();
     }
 
     public void onBiometricAuthenticationSucceeded() {
@@ -303,10 +335,12 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
                 if (success) {
                     mAccountsListAdapter.setViews(findViewById(R.id.accounts_list), findViewById(R.id.empty_view));
                     mActiveGroup = null;
-                    findViewById(R.id.accounts_list_header).setVisibility((mItems.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
+                    findViewById(R.id.accounts_list_header).setVisibility(((mLoadedData == null) || (mLoadedData.accounts == null) || mLoadedData.accounts.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
+                    setAccountsListIndexVisibility();
                     ((EditText) findViewById(R.id.filter_text)).setText(null);
                 }
                 setSyncDataButtonAvailability();
+                setAccountsListIndexVisibility();
             }
         }
     }
@@ -317,9 +351,9 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     }
 
     @Override
-    public void onDataLoadSuccess(@Nullable List<JSONObject> items) {
+    public void onDataLoadSuccess(@Nullable TwoAuthLoadedData data) {
         synchronized (mSynchronizationObject) {
-            ListUtils.setItems(mItems, items);
+            mLoadedData = data;
             onDataLoaded(true);
         }
     }
@@ -327,7 +361,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     private void filterData() {
         synchronized (mSynchronizationObject) {
             ThreadUtils.interrupt(mDataFilterer);
-            mDataFilterer = new DataFilterer(this, mAccountsListAdapter, mGroupsListAdapter, mItems, mActiveGroup, ((EditText) findViewById(R.id.filter_text)).getText().toString(), this);
+            mDataFilterer = new DataFilterer(this, mAccountsListAdapter, mGroupsListAdapter, mLoadedData.accounts, mActiveGroup, ((EditText) findViewById(R.id.filter_text)).getText().toString(), this);
             mDataFilterer.start();
         }
     }
