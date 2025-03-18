@@ -322,11 +322,12 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    public void copyActiveAccountOtpCodeToClipboard(final Activity activity) {
+    public boolean copyActiveAccountOtpCodeToClipboard(final Activity activity) {
         synchronized (mSynchronizationObject) {
             if (mActiveAccountPosition != RecyclerView.NO_POSITION) {
-                TwoFactorAccountViewHolder.copyToClipboard(activity, getItem(mActiveAccountPosition));
+                return TwoFactorAccountViewHolder.copyToClipboard(activity, getItem(mActiveAccountPosition));
             }
         }
+        return false;
     }
 }

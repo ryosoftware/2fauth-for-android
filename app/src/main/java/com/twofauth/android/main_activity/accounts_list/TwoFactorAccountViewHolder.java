@@ -26,6 +26,7 @@ import com.bastiaanjansen.otp.TOTPGenerator;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
+import com.twofauth.android.ThreadUtils;
 import com.twofauth.android.VibratorUtils;
 import com.twofauth.android.main_service.ServerDataLoader;
 
@@ -187,10 +188,11 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         itemView.setAlpha(show_otp || (! showing_other_otp) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
     }
 
-    public void copyToClipboard(@NotNull final View view) {
+    public boolean copyToClipboard(@NotNull final View view) {
         final Context context = view.getContext();
         final boolean minimize_app_after_copy_to_clipboard = Constants.getDefaultSharedPreferences(context).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, context.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default));
         Utils.copyToClipboard(view, mOtp.getTag().toString(), true, minimize_app_after_copy_to_clipboard);
+        return minimize_app_after_copy_to_clipboard;
     }
 
     public void onClick(@NotNull final View view) {
@@ -204,8 +206,10 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     @Override
     public boolean onLongClick(@NotNull final View view) {
         if (mOtp.getTag() != null) {
-            VibratorUtils.vibrate(view.getContext(), ON_LONG_CLICK_VIBRATION_INTERVAL);
-            copyToClipboard(view);
+            final boolean has_vibrated = VibratorUtils.vibrate(view.getContext(), ON_LONG_CLICK_VIBRATION_INTERVAL), app_has_been_minimized = copyToClipboard(view);
+            if ((has_vibrated) && (app_has_been_minimized)) {
+                ThreadUtils.sleep(ON_LONG_CLICK_VIBRATION_INTERVAL);
+            }
             return true;
         }
         return false;
@@ -269,11 +273,14 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return null;
     }
 
-    public static void copyToClipboard(@NotNull final Activity activity, @NotNull final JSONObject object) {
+    public static boolean copyToClipboard(@NotNull final Activity activity, @NotNull final JSONObject object) {
         final String otp_code = getRevealedOtp(object);
         if (otp_code != null) {
-            Utils.copyToClipboard(activity, otp_code, true, Constants.getDefaultSharedPreferences(activity).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, activity.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default)));
+            final boolean minimize_app_after_copy_to_clipboard = Constants.getDefaultSharedPreferences(activity).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, activity.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default));
+            Utils.copyToClipboard(activity, otp_code, true, minimize_app_after_copy_to_clipboard);
+            return minimize_app_after_copy_to_clipboard;
         }
+        return false;
     }
     public static TwoFactorAccountViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
         return new TwoFactorAccountViewHolder(parent, on_click_listener);
