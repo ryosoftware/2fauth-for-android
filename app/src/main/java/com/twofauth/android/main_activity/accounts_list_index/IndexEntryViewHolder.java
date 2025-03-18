@@ -2,6 +2,8 @@ package com.twofauth.android.main_activity.accounts_list_index;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.View;
 import android.widget.TextView;
 
@@ -9,11 +11,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.twofauth.android.R;
 import com.twofauth.android.UiUtils;
+import com.twofauth.android.VibratorUtils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class IndexEntryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private static final long ON_CLICK_VIBRATION_INTERVAL = 30;
+
     public interface OnViewHolderClickListener {
         public abstract void onClick(int position);
     }
@@ -40,6 +45,7 @@ public class IndexEntryViewHolder extends RecyclerView.ViewHolder implements Vie
     public void onClick(@NotNull final View view) {
         final int position = getBindingAdapterPosition();
         if ((position != RecyclerView.NO_POSITION) && (mOnClickListener != null)) {
+            VibratorUtils.vibrate(view.getContext(), ON_CLICK_VIBRATION_INTERVAL);
             mOnClickListener.onClick(position);
         }
     }

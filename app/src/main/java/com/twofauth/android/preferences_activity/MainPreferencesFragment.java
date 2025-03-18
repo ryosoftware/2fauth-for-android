@@ -23,6 +23,7 @@ import com.twofauth.android.PreferencesActivity;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
 import com.twofauth.android.UiUtils;
+import com.twofauth.android.VibratorUtils;
 import com.twofauth.android.main_activity.AuthenticWithBiometrics;
 import com.twofauth.android.main_activity.AuthenticWithPin;
 import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
@@ -146,6 +147,10 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.UNGROUP_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISPLAY_ACCOUNT_GROUP_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY).setOnPreferenceChangeListener(this);
+        findPreference(Constants.VIBRATE_ON_SOME_ACTIONS_KEY).setOnPreferenceChangeListener(this);
+        if (!VibratorUtils.canVibrate(context)) {
+            findPreference(Constants.VIBRATE_ON_SOME_ACTIONS_KEY).getParent().removePreference(findPreference(Constants.VIBRATE_ON_SOME_ACTIONS_KEY));
+        }
         findPreference(Constants.DISABLE_SCREENSHOTS_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.HIDE_OTP_AUTOMATICALLY_KEY).setOnPreferenceChangeListener(this);
         findPreference(PIN_ACCESS_ENABLED_KEY).setOnPreferenceChangeListener(this);
@@ -307,6 +312,10 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             return true;
         }
         else if (Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY.equals(preference.getKey())) {
+            onSettingValueChanged(preference.getKey());
+            return true;
+        }
+        else if (Constants.VIBRATE_ON_SOME_ACTIONS_KEY.equals(preference.getKey())) {
             onSettingValueChanged(preference.getKey());
             return true;
         }

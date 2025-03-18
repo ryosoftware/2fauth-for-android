@@ -20,6 +20,8 @@
 
         <CheckBoxPreference android:key="minimize-app-after-copy-to-clipboard" android:title="@string/minimize_app_after_copy_to_clipboard" android:summary="@string/minimize_app_after_copy_to_clipboard_summary" android:defaultValue="@bool/minimize_app_after_copy_to_clipboard_default" />
 
+        <CheckBoxPreference android:key="vibrate-on-some-actions" android:title="@string/vibrate_on_some_actions" android:summary="@string/vibrate_on_some_actions_summary" android:defaultValue="@bool/vibrate_on_some_actions_default" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/security">

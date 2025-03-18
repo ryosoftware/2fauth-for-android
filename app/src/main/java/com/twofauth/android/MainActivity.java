@@ -43,7 +43,6 @@ import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastRecei
 
 import com.twofauth.android.main_activity.AccountsListAdapter;
 import com.twofauth.android.main_activity.FabButtonShowOrHide;
-import com.twofauth.android.main_service.ServerDataLoader;
 import com.twofauth.android.main_service.ServerDataLoader.TwoAuthLoadedData;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 
@@ -58,10 +57,8 @@ import android.widget.ProgressBar;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONObject;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, AccountsListAdapter.OnOtpCodeVisibleStateChanged, GroupsListAdapter.OnSelectedGroupChanges, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
@@ -70,6 +67,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
     private static final long SYNC_BUTTON_ROTATION_DURATION = (long) (2.5f * DateUtils.SECOND_IN_MILLIS);
 
+    private static final long FAB_BUTTON_CLICK_VIBRATION_INTERVAL = 30;
     private static class ThreadUtils {
         public static void interrupt(@Nullable final Thread thread) {
             if (thread != null) {
@@ -251,6 +249,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     @Override
     public void onClick(@NotNull final View view) {
         final int id = view.getId();
+        VibratorUtils.vibrate(this, FAB_BUTTON_CLICK_VIBRATION_INTERVAL);
         if (id == R.id.sync_server_data) {
             MainService.startService(this);
         }

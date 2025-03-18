@@ -29,6 +29,8 @@ public class Constants {
     public static final String DISABLE_SCREENSHOTS_KEY = "disable-screenshots";
 
     public static final String MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY = "minimize-app-after-copy-to-clipboard";
+
+    public static final String VIBRATE_ON_SOME_ACTIONS_KEY = "vibrate-on-some-actions";
     public static final String HIDE_OTP_AUTOMATICALLY_KEY = "hide-otp-codes-automatically";
 
     public static final String PIN_ACCESS_KEY = "pin-access";

@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
 import com.twofauth.android.UiUtils;
+import com.twofauth.android.VibratorUtils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AuthenticWithPin {
+    private static final long BUTTON_DELETE_VIBRATION_INTERVAL = 20;
+    private static final long BUTTON_NUMBER_VIBRATION_INTERVAL = 10;
     private static final int MIN_PIN_LENGTH = 4;
     private static final int MAX_PIN_LENGTH = 8;
     private static final int MAX_ATTEMPTS = 3;
@@ -108,7 +111,9 @@ public class AuthenticWithPin {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(@NotNull final View view) {
-                    if (view.getId() == R.id.button_delete) {
+                    final boolean is_button_delete = (view.getId() == R.id.button_delete);
+                    VibratorUtils.vibrate(view.getContext(), is_button_delete ? BUTTON_DELETE_VIBRATION_INTERVAL : BUTTON_NUMBER_VIBRATION_INTERVAL);
+                    if (is_button_delete) {
                         pin_data.pin /= 10;
                         pin_data.digits --;
                     }
@@ -195,7 +200,9 @@ public class AuthenticWithPin {
                 @Override
                 public void onClick(@NotNull final View view) {
                     final PinData pin_data = pins_data[(int) dialog.getButton(DialogInterface.BUTTON_POSITIVE).getTag()];
-                    if (view.getId() == R.id.button_delete) {
+                    final boolean is_button_delete = (view.getId() == R.id.button_delete);
+                    VibratorUtils.vibrate(view.getContext(), is_button_delete ? BUTTON_DELETE_VIBRATION_INTERVAL : BUTTON_NUMBER_VIBRATION_INTERVAL);
+                    if (is_button_delete) {
                         pin_data.pin /= 10;
                         pin_data.digits --;
                     }

@@ -26,6 +26,7 @@ import com.bastiaanjansen.otp.TOTPGenerator;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
+import com.twofauth.android.VibratorUtils;
 import com.twofauth.android.main_service.ServerDataLoader;
 
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +52,9 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private static final float OTP_BLINK_ITEM_VISIBLE_ALPHA = 1.0f;
     private static final float OTP_BLINK_ITEM_NOT_VISIBLE_ALPHA = 0.3f;
     public static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
+
+    private static final long ON_CLICK_VIBRATION_INTERVAL = 30;
+    private static final long ON_LONG_CLICK_VIBRATION_INTERVAL = 60;
 
     public interface OnViewHolderClickListener {
         public abstract void onClick(final int position);
@@ -192,6 +196,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     public void onClick(@NotNull final View view) {
         final int position = getBindingAdapterPosition();
         if ((position != RecyclerView.NO_POSITION) && (mOnClickListener != null)) {
+            VibratorUtils.vibrate(view.getContext(), ON_CLICK_VIBRATION_INTERVAL);
             mOnClickListener.onClick(position);
         }
     }
@@ -199,6 +204,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     @Override
     public boolean onLongClick(@NotNull final View view) {
         if (mOtp.getTag() != null) {
+            VibratorUtils.vibrate(view.getContext(), ON_LONG_CLICK_VIBRATION_INTERVAL);
             copyToClipboard(view);
             return true;
         }
