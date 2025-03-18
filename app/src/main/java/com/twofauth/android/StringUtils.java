@@ -20,6 +20,14 @@ public class StringUtils {
         return compare(string_1, string_2, false);
     }
 
+    public static int compare(@Nullable final Character char_1, @Nullable final Character char_2, final boolean ignore_case) {
+        return compare(char_1 == null ? null : char_1.toString(), char_2 == null ? null : char_2.toString(), ignore_case);
+    }
+
+    public static int compare(@Nullable final Character char_1, @Nullable final Character char_2) {
+        return compare(char_1, char_2, false);
+    }
+
     public static boolean equals(@Nullable final String string_1, @Nullable final String string_2, final boolean ignore_case) {
         if (string_1 == null) {
             return string_2 == null;

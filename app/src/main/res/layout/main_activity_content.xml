@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
-            android:id="@+id/filters"
+            android:id="@+id/accounts_list_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -48,7 +48,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:layout_marginTop="10dp" />
+                android:layout_marginTop="10dp"
+                android:stateListAnimator="@null" />
+
+            <ProgressBar
+                android:id="@+id/otp_time"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="10dp"
+                android:max="100"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:visibility="invisible" />
 
         </LinearLayout>
 
@@ -57,10 +67,37 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_below="@id/filters"
+            android:layout_below="@id/accounts_list_header"
             android:layout_alignWithParentIfMissing="true"
+            android:stateListAnimator="@null"
             android:visibility="gone" />
-        
+
+        <LinearLayout
+            android:id="@+id/accounts_list_index_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/accounts_list_header"
+            android:layout_marginEnd="@dimen/fab_margin"
+            android:layout_marginTop="@dimen/fab_margin"
+            android:layout_marginBottom="260dp"
+            android:layout_alignWithParentIfMissing="true"
+            android:elevation="6dp"
+            android:stateListAnimator="@null"
+            android:background="@drawable/border_frame_solid_no_border"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/accounts_list_index"
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:scrollbars="none" />
+
+        </LinearLayout>
+
     </RelativeLayout>
 
     <LinearLayout

@@ -26,11 +26,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="@dimen/fab_margin"
         android:translationY="-25dp"
         app:layout_anchor="@id/sync_server_data"
         app:layout_anchorGravity="top"
         app:srcCompat="@drawable/ic_actionbar_settings" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/copy_to_clipboard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:translationY="-25dp"
+        app:layout_anchor="@id/open_app_settings"
+        app:layout_anchorGravity="top"
+        app:srcCompat="@drawable/ic_actionbar_copy"
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -8,6 +8,7 @@ import com.twofauth.android.BaseActivity;
 import com.twofauth.android.Constants;
 import com.twofauth.android.StringUtils;
 import com.twofauth.android.main_service.ServerDataLoader;
+import com.twofauth.android.main_service.ServerDataLoader.TwoAuthLoadedData;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -18,26 +19,26 @@ import java.util.List;
 
 public class DataLoader extends Thread {
     public interface OnDataLoadListener {
-        public abstract void onDataLoadSuccess(List<JSONObject> items);
+        public abstract void onDataLoadSuccess(TwoAuthLoadedData data);
         public abstract void onDataLoadError();
     }
 
     private class DataLoaderDisplayer implements Runnable, BaseActivity.SynchronizedCallback {
         private boolean mSuccess;
-        private final List<JSONObject> mAccounts;
+        private final TwoAuthLoadedData mTwoAuthLoadedData;
 
         private final List<String> mGroups;
 
-        DataLoaderDisplayer(final boolean success, @Nullable final List<JSONObject> accounts, @Nullable final List<String> groups) {
+        DataLoaderDisplayer(final boolean success, @Nullable final TwoAuthLoadedData two_auth_loaded_data, @Nullable final List<String> groups) {
             mSuccess = success;
-            mAccounts = accounts;
+            mTwoAuthLoadedData = two_auth_loaded_data;
             mGroups = groups;
         }
 
         @Override
         public Object synchronizedCode(Object object)
         {
-            mAccountsListAdapter.setItems(mAccounts);
+            mAccountsListAdapter.setItems(mTwoAuthLoadedData == null ? null : mTwoAuthLoadedData.accounts);
             mGroupsListAdapter.setItems(mGroups);
             return null;
         }
@@ -55,7 +56,7 @@ public class DataLoader extends Thread {
             }
             finally {
                 if (mSuccess) {
-                    mListener.onDataLoadSuccess(mAccounts);
+                    mListener.onDataLoadSuccess(mTwoAuthLoadedData);
                 }
                 else {
                     mListener.onDataLoadError();
@@ -79,8 +80,9 @@ public class DataLoader extends Thread {
     }
 
     private List<String> getGroups(@Nullable final List<JSONObject> items) {
-        final List<String> groups = new ArrayList<String>();
+        List<String> groups = null;
         if (items != null) {
+            groups = new ArrayList<String>();
             for (JSONObject object : items) {
                 final String group = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY);
                 if (Thread.interrupted()) {
@@ -100,13 +102,14 @@ public class DataLoader extends Thread {
         return groups;
     }
 
+
     public void run() {
         boolean success = false;
-        List<JSONObject> accounts = null;
-        List<String>groups = null;
+        TwoAuthLoadedData two_auth_loaded_data = null;
+        List<String> groups = null;
         try {
-            accounts = ServerDataLoader.getTwoFactorAuthCodes(mActivity);
-            groups = getGroups(accounts);
+            two_auth_loaded_data = ServerDataLoader.getTwoFactorAuthCodes(mActivity);
+            groups = getGroups(two_auth_loaded_data.accounts);
             success = true;
         }
         catch (Exception e) {
@@ -114,7 +117,7 @@ public class DataLoader extends Thread {
         }
         finally {
             if ((! Thread.interrupted()) && (! mActivity.isFinishedOrFinishing())) {
-                mActivity.runOnUiThread(new DataLoaderDisplayer(success, accounts, groups));
+                mActivity.runOnUiThread(new DataLoaderDisplayer(success, two_auth_loaded_data, groups));
             }
         }
     }

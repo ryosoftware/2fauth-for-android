@@ -57,7 +57,7 @@
         <item quantity="many">The last sync was on %2$s and %1$d accounts were loaded.\n\n%3$s</item>
     </plurals>
 
-    <string name="appearance">Appearance</string>
+    <string name="appearance">Appearance &amp; usability</string>
 
     <string name="otp_code">OTP code</string>
 
@@ -76,11 +76,11 @@
     <string name="display_account_group">Display account group</string>
     <string name="display_account_group_summary">The name of the group to which the account belongs will be displayed, if applicable.</string>
 
-    <string name="show_copy_to_clipboard_button">Show Copy to Clipboard button</string>
-    <string name="show_copy_to_clipboard_button_summary">Displays a button to copy the currently displayed OTP code to the Clipboard.\n\nWhen an OTP code is visible you can always copy it by long clicking on it.</string>
-
     <string name="minimize_app_after_copy_to_clipboard">Minimize after Copy to Clipboard</string>
     <string name="minimize_app_after_copy_to_clipboard_summary">Minimizes the app when an OTP code is copied to the Clipboard</string>
+
+    <string name="vibrate_on_some_actions">Vibration feedback</string>
+    <string name="vibrate_on_some_actions_summary">Make phone vibrate as feedback for some actions</string>
 
     <string name="security">Security</string>
 

@@ -1,7 +1,9 @@
-package com.twofauth.android.main_activity.groups_list;
+package com.twofauth.android.main_activity.accounts_list_index;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.View;
 import android.widget.TextView;
 
@@ -14,28 +16,29 @@ import com.twofauth.android.VibratorUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class IndexEntryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private static final long ON_CLICK_VIBRATION_INTERVAL = 30;
-    public interface OnViewHolderClickListener {
-        public abstract void onClick(final int position);
-    }
 
-    private final TextView mGroup;
+    public interface OnViewHolderClickListener {
+        public abstract void onClick(int position);
+    }
 
     private final OnViewHolderClickListener mOnClickListener;
 
-    public GroupViewHolder(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
+    private final TextView mLetter;
+
+    public IndexEntryViewHolder(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
         super(parent);
         mOnClickListener = on_click_listener;
         parent.setOnClickListener(this);
-        mGroup = (TextView) parent.findViewById(R.id.group);
+        mLetter = (TextView) parent.findViewById(R.id.letter);
     }
 
-    public void draw(@NotNull final Context context, @NotNull final String group, final boolean is_active) {
+    public void draw(@NotNull final Context context, final Character letter, final boolean is_active) {
         final Resources resources = context.getResources();
-        mGroup.setText(group);
-        mGroup.setTextColor(is_active ? resources.getColor(R.color.accent_foreground, context.getTheme()) : UiUtils.getSystemColor(context, android.R.attr.textColorSecondary));
-        mGroup.setSelected(is_active);
+        mLetter.setText(letter.toString().toUpperCase());
+        mLetter.setTextColor(is_active ? resources.getColor(R.color.accent_foreground, context.getTheme()) : UiUtils.getSystemColor(context, android.R.attr.textColorSecondary));
+        mLetter.setSelected(is_active);
     }
 
     @Override
@@ -47,8 +50,7 @@ public class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }
     }
 
-    public static GroupViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
-        return new GroupViewHolder(parent, on_click_listener);
+    public static IndexEntryViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
+        return new IndexEntryViewHolder(parent, on_click_listener);
     }
 }
-

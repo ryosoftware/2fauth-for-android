@@ -17,17 +17,16 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bastiaanjansen.otp.HMACAlgorithm;
 import com.bastiaanjansen.otp.TOTPGenerator;
-import com.google.android.material.button.MaterialButton;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
+import com.twofauth.android.VibratorUtils;
 import com.twofauth.android.main_service.ServerDataLoader;
 
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +51,10 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
 
     private static final float OTP_BLINK_ITEM_VISIBLE_ALPHA = 1.0f;
     private static final float OTP_BLINK_ITEM_NOT_VISIBLE_ALPHA = 0.3f;
-    private static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
+    public static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
+
+    private static final long ON_CLICK_VIBRATION_INTERVAL = 30;
+    private static final long ON_LONG_CLICK_VIBRATION_INTERVAL = 60;
 
     public interface OnViewHolderClickListener {
         public abstract void onClick(final int position);
@@ -70,8 +72,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
             return null;
         }
 
-        public static void copyToClipboard(@NotNull final View view, @NotNull final String value, final boolean is_sensitive, final boolean finish_activity) {
-            final Context context = view.getContext();
+        private static void copyToClipboard(@NotNull final Context context, @NotNull final String value, final boolean is_sensitive, @Nullable final Activity activity_to_be_finished) {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null) {
                 ClipData clip = ClipData.newPlainText(context.getString(R.string.otp_code), value);
@@ -80,19 +81,24 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
                     bundle.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
                     clip.getDescription().setExtras(bundle);
                 }
-                if (finish_activity) {
+                if (activity_to_be_finished != null) {
                     clipboard.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
                         @Override
                         public void onPrimaryClipChanged() {
-                            final Activity activity = getActivity(view);
-                            if (activity != null) {
-                                activity.finish();
-                            }
+                            activity_to_be_finished.finish();
                         }
                     });
                 }
                 clipboard.setPrimaryClip(clip);
             }
+        }
+
+        public static void copyToClipboard(@NotNull final View view, @NotNull final String value, final boolean is_sensitive, final boolean finish_activity) {
+            copyToClipboard(view.getContext(), value, is_sensitive, finish_activity ? getActivity(view) : null);
+        }
+
+        public static void copyToClipboard(@NotNull final Activity activity, @NotNull final String value, final boolean is_sensitive, final boolean finish_activity) {
+            copyToClipboard(activity, value, is_sensitive, finish_activity ? activity : null);
         }
     }
 
@@ -101,11 +107,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private final TextView mAccount;
     private final TextView mGroup;
     private final ImageView mIcon;
-
-    private final View mOtpContainer;
     private final TextView mOtp;
-    private final ProgressBar mOtpTime;
-    private final MaterialButton mOtpCopyToClipboard;
     private final TextView mOtpTypeUnsupported;
 
     private Animation mAnimation = null;
@@ -119,11 +121,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mAccount = (TextView) parent.findViewById(R.id.account);
         mGroup = (TextView) parent.findViewById(R.id.group);
         mIcon = (ImageView) parent.findViewById(R.id.icon);
-        mOtpContainer = parent.findViewById(R.id.otp_container);
         mOtp = (TextView) parent.findViewById(R.id.otp);
-        mOtpTime = (ProgressBar) parent.findViewById(R.id.otp_time);
-        mOtpCopyToClipboard = (MaterialButton) parent.findViewById(R.id.otp_copy_to_clipboard);
-        mOtpCopyToClipboard.setOnClickListener(this);
         mOtpTypeUnsupported = (TextView) parent.findViewById(R.id.otp_type_unsupported);
     }
 
@@ -147,26 +145,6 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY));
     }
 
-    private long getMillisUntilNextOtp(@NotNull final JSONObject object) {
-        Object generator = initializeOtpGenerator(object);
-        if (generator != null) {
-            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
-                return ((TOTPGenerator) generator).durationUntilNextTimeWindow().toMillis();
-            }
-        }
-        return -1;
-    }
-
-    private String getRevealedOtp(@NotNull final JSONObject object) {
-        Object generator = initializeOtpGenerator(object);
-        if (generator != null) {
-            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
-                return ((TOTPGenerator) generator).now();
-            }
-        }
-        return null;
-    }
-
     private String getHiddenOtp(@NotNull JSONObject object) {
         return StringUtils.toHiddenString(object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_PASSWORD_LENGTH_KEY));
     }
@@ -174,7 +152,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private Animation getOtpAnimation() {
         if (mAnimation == null) {
             mAnimation = new AlphaAnimation(OTP_BLINK_ITEM_VISIBLE_ALPHA, OTP_BLINK_ITEM_NOT_VISIBLE_ALPHA);
-            mAnimation.setDuration(750);
+            mAnimation.setDuration(500);
             mAnimation.setStartOffset(0);
             mAnimation.setRepeatMode(Animation.REVERSE);
             mAnimation.setRepeatCount(Animation.INFINITE);
@@ -204,35 +182,30 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         else if ((otp_animation != null) && ((millis_until_next_otp < 0) || (millis_until_next_otp > OTP_IS_ABOUT_TO_EXPIRE_TIME))) {
             mOtp.clearAnimation();
         }
-        mOtpTime.setProgress(millis_until_next_otp >= 0 ? (int) (millis_until_next_otp / (10 * object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_PERIOD_KEY, 1))) : 0);
-        mOtpTime.setProgressTintList(otp_color_state_list);
-        mOtpTime.setVisibility(millis_until_next_otp >= 0 ? View.VISIBLE : View.INVISIBLE);
-        mOtpCopyToClipboard.setBackgroundTintList(otp_color_state_list);
-        mOtpCopyToClipboard.setVisibility(millis_until_next_otp >= 0 && options.isShowCopyToClipboardButtonDisplayed() ? View.VISIBLE : View.GONE);
-        mOtpContainer.setVisibility(otp != null ? View.VISIBLE : View.GONE);
         mOtpTypeUnsupported.setVisibility(otp == null ? View.VISIBLE : View.GONE);
         mOtpTypeUnsupported.setText(context.getString(R.string.otp_type_is_unsupported, object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY).toUpperCase()));
         itemView.setAlpha(show_otp || (! showing_other_otp) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
     }
 
+    public void copyToClipboard(@NotNull final View view) {
+        final Context context = view.getContext();
+        final boolean minimize_app_after_copy_to_clipboard = Constants.getDefaultSharedPreferences(context).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, context.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default));
+        Utils.copyToClipboard(view, mOtp.getTag().toString(), true, minimize_app_after_copy_to_clipboard);
+    }
+
     public void onClick(@NotNull final View view) {
-        if (view.getId() == R.id.otp_copy_to_clipboard) {
-            final Context context = view.getContext();
-            final boolean minimize_app_after_copy_to_clipboard = Constants.getDefaultSharedPreferences(context).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, context.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default));
-            Utils.copyToClipboard(view, mOtp.getTag().toString(), true, minimize_app_after_copy_to_clipboard);
-            if (minimize_app_after_copy_to_clipboard) {
-                return;
-            }
-        }
-        if (mOnClickListener != null) {
-            mOnClickListener.onClick(getBindingAdapterPosition());
+        final int position = getBindingAdapterPosition();
+        if ((position != RecyclerView.NO_POSITION) && (mOnClickListener != null)) {
+            VibratorUtils.vibrate(view.getContext(), ON_CLICK_VIBRATION_INTERVAL);
+            mOnClickListener.onClick(position);
         }
     }
 
     @Override
     public boolean onLongClick(@NotNull final View view) {
         if (mOtp.getTag() != null) {
-            onClick(mOtpCopyToClipboard);
+            VibratorUtils.vibrate(view.getContext(), ON_LONG_CLICK_VIBRATION_INTERVAL);
+            copyToClipboard(view);
             return true;
         }
         return false;
@@ -256,6 +229,26 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return object.opt(TWO_FACTOR_AUTH_DATA_GENERATOR_KEY);
     }
 
+    public static long getOtpMillis(@NotNull final JSONObject object) {
+        Object generator = initializeOtpGenerator(object);
+        if (generator != null) {
+            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+                return ((TOTPGenerator) generator).getPeriod().toMillis();
+            }
+        }
+        return -1;
+    }
+
+    public static long getMillisUntilNextOtp(@NotNull final JSONObject object) {
+        Object generator = initializeOtpGenerator(object);
+        if (generator != null) {
+            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+                return ((TOTPGenerator) generator).durationUntilNextTimeWindow().toMillis();
+            }
+        }
+        return -1;
+    }
+
     public static long getMillisUntilNextOtpCompleteCycle(@NotNull final JSONObject object) {
         Object generator = initializeOtpGenerator(object);
         if (generator != null) {
@@ -266,6 +259,22 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return -1;
     }
 
+    private static String getRevealedOtp(@NotNull final JSONObject object) {
+        Object generator = initializeOtpGenerator(object);
+        if (generator != null) {
+            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+                return ((TOTPGenerator) generator).now();
+            }
+        }
+        return null;
+    }
+
+    public static void copyToClipboard(@NotNull final Activity activity, @NotNull final JSONObject object) {
+        final String otp_code = getRevealedOtp(object);
+        if (otp_code != null) {
+            Utils.copyToClipboard(activity, otp_code, true, Constants.getDefaultSharedPreferences(activity).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, activity.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default)));
+        }
+    }
     public static TwoFactorAccountViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
         return new TwoFactorAccountViewHolder(parent, on_click_listener);
     }

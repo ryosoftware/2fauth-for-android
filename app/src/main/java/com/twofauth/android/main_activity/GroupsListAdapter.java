@@ -1,5 +1,6 @@
 package com.twofauth.android.main_activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -7,7 +8,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.twofauth.android.ListUtils;
 import com.twofauth.android.R;
+import com.twofauth.android.RecyclerViewUtils;
 import com.twofauth.android.main_activity.groups_list.GroupViewHolder;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,21 +22,21 @@ import java.util.List;
 public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements GroupViewHolder.OnViewHolderClickListener {
     private static final int GROUP = 1;
     private final List<String> mItems = new ArrayList<String>();
-    private final onSelectedGroupChanges mOnSelectedGroupChanges;
+    private final OnSelectedGroupChanges mOnSelectedGroupChanges;
     private final Object mSynchronizationObject = new Object();
 
     private RecyclerView mRecyclerView = null;
-    private int mActiveGroupPosition = -1;
+    private int mActiveGroupPosition = RecyclerView.NO_POSITION;
 
-    public interface onSelectedGroupChanges {
+    public interface OnSelectedGroupChanges {
         public abstract void onSelectedGroupChanges(final String selected_group, final String previous_selected_group);
     }
 
-    public GroupsListAdapter(@NotNull final onSelectedGroupChanges on_selected_group_changes) {
+    public GroupsListAdapter(@NotNull final OnSelectedGroupChanges on_selected_group_changes) {
         mOnSelectedGroupChanges = on_selected_group_changes;
     }
 
-    public GroupsListAdapter(@Nullable final List<String> items, @NotNull final onSelectedGroupChanges on_selected_group_changes) {
+    public GroupsListAdapter(@Nullable final List<String> items, @NotNull final OnSelectedGroupChanges on_selected_group_changes) {
         this(on_selected_group_changes);
         setItems(items);
     }
@@ -58,10 +61,7 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NotNull final ViewGroup parent, final int view_type) {
         final Context context = parent.getContext();
-        if (view_type == GROUP) {
-            return GroupViewHolder.newInstance(LayoutInflater.from(context).inflate(R.layout.account_group_item_data, parent, false), this);
-        }
-        throw new RuntimeException("There is no type that matches the type " + view_type + " + make sure your using types correctly");
+        return GroupViewHolder.newInstance(LayoutInflater.from(context).inflate(R.layout.account_group_item_data, parent, false), this);
     }
 
     @Override
@@ -75,10 +75,10 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public void setItems(@Nullable final List<String> items) {
         synchronized (mSynchronizationObject) {
-            mActiveGroupPosition = -1;
+            mActiveGroupPosition = RecyclerView.NO_POSITION;
             ListUtils.setItems(mItems, items);
         }
-        notifyDataSetChanged();
+        RecyclerViewUtils.notifyDataSetChanged(this, mRecyclerView);
     }
 
     private String getItem(final int position) {
@@ -93,7 +93,9 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
-        return mItems.size();
+        synchronized (mSynchronizationObject) {
+            return mItems.size();
+        }
     }
 
     @Override
@@ -101,22 +103,18 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         synchronized (mSynchronizationObject) {
             final Context context = mRecyclerView.getContext();
             final int older_active_group_position = mActiveGroupPosition;
-            mActiveGroupPosition = (older_active_group_position == position) ? -1 : position;
-            if (older_active_group_position != -1) {
-                notifyItemChanged(older_active_group_position);
-            }
-            if (mActiveGroupPosition != -1) {
-                notifyItemChanged(mActiveGroupPosition);
-            }
-            mOnSelectedGroupChanges.onSelectedGroupChanges(mActiveGroupPosition == -1 ? null : getItem(mActiveGroupPosition), older_active_group_position == -1 ? null : getItem(older_active_group_position));
+            mActiveGroupPosition = (older_active_group_position == position) ? RecyclerView.NO_POSITION : position;
+            RecyclerViewUtils.notifyItemChanged(this, mRecyclerView, new int[] { older_active_group_position, mActiveGroupPosition });
+            mOnSelectedGroupChanges.onSelectedGroupChanges(mActiveGroupPosition == RecyclerView.NO_POSITION ? null : getItem(mActiveGroupPosition), older_active_group_position == RecyclerView.NO_POSITION ? null : getItem(older_active_group_position));
         }
     }
 
     public void setActiveGroup(@Nullable final String value) {
         synchronized (mSynchronizationObject) {
-            final int position = mItems.indexOf(value);
+            int position = mItems.indexOf(value);
+            position = ((position >= 0) && (position < getItemCount())) ? position : RecyclerView.NO_POSITION;
             if (mActiveGroupPosition != position) {
-                onClick(mItems.indexOf(value));
+                onClick(position);
             }
         }
     }
