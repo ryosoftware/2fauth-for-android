@@ -77,9 +77,6 @@
     <string name="display_account_group">Mostrar el grupo</string>
     <string name="display_account_group_summary">Se mostrará el grupo al que pertenece cada cuenta, si es el caso.</string>
 
-    <string name="show_copy_to_clipboard_button">Botón de copiar al portapapeles</string>
-    <string name="show_copy_to_clipboard_button_summary">Muestra un botón para copiar en el portapapeles el código OTP que se está visualizando.\n\nCuando un código OTP es visible también lo puede copiar haciendo clic largo en el mismo.</string>
-
     <string name="minimize_app_after_copy_to_clipboard">Minimizar al copiar</string>
     <string name="minimize_app_after_copy_to_clipboard_summary">Minimiza la app cuando un código OTP es copiado al portapapeles</string>
 
