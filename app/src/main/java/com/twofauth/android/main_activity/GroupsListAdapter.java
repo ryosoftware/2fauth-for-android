@@ -1,5 +1,6 @@
 package com.twofauth.android.main_activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -18,23 +19,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements GroupViewHolder.OnViewHolderClickListener {
+    private static final int NO_ONE_ACTIVE_GROUP = -1;
     private static final int GROUP = 1;
     private final List<String> mItems = new ArrayList<String>();
-    private final onSelectedGroupChanges mOnSelectedGroupChanges;
+    private final OnSelectedGroupChanges mOnSelectedGroupChanges;
     private final Object mSynchronizationObject = new Object();
 
     private RecyclerView mRecyclerView = null;
-    private int mActiveGroupPosition = -1;
+    private int mActiveGroupPosition = NO_ONE_ACTIVE_GROUP;
 
-    public interface onSelectedGroupChanges {
+    public interface OnSelectedGroupChanges {
         public abstract void onSelectedGroupChanges(final String selected_group, final String previous_selected_group);
     }
 
-    public GroupsListAdapter(@NotNull final onSelectedGroupChanges on_selected_group_changes) {
+    public GroupsListAdapter(@NotNull final OnSelectedGroupChanges on_selected_group_changes) {
         mOnSelectedGroupChanges = on_selected_group_changes;
     }
 
-    public GroupsListAdapter(@Nullable final List<String> items, @NotNull final onSelectedGroupChanges on_selected_group_changes) {
+    public GroupsListAdapter(@Nullable final List<String> items, @NotNull final OnSelectedGroupChanges on_selected_group_changes) {
         this(on_selected_group_changes);
         setItems(items);
     }
@@ -74,9 +76,10 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setItems(@Nullable final List<String> items) {
         synchronized (mSynchronizationObject) {
-            mActiveGroupPosition = -1;
+            mActiveGroupPosition = NO_ONE_ACTIVE_GROUP;
             ListUtils.setItems(mItems, items);
         }
         notifyDataSetChanged();
@@ -94,7 +97,9 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
-        return mItems.size();
+        synchronized (mSynchronizationObject) {
+            return mItems.size();
+        }
     }
 
     @Override
@@ -102,22 +107,23 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         synchronized (mSynchronizationObject) {
             final Context context = mRecyclerView.getContext();
             final int older_active_group_position = mActiveGroupPosition;
-            mActiveGroupPosition = (older_active_group_position == position) ? -1 : position;
-            if (older_active_group_position != -1) {
+            mActiveGroupPosition = (older_active_group_position == position) ? NO_ONE_ACTIVE_GROUP : position;
+            if (older_active_group_position != NO_ONE_ACTIVE_GROUP) {
                 notifyItemChanged(older_active_group_position);
             }
-            if (mActiveGroupPosition != -1) {
+            if (mActiveGroupPosition != NO_ONE_ACTIVE_GROUP) {
                 notifyItemChanged(mActiveGroupPosition);
             }
-            mOnSelectedGroupChanges.onSelectedGroupChanges(mActiveGroupPosition == -1 ? null : getItem(mActiveGroupPosition), older_active_group_position == -1 ? null : getItem(older_active_group_position));
+            mOnSelectedGroupChanges.onSelectedGroupChanges(mActiveGroupPosition == NO_ONE_ACTIVE_GROUP ? null : getItem(mActiveGroupPosition), older_active_group_position == NO_ONE_ACTIVE_GROUP ? null : getItem(older_active_group_position));
         }
     }
 
     public void setActiveGroup(@Nullable final String value) {
         synchronized (mSynchronizationObject) {
-            final int position = mItems.indexOf(value);
+            int position = mItems.indexOf(value);
+            position = ((position >= 0) && (position < getItemCount())) ? position : NO_ONE_ACTIVE_GROUP;
             if (mActiveGroupPosition != position) {
-                onClick(mItems.indexOf(value));
+                onClick(position);
             }
         }
     }
