@@ -66,15 +66,10 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     private static final String LAST_NOTIFIED_APP_UPDATED_TIME_KEY = "last-notified-app-updated-time";
     private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
     private static final long SYNC_BUTTON_ROTATION_DURATION = (long) (2.5f * DateUtils.SECOND_IN_MILLIS);
+    private static final long OPEN_SETTINGS_VIBRATION_INTERVAL = 30;
+    private static final long SYNC_ACCOUNTS_VIBRATION_INTERVAL = 30;
+    private static final long COPY_TO_CLIPBOARD_VIBRATION_INTERVAL = 60;
 
-    private static final long FAB_BUTTON_CLICK_VIBRATION_INTERVAL = 30;
-    private static class ThreadUtils {
-        public static void interrupt(@Nullable final Thread thread) {
-            if (thread != null) {
-                thread.interrupt();
-            }
-        }
-    }
     private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
 
     private final AccountsListIndexAdapter mAccountsListIndexAdapter = new AccountsListIndexAdapter();
@@ -249,15 +244,19 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     @Override
     public void onClick(@NotNull final View view) {
         final int id = view.getId();
-        VibratorUtils.vibrate(this, FAB_BUTTON_CLICK_VIBRATION_INTERVAL);
         if (id == R.id.sync_server_data) {
+            VibratorUtils.vibrate(this, SYNC_ACCOUNTS_VIBRATION_INTERVAL);
             MainService.startService(this);
         }
         else if (id == R.id.open_app_settings) {
+            VibratorUtils.vibrate(this, OPEN_SETTINGS_VIBRATION_INTERVAL);
             startActivityForResult(PreferencesActivity.class);
         }
         else if (id == R.id.copy_to_clipboard) {
-            mAccountsListAdapter.copyActiveAccountOtpCodeToClipboard(this);
+            final boolean has_vibrated = VibratorUtils.vibrate(this, COPY_TO_CLIPBOARD_VIBRATION_INTERVAL), app_has_been_minimized = mAccountsListAdapter.copyActiveAccountOtpCodeToClipboard(this);
+            if ((has_vibrated) && (app_has_been_minimized)) {
+                ThreadUtils.sleep(COPY_TO_CLIPBOARD_VIBRATION_INTERVAL);
+            }
         }
     }
 

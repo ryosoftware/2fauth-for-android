@@ -12,10 +12,12 @@ public class VibratorUtils {
         return ((vibrator != null) && (vibrator.hasVibrator()));
     }
 
-    public static void vibrate(@NotNull final Context context, long time) {
+    public static boolean vibrate(@NotNull final Context context, long time) {
         final Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         if ((vibrator != null) && (vibrator.hasVibrator()) && (Constants.getDefaultSharedPreferences(context).getBoolean(Constants.VIBRATE_ON_SOME_ACTIONS_KEY, context.getResources().getBoolean(R.bool.vibrate_on_some_actions_default)))) {
             vibrator.vibrate(VibrationEffect.createOneShot(time, VibrationEffect.DEFAULT_AMPLITUDE));
+            return true;
         }
+        return false;
     }
 }
