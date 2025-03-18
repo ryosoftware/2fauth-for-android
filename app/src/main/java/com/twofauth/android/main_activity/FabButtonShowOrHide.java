@@ -18,6 +18,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FabButtonShowOrHide {
+    public enum DisplayState { VISIBLE, HIDDEN };
+
     private static class RecyclerViewOnScrollListener extends RecyclerView.OnScrollListener {
         private final FabButtonShowOrHide mOwner;
 
@@ -47,6 +49,7 @@ public class FabButtonShowOrHide {
     private final List<View> mOtherViews = new ArrayList<View>();
     private final List<Animator> mActiveAnimations = new ArrayList<Animator>();
 
+    private DisplayState mDisplayState = null;
     private final RecyclerViewOnScrollListener mRecyclerViewOnScrollListener = new RecyclerViewOnScrollListener(this);
 
     public FabButtonShowOrHide(@NotNull final RecyclerView recycler_view, @NotNull final FloatingActionButton[] floating_action_buttons, @Nullable final View[] other_views) {
@@ -110,6 +113,7 @@ public class FabButtonShowOrHide {
             for (final View view : mOtherViews) {
                 hide(view);
             }
+            mDisplayState = DisplayState.HIDDEN;
         }
     }
 
@@ -136,6 +140,7 @@ public class FabButtonShowOrHide {
             for (final View view : mOtherViews) {
                 show(view);
             }
+            mDisplayState = DisplayState.VISIBLE;
         }
     }
 
@@ -151,5 +156,9 @@ public class FabButtonShowOrHide {
             cancelAnimations();
             ListUtils.setItems(mOtherViews, other_views);
         }
+    }
+
+    public DisplayState getDisplayState() {
+        return mDisplayState;
     }
 }

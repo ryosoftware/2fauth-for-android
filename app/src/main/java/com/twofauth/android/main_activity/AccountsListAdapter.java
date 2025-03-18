@@ -1,6 +1,7 @@
 package com.twofauth.android.main_activity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.format.DateUtils;
@@ -235,6 +236,14 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         synchronized (mSynchronizationObject) {
             mResumed = true;
             updateViewsVisibility();
+        }
+    }
+
+    public void copyActiveAccountOtpCodeToClipboard(final Activity activity) {
+        synchronized (mSynchronizationObject) {
+            if (mActiveAccountPosition != -1) {
+                TwoFactorAccountViewHolder.copyToClipboard(activity, getItem(mActiveAccountPosition));
+            }
         }
     }
 }

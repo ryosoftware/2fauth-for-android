@@ -70,8 +70,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
             return null;
         }
 
-        public static void copyToClipboard(@NotNull final View view, @NotNull final String value, final boolean is_sensitive, final boolean finish_activity) {
-            final Context context = view.getContext();
+        private static void copyToClipboard(@NotNull final Context context, @NotNull final String value, final boolean is_sensitive, @Nullable final Activity activity_to_be_finished) {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null) {
                 ClipData clip = ClipData.newPlainText(context.getString(R.string.otp_code), value);
@@ -80,19 +79,24 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
                     bundle.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
                     clip.getDescription().setExtras(bundle);
                 }
-                if (finish_activity) {
+                if (activity_to_be_finished != null) {
                     clipboard.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
                         @Override
                         public void onPrimaryClipChanged() {
-                            final Activity activity = getActivity(view);
-                            if (activity != null) {
-                                activity.finish();
-                            }
+                            activity_to_be_finished.finish();
                         }
                     });
                 }
                 clipboard.setPrimaryClip(clip);
             }
+        }
+
+        public static void copyToClipboard(@NotNull final View view, @NotNull final String value, final boolean is_sensitive, final boolean finish_activity) {
+            copyToClipboard(view.getContext(), value, is_sensitive, finish_activity ? getActivity(view) : null);
+        }
+
+        public static void copyToClipboard(@NotNull final Activity activity, @NotNull final String value, final boolean is_sensitive, final boolean finish_activity) {
+            copyToClipboard(activity, value, is_sensitive, finish_activity ? activity : null);
         }
     }
 
@@ -137,16 +141,6 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
 
     private boolean isOtpSupported(@NotNull final JSONObject object) {
         return OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY));
-    }
-
-    private String getRevealedOtp(@NotNull final JSONObject object) {
-        Object generator = initializeOtpGenerator(object);
-        if (generator != null) {
-            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
-                return ((TOTPGenerator) generator).now();
-            }
-        }
-        return null;
     }
 
     private String getHiddenOtp(@NotNull JSONObject object) {
@@ -260,6 +254,22 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return -1;
     }
 
+    private static String getRevealedOtp(@NotNull final JSONObject object) {
+        Object generator = initializeOtpGenerator(object);
+        if (generator != null) {
+            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+                return ((TOTPGenerator) generator).now();
+            }
+        }
+        return null;
+    }
+
+    public static void copyToClipboard(@NotNull final Activity activity, @NotNull final JSONObject object) {
+        final String otp_code = getRevealedOtp(object);
+        if (otp_code != null) {
+            Utils.copyToClipboard(activity, otp_code, true, Constants.getDefaultSharedPreferences(activity).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, activity.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard_default)));
+        }
+    }
     public static TwoFactorAccountViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
         return new TwoFactorAccountViewHolder(parent, on_click_listener);
     }

@@ -1,5 +1,6 @@
 package com.twofauth.android;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -83,9 +84,12 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     private final ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this);
     private String mStartedActivityForResult;
     private boolean mUnlocked = false;
-    private final RotateAnimation mRotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);;
-    private boolean mRotatingFab = false;
 
+    private FabButtonShowOrHide mFabButtonShowOrHide;
+    private final RotateAnimation mRotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);;
+    private boolean mRotatingSyncingAccountsFab = false;
+
+    @SuppressLint("CutPasteId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,7 +114,8 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         });
         ((FloatingActionButton) findViewById(R.id.sync_server_data)).setOnClickListener(this);
         ((FloatingActionButton) findViewById(R.id.open_app_settings)).setOnClickListener(this);
-        new FabButtonShowOrHide((RecyclerView) findViewById(R.id.accounts_list), new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) });
+        ((FloatingActionButton) findViewById(R.id.copy_to_clipboard)).setOnClickListener(this);
+        mFabButtonShowOrHide = new FabButtonShowOrHide((RecyclerView) findViewById(R.id.accounts_list), new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) });
         ((EditText) findViewById(R.id.filter_text)).addTextChangedListener(this);
         mRotateAnimation.setDuration(SYNC_BUTTON_ROTATION_DURATION);
         mRotateAnimation.setInterpolator(new LinearInterpolator());
@@ -143,8 +148,10 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         super.onPause();
         mReceiver.disable(this);
         mUnlocked = false;
-        mAccountsListAdapter.onPause();
-        findViewById(R.id.accounts_list_header).setVisibility(View.GONE);
+        if (! isFinishedOrFinishing()) {
+            mAccountsListAdapter.onPause();
+            findViewById(R.id.accounts_list_header).setVisibility(View.GONE);
+        }
     }
 
     public void onConfigurationChanged(Configuration new_config) {
@@ -218,10 +225,17 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
         else if (id == R.id.open_app_settings) {
             startActivityForResult(PreferencesActivity.class);
         }
+        else if (id == R.id.copy_to_clipboard) {
+            mAccountsListAdapter.copyActiveAccountOtpCodeToClipboard(this);
+        }
     }
 
     public void onOtpCodeBecomesVisible() {
         findViewById(R.id.otp_time).setVisibility(View.VISIBLE);
+        if (mFabButtonShowOrHide.getDisplayState() != FabButtonShowOrHide.DisplayState.HIDDEN) {
+            ((FloatingActionButton) findViewById(R.id.copy_to_clipboard)).show();
+        }
+        mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings), (FloatingActionButton) findViewById(R.id.copy_to_clipboard) });
     }
 
     public void onOtpCodeShowAnimated(final long interval_until_current_otp_cycle_ends, final long cycle_time, final boolean current_otp_cycle_ending) {
@@ -232,6 +246,8 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
 
     public void onOtpCodeHidden() {
         findViewById(R.id.otp_time).setVisibility(View.INVISIBLE);
+        ((FloatingActionButton) findViewById(R.id.copy_to_clipboard)).hide();
+        mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) });
     }
 
     @Override
@@ -250,13 +266,13 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
             synchronized (mSynchronizationObject) {
                 final boolean syncing_or_loading_data = ((mDataLoader != null) || (MainService.isRunning(this)));
                 ((FloatingActionButton) findViewById(R.id.sync_server_data)).setEnabled(MainService.canSyncServerData(this) && (! syncing_or_loading_data));
-                if ((syncing_or_loading_data) && (! mRotatingFab)) {
+                if ((syncing_or_loading_data) && (!mRotatingSyncingAccountsFab)) {
                     ((FloatingActionButton) findViewById(R.id.sync_server_data)).startAnimation(mRotateAnimation);
-                    mRotatingFab = true;
+                    mRotatingSyncingAccountsFab = true;
                 }
-                else if ((! syncing_or_loading_data) && (mRotatingFab)) {
+                else if ((! syncing_or_loading_data) && (mRotatingSyncingAccountsFab)) {
                     ((FloatingActionButton) findViewById(R.id.sync_server_data)).clearAnimation();
-                    mRotatingFab = false;
+                    mRotatingSyncingAccountsFab = false;
                 }
             }
         }
