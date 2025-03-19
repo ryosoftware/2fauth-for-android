@@ -16,6 +16,7 @@ import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.twofauth.android.CancellableEditTextPreference;
 import com.twofauth.android.Constants;
 import com.twofauth.android.HtmlActivity;
 import com.twofauth.android.MainService;
@@ -127,6 +128,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     private void initializePreferencesListeners(@NotNull final Context context) {
         final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
         final EditTextPreference server_location_preference = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY), token_preference = (EditTextPreference) findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
+        server_location_preference.setOnPreferenceClickListener(this);
         server_location_preference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
             @Override
             public void onBindEditText(@NonNull EditText edit_text) {
@@ -135,6 +137,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             }
         });
         server_location_preference.setOnPreferenceChangeListener(this);
+        token_preference.setOnPreferenceClickListener(this);
         token_preference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
             public void onBindEditText(@NonNull final EditText edit_text) {
                 edit_text.setHint(Constants.getDefaultSharedPreferences(edit_text.getContext()).contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? getString(R.string.token_unchanged) : "");
@@ -200,7 +203,20 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     @Override
     public boolean onPreferenceClick(@NonNull final Preference preference) {
         final Context context = preference.getContext();
-        if (SYNC_DETAILS_KEY.equals(preference.getKey())) {
+        if ((Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY.equals(preference.getKey())) || (Constants.TWO_FACTOR_AUTH_TOKEN_KEY.equals(preference.getKey()))) {
+            if (Constants.theyAreTwoFactorAccountUpdatedData(context)) {
+                UiUtils.showConfirmDialog(getActivity(), R.string.not_synced_changes_will_be_lost, R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (isAdded()) {
+                            ((CancellableEditTextPreference) preference).showDialog();
+                        }
+                    }
+                });
+                return true;
+            }
+        }
+        else if (SYNC_DETAILS_KEY.equals(preference.getKey())) {
             MainService.startService(context);
         }
         else if (RESET_ACCOUNTS_LAST_USE_KEY.equals(preference.getKey())) {
@@ -225,6 +241,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                 final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
                 final SharedPreferences.Editor editor = preferences.edit();
                 Constants.deleteTwoFactorAccountLastUseKeys(preferences, editor);
+                Constants.deleteTwoFactorAccountUpdatedDataKeys(preferences, editor);
                 editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY);
                 editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_LENGTH_KEY);
                 editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY);

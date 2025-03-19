@@ -36,6 +36,8 @@
     <string name="token_has_changed_and_downloaded_data_exists">The server access token has been updated.\n\nAdditionally, we recommend that you delete any previously downloaded account data from the app.\n\nDo you want to delete the data now?</string>
     <string name="token_has_changed_and_no_downloaded_data_exists">The server access token has been updated</string>
 
+    <string name="not_synced_changes_will_be_lost">There are unsynced changes that will be lost if you continue with this operation without first performing a data synchronization.\n\nAre you sure you want to continue?</string>
+
     <plurals name="number_of_accounts">
         <item quantity="one">There are one account listed</item>
         <item quantity="other">There are %1$d accounts listed</item>
@@ -124,6 +126,7 @@
 
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
     <string name="ok">OK</string>
     <string name="install_now">Install now</string>
 

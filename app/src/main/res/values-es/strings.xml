@@ -37,6 +37,8 @@
     <string name="token_has_changed_and_downloaded_data_exists">El token de acceso al servidor se ha actualizado.\n\nAdicionalmente, le recomendamos que elimine de la app los datos de las cuentas que se hubieran descargado anteriormente.\n\n¿Desea eliminar los datos ahora?</string>
     <string name="token_has_changed_and_no_downloaded_data_exists">El token de acceso al servidor se ha actualizado</string>
 
+    <string name="not_synced_changes_will_be_lost">Hay cambios no sincronizados que se perderán si continúa con esta operación sin realizar antes una sincronización de datos.\n\n¿Está seguro de que desea continuar?</string>
+
     <plurals name="number_of_accounts">
         <item quantity="one">Se lista una única cuenta</item>
         <item quantity="other">Se listan %1$d cuentas</item>
@@ -125,6 +127,7 @@
 
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
+    <string name="yes">Sí</string>
     <string name="ok">OK</string>
     <string name="install_now">Instalar ahora</string>
 
