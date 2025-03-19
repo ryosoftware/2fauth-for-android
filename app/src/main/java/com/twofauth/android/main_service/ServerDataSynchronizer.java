@@ -12,6 +12,7 @@ import com.twofauth.android.JsonUtils;
 import com.twofauth.android.HttpUtils;
 import com.twofauth.android.ListUtils;
 import com.twofauth.android.MainService;
+import com.twofauth.android.MainService.SyncResultType;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
 
@@ -167,7 +168,7 @@ public class ServerDataSynchronizer extends Thread
 
     @Override
     public void run() {
-        boolean there_are_changes = false;
+        SyncResultType result_type = MainService.SyncResultType.ERROR;
         if ((mServer != null) && (mToken != null)) {
             final SharedPreferences.Editor editor = Constants.getDefaultSharedPreferences(mMainService).edit();
             try {
@@ -176,7 +177,10 @@ public class ServerDataSynchronizer extends Thread
                     final int group_id = object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY, -1);
                     object.put(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY, ((groups != null) && groups.containsKey(group_id)) ? groups.get(group_id).optString(Constants.TWO_FACTOR_AUTH_GROUP_NAME_KEY, "") : "");
                 }
-                if (! equals(loaded_accounts, stored_accounts)) {
+                if (equals(loaded_accounts, stored_accounts)) {
+                    result_type = SyncResultType.NO_CHANGES;
+                }
+                else {
                     for (JSONObject object : loaded_accounts.values()) {
                         saveTwoFactorAuthIcon(object);
                     }
@@ -188,17 +192,17 @@ public class ServerDataSynchronizer extends Thread
                         }
                     }
                     editor.putString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, JsonUtils.JSonObjectsToString(loaded_accounts.values())).putInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_LENGTH_KEY, loaded_accounts.size());
-                    there_are_changes = true;
+                    result_type = SyncResultType.UPDATED;
                 }
                 editor.putLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, System.currentTimeMillis()).remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY).remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY).apply();
-                mMainService.sendBroadcast(new Intent(MainService.ACTION_SERVICE_DATA_SYNCED).putExtra(MainService.EXTRA_THERE_ARE_CHANGES, there_are_changes));
+                mMainService.sendBroadcast(new Intent(MainService.ACTION_SERVICE_DATA_SYNCED).putExtra(MainService.EXTRA_RESULT_TYPE, result_type.name()));
             }
             catch (Exception e) {
                 editor.putString(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY, e.getMessage()).putLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY, System.currentTimeMillis()).apply();
                 Log.e(Constants.LOG_TAG_NAME, "Exception while processing downloaded 2FA codes", e);
             }
         }
-        mMainService.stopSelf(there_are_changes);
+        mMainService.stopSelf(result_type);
     }
 
     public static TwoAuthLoadedData getTwoFactorAuthCodes(@NotNull final Context context) throws Exception {

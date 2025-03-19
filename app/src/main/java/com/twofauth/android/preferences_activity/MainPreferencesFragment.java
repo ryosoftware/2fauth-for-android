@@ -26,6 +26,7 @@ import com.twofauth.android.UiUtils;
 import com.twofauth.android.VibratorUtils;
 import com.twofauth.android.main_activity.AuthenticWithBiometrics;
 import com.twofauth.android.main_activity.AuthenticWithPin;
+import com.twofauth.android.MainService.SyncResultType;
 import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
 
 import org.jetbrains.annotations.NotNull;
@@ -72,12 +73,12 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     }
 
     @Override
-    public void onServiceFinished(final boolean there_are_changes) {
+    public void onServiceFinished(@Nullable final SyncResultType result_type) {
         setSyncDetailsPreferenceState();
     }
 
     @Override
-    public void onDataSyncedFromServer(final boolean there_are_changes) {}
+    public void onDataSyncedFromServer(@Nullable final SyncResultType result_type) {}
 
     private void setSyncDetailsPreferenceState() {
         if (isAdded()) {

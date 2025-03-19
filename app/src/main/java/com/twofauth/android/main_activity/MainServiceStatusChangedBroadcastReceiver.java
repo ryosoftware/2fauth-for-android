@@ -10,6 +10,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 
 import com.twofauth.android.MainService;
+import com.twofauth.android.MainService.SyncResultType;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,9 +19,9 @@ public class MainServiceStatusChangedBroadcastReceiver extends BroadcastReceiver
     public interface OnMainServiceStatusChanged {
         public abstract void onServiceStarted();
 
-        public abstract void onServiceFinished(boolean there_are_changes);
+        public abstract void onServiceFinished(SyncResultType result_type);
 
-        public abstract void onDataSyncedFromServer(boolean there_are_changes);
+        public abstract void onDataSyncedFromServer(SyncResultType result_type);
     }
     private final OnMainServiceStatusChanged mListener;
 
@@ -34,10 +35,12 @@ public class MainServiceStatusChangedBroadcastReceiver extends BroadcastReceiver
                 mListener.onServiceStarted();
             }
             else if (MainService.ACTION_SERVICE_FINISHED.equals(action)) {
-                mListener.onServiceFinished(intent.getBooleanExtra(MainService.EXTRA_THERE_ARE_CHANGES, true));
+                final String result_type = intent.getStringExtra(MainService.EXTRA_RESULT_TYPE);
+                mListener.onServiceFinished(result_type == null ? null : SyncResultType.valueOf(result_type));
             }
             else if (MainService.ACTION_SERVICE_DATA_SYNCED.equals(action)) {
-                mListener.onDataSyncedFromServer(intent.getBooleanExtra(MainService.EXTRA_THERE_ARE_CHANGES, true));
+                final String result_type = intent.getStringExtra(MainService.EXTRA_RESULT_TYPE);
+                mListener.onDataSyncedFromServer(result_type == null ? null : SyncResultType.valueOf(result_type));
             }
         }
     }

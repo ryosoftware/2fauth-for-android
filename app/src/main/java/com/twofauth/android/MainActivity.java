@@ -40,6 +40,7 @@ import com.twofauth.android.main_activity.DataFilterer;
 import com.twofauth.android.main_activity.DataLoader;
 import com.twofauth.android.main_activity.GroupsListAdapter;
 import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
+import com.twofauth.android.MainService.SyncResultType;
 
 import com.twofauth.android.main_activity.AccountsListAdapter;
 import com.twofauth.android.main_activity.FabButtonShowOrHide;
@@ -311,16 +312,16 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     public void onServiceStarted() {
         setSyncDataButtonAvailability();
     }
-    public void onServiceFinished(final boolean there_are_changes) {
+    public void onServiceFinished(@Nullable final SyncResultType result_type) {
         setSyncDataButtonAvailability();
-        if (there_are_changes) {
+        if ((result_type == null) || (result_type != SyncResultType.NO_CHANGES)) {
             loadData();
         }
         else {
             UiUtils.showToast(this, R.string.sync_no_changes);
         }
     }
-    public void onDataSyncedFromServer(final boolean there_are_changes) {}
+    public void onDataSyncedFromServer(@Nullable final SyncResultType result_type) {}
 
     private void loadData() {
         synchronized (mSynchronizationObject) {
