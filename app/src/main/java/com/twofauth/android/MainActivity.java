@@ -314,12 +314,10 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
         setSyncDataButtonAvailability();
     }
     public void onServiceFinished(@Nullable final SyncResultType result_type) {
+        UiUtils.showToast(this, result_type == SyncResultType.UPDATED ? R.string.sync_completed : result_type == SyncResultType.NO_CHANGES ? R.string.sync_no_changes : R.string.sync_error);
         setSyncDataButtonAvailability();
-        if ((result_type == null) || (result_type != SyncResultType.NO_CHANGES)) {
+        if (result_type == SyncResultType.UPDATED) {
             loadData();
-        }
-        else {
-            UiUtils.showToast(this, R.string.sync_no_changes);
         }
     }
     public void onDataSyncedFromServer(@Nullable final SyncResultType result_type) {}
