@@ -92,7 +92,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                         last_sync_details = getString(R.string.last_sync_error, preferences.getString(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY, null), StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY, 0)), last_sync_details);
                     }
                     else if (preferences.contains(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY)) {
-                        final int number_of_accounts = preferences.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY, 0);
+                        final int number_of_accounts = preferences.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_LENGTH_KEY, 0);
                         last_sync_details = getResources().getQuantityString(R.plurals.sync_details, number_of_accounts, number_of_accounts, StringUtils.getDateTimeString(context, preferences.getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, 0)), last_sync_details);
                     }
                 }
@@ -223,7 +223,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             if (context != null) {
                 SharedPreferences.Editor editor = Constants.getDefaultSharedPreferences(context).edit();
                 editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY);
-                editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_SIZE_KEY);
+                editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_LENGTH_KEY);
                 editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY);
                 editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY);
                 editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY);
