@@ -8,6 +8,7 @@ import android.net.Uri;
 import androidx.preference.PreferenceManager;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 public class Constants {
@@ -91,17 +92,19 @@ public class Constants {
         return String.format("%s-%d", TWO_FACTOR_AUTH_ACCOUNT_LAST_USE_KEY_PREFIX, object.optInt(TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY));
     }
 
-    public static void deleteTwoFactorAccountLastUseKeys(@NotNull final Context context) {
-        final SharedPreferences preferences = getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = null;
+    public static SharedPreferences.Editor deleteTwoFactorAccountLastUseKeys(@NotNull final SharedPreferences preferences, @Nullable SharedPreferences.Editor editor) {
         for (final String key : preferences.getAll().keySet()) {
             if (key.startsWith(TWO_FACTOR_AUTH_ACCOUNT_LAST_USE_KEY_PREFIX)) {
                 if (editor == null) {
-		    editor = preferences.edit();
-		}
-		editor.remove(key);
-	    }
-	}
+                    editor = preferences.edit();
+                }
+                editor.remove(key);
+            }
+        }
+        return editor;
+    }
+    public static void deleteTwoFactorAccountLastUseKeys(@NotNull final Context context) {
+        final SharedPreferences.Editor editor = deleteTwoFactorAccountLastUseKeys(getDefaultSharedPreferences(context), null);
         if (editor != null) {
             editor.apply();
         }

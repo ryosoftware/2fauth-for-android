@@ -221,7 +221,9 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         if (message_id == 0) {
             final Context context = getContext();
             if (context != null) {
-                SharedPreferences.Editor editor = Constants.getDefaultSharedPreferences(context).edit();
+                final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
+                final SharedPreferences.Editor editor = preferences.edit();
+                Constants.deleteTwoFactorAccountLastUseKeys(preferences, editor);
                 editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY);
                 editor.remove(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_LENGTH_KEY);
                 editor.remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY);
