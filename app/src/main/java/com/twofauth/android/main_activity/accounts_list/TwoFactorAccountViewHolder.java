@@ -143,7 +143,15 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     }
 
     private boolean isOtpSupported(@NotNull final JSONObject object) {
-        return OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY));
+        if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+            final String algorithm = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_ALGORITHM_KEY);
+            for (String supported_algorithm : new String[] { ALGORITHM_SHA512, ALGORITHM_SHA384, ALGORITHM_SHA256, ALGORITHM_SHA224, ALGORITHM_SHA1 }) {
+                if (supported_algorithm.equals(algorithm)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private String getHiddenOtp(@NotNull JSONObject object) {
@@ -176,6 +184,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         final ColorStateList otp_color_state_list = ColorStateList.valueOf(otp_color);
         mOtp.setTextColor(otp_color);
         mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);
+        mOtp.setVisibility(otp == null ? View.GONE : View.VISIBLE);
         Animation otp_animation = mOtp.getAnimation();
         if ((otp_animation == null) && (millis_until_next_otp > 0) && (millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME)) {
             mOtp.startAnimation(getOtpAnimation());
@@ -184,8 +193,8 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
             mOtp.clearAnimation();
         }
         mOtpTypeUnsupported.setVisibility(otp == null ? View.VISIBLE : View.GONE);
-        mOtpTypeUnsupported.setText(context.getString(R.string.otp_type_is_unsupported, object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY).toUpperCase()));
-        itemView.setAlpha(show_otp || (! showing_other_otp) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
+        mOtpTypeUnsupported.setText(context.getString(R.string.otp_type_is_unsupported, object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY).toUpperCase(), object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_ALGORITHM_KEY).toUpperCase()));
+        itemView.setAlpha((otp != null) && (show_otp || (! showing_other_otp)) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
     }
 
     public boolean copyToClipboard(@NotNull final View view) {

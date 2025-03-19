@@ -62,7 +62,7 @@
 
     <string name="otp_code">OTP code</string>
 
-    <string name="otp_type_is_unsupported">%1$s algorithm is not supported</string>
+    <string name="otp_type_is_unsupported">%2$s (%1$s) algorithm is not supported</string>
 
     <string name="sort_accounts_by_last_use">Sort accounts by usage</string>
     <string name="sort_accounts_by_last_use_summary">Sort accounts by usage (list first the last accounts for which an OTP code has been displayed) instead of just sorting by service name</string>
