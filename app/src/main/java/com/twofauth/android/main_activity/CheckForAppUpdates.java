@@ -138,24 +138,26 @@ public class CheckForAppUpdates extends Thread {
         String apk_local_file_version = null;
         boolean there_is_an_app_update = false;
         try {
-            final SharedPreferences preferences = Constants.getDefaultSharedPreferences(mActivity);
-            final JSONObject object = getLatestReleaseData(true);
-            apk_local_file_version = object.optString(APP_VERSION_ENTRY_NAME);
-            final int last_available_app_version = parseAppVersionNumber(apk_local_file_version), app_installed_version = parseAppVersionNumber(mActivity.getString(R.string.app_version_name_value));
-            int last_downloaded_version = parseAppVersionNumber(preferences.getString(LAST_DOWNLOADED_APP_VERSION_KEY, null));
-            apk_local_file = getApkLocalFile();
-            if ((last_downloaded_version != 0) && ((last_downloaded_version <= app_installed_version) || (last_downloaded_version < last_available_app_version))) {
-                apk_local_file.delete();
-                preferences.edit().remove(LAST_DOWNLOADED_APP_VERSION_KEY).apply();
-                last_downloaded_version = 0;
-            }
-            if ((last_available_app_version > app_installed_version) && (! object.optBoolean(DRAFT_ENTRY_NAME, true)) && (! object.optBoolean(PRE_RELEASE_ENTRY_NAME, true))) {
-                there_is_an_app_update = (last_available_app_version == last_downloaded_version);
-                if (! there_is_an_app_update) {
-                    final JSONObject apk_asset = getLatestApkFileData(object);
-                    if ((apk_asset != null) && (downloadLatestApkFileData(apk_asset, apk_local_file))) {
-                        preferences.edit().putString(LAST_DOWNLOADED_APP_VERSION_KEY, apk_local_file_version).apply();
-                        there_is_an_app_update = true;
+            if (! mActivity.getResources().getBoolean(R.bool.is_debug_version)) {
+                final SharedPreferences preferences = Constants.getDefaultSharedPreferences(mActivity);
+                final JSONObject object = getLatestReleaseData(true);
+                apk_local_file_version = object.optString(APP_VERSION_ENTRY_NAME);
+                final int last_available_app_version = parseAppVersionNumber(apk_local_file_version), app_installed_version = parseAppVersionNumber(mActivity.getString(R.string.app_version_name_value));
+                int last_downloaded_version = parseAppVersionNumber(preferences.getString(LAST_DOWNLOADED_APP_VERSION_KEY, null));
+                apk_local_file = getApkLocalFile();
+                if ((last_downloaded_version != 0) && ((last_downloaded_version <= app_installed_version) || (last_downloaded_version < last_available_app_version))) {
+                    apk_local_file.delete();
+                    preferences.edit().remove(LAST_DOWNLOADED_APP_VERSION_KEY).apply();
+                    last_downloaded_version = 0;
+                }
+                if ((last_available_app_version > app_installed_version) && (! object.optBoolean(DRAFT_ENTRY_NAME, true)) && (! object.optBoolean(PRE_RELEASE_ENTRY_NAME, true))) {
+                    there_is_an_app_update = (last_available_app_version == last_downloaded_version);
+                    if (! there_is_an_app_update) {
+                        final JSONObject apk_asset = getLatestApkFileData(object);
+                        if ((apk_asset != null) && (downloadLatestApkFileData(apk_asset, apk_local_file))) {
+                            preferences.edit().putString(LAST_DOWNLOADED_APP_VERSION_KEY, apk_local_file_version).apply();
+                            there_is_an_app_update = true;
+                        }
                     }
                 }
             }
