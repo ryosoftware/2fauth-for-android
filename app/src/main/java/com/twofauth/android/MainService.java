@@ -69,7 +69,7 @@ public class MainService extends Service {
     private Notification getNotification() {
         createNotificationChannel();
         final NotificationCompat.Builder notification_builder = new NotificationCompat.Builder(getBaseContext(), MAIN_SERVICE_NOTIFICATION_CHANNEL);
-        notification_builder.setContentText(getString(ServerDataSynchronizer.getTwoFactorAuthCodesLastLoadTime(this) == 0 ? R.string.trying_to_load_2fa_codes : R.string.trying_to_refresh_2fa_codes));
+        notification_builder.setContentText(getString(Constants.getDefaultSharedPreferences(this).contains(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY) ? R.string.trying_to_refresh_2fa_codes : R.string.trying_to_load_2fa_codes));
         notification_builder.setSmallIcon(R.drawable.ic_notification_syncing);
         notification_builder.setContentIntent(PendingIntent.getActivity(getBaseContext(), MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID, new Intent(getBaseContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         notification_builder.setShowWhen(false);

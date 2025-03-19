@@ -233,10 +233,6 @@ public class ServerDataSynchronizer extends Thread
         return new TwoAuthLoadedData(list, ! sort_using_last_use);
     }
 
-    public static long getTwoFactorAuthCodesLastLoadTime(@NotNull final Context context) {
-        return Constants.getDefaultSharedPreferences(context).getLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, 0);
-    }
-
     @SuppressLint("DefaultLocale")
     private static File getTwoFactorAuthIconPath(@NotNull final Context context, @NotNull final JSONObject object, @Nullable final DashBoardIconsUtils.Mode mode) throws Exception {
         final int id = object.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY);
