@@ -21,15 +21,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class JsonUtils {
     public static Map<Integer, JSONObject> StringToJsonMap(@Nullable final String data, @NotNull final String id_key) throws Exception {
-        final Map<Integer, JSONObject> map = new HashMap<Integer, JSONObject>();
+        Map<Integer, JSONObject> map = null;
         if (data != null) {
             final JSONArray array = new JSONArray(data);
-            for (int i = 0; i < array.length(); i ++) {
-                final JSONObject object = array.getJSONObject(i);
-                map.put(object.getInt(id_key), object);
+            if (array.length() > 0) {
+                map = new HashMap<Integer, JSONObject>();
+                for (int i = 0; i < array.length(); i ++) {
+                    final JSONObject object = array.getJSONObject(i);
+                    map.put(object.getInt(id_key), object);
+                }
             }
         }
         return map;

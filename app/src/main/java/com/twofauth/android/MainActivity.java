@@ -43,7 +43,7 @@ import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastRecei
 
 import com.twofauth.android.main_activity.AccountsListAdapter;
 import com.twofauth.android.main_activity.FabButtonShowOrHide;
-import com.twofauth.android.main_service.ServerDataLoader.TwoAuthLoadedData;
+import com.twofauth.android.main_service.ServerDataSynchronizer.TwoAuthLoadedData;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 
 import android.view.ViewGroup;
@@ -311,11 +311,16 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     public void onServiceStarted() {
         setSyncDataButtonAvailability();
     }
-    public void onServiceFinished() {
+    public void onServiceFinished(final boolean there_are_changes) {
         setSyncDataButtonAvailability();
-        loadData();
+        if (there_are_changes) {
+            loadData();
+        }
+        else {
+            UiUtils.showToast(this, R.string.sync_no_changes);
+        }
     }
-    public void onDataSyncedFromServer() {}
+    public void onDataSyncedFromServer(final boolean there_are_changes) {}
 
     private void loadData() {
         synchronized (mSynchronizationObject) {

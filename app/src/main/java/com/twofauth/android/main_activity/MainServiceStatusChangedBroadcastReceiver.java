@@ -18,9 +18,9 @@ public class MainServiceStatusChangedBroadcastReceiver extends BroadcastReceiver
     public interface OnMainServiceStatusChanged {
         public abstract void onServiceStarted();
 
-        public abstract void onServiceFinished();
+        public abstract void onServiceFinished(boolean there_are_changes);
 
-        public abstract void onDataSyncedFromServer();
+        public abstract void onDataSyncedFromServer(boolean there_are_changes);
     }
     private final OnMainServiceStatusChanged mListener;
 
@@ -34,10 +34,10 @@ public class MainServiceStatusChangedBroadcastReceiver extends BroadcastReceiver
                 mListener.onServiceStarted();
             }
             else if (MainService.ACTION_SERVICE_FINISHED.equals(action)) {
-                mListener.onServiceFinished();
+                mListener.onServiceFinished(intent.getBooleanExtra(MainService.EXTRA_THERE_ARE_CHANGES, true));
             }
             else if (MainService.ACTION_SERVICE_DATA_SYNCED.equals(action)) {
-                mListener.onDataSyncedFromServer();
+                mListener.onDataSyncedFromServer(intent.getBooleanExtra(MainService.EXTRA_THERE_ARE_CHANGES, true));
             }
         }
     }

@@ -16,16 +16,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.twofauth.android.main_service.ServerDataLoader;
+import com.twofauth.android.main_service.ServerDataSynchronizer;
 
 public class MainService extends Service {
     public static final String ACTION_SERVICE_STARTED = MainService.class.getName() + ".ON_STARTED";
     public static final String ACTION_SERVICE_FINISHED = MainService.class.getName() + ".ON_FINISHED";
-    public static final String ACTION_SERVICE_DATA_SYNCED = MainService.class.getName() + ".ON_DATA_LOADED";
+    public static final String ACTION_SERVICE_DATA_SYNCED = MainService.class.getName() + ".ON_DATA_SYNCED";
+    public static final String EXTRA_THERE_ARE_CHANGES = "there-are-changes";
 
     public static final String MAIN_SERVICE_NOTIFICATION_CHANNEL = "main-service";
     public static final int MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID = 1001;
 
+    private boolean mThereAreChanges = false;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -36,13 +38,13 @@ public class MainService extends Service {
         else {
             startForeground(MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID, getNotification());
         }
-        (new ServerDataLoader(this)).start();
+        (new ServerDataSynchronizer(this)).start();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        sendBroadcast(new Intent(ACTION_SERVICE_FINISHED));
+        sendBroadcast(new Intent(ACTION_SERVICE_FINISHED).putExtra(EXTRA_THERE_ARE_CHANGES, mThereAreChanges));
     }
 
     @Override
@@ -50,6 +52,10 @@ public class MainService extends Service {
         return null;
     }
 
+    public void stopSelf(final boolean there_are_changes) {
+        mThereAreChanges = there_are_changes;
+        stopSelf();
+    }
     private void createNotificationChannel() {
         final NotificationManager notification_manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (notification_manager.getNotificationChannel(MAIN_SERVICE_NOTIFICATION_CHANNEL) == null) {
@@ -63,7 +69,7 @@ public class MainService extends Service {
     private Notification getNotification() {
         createNotificationChannel();
         final NotificationCompat.Builder notification_builder = new NotificationCompat.Builder(getBaseContext(), MAIN_SERVICE_NOTIFICATION_CHANNEL);
-        notification_builder.setContentText(getString(ServerDataLoader.getTwoFactorAuthCodesLastLoadTime(this) == 0 ? R.string.trying_to_load_2fa_codes : R.string.trying_to_refresh_2fa_codes));
+        notification_builder.setContentText(getString(ServerDataSynchronizer.getTwoFactorAuthCodesLastLoadTime(this) == 0 ? R.string.trying_to_load_2fa_codes : R.string.trying_to_refresh_2fa_codes));
         notification_builder.setSmallIcon(R.drawable.ic_notification_syncing);
         notification_builder.setContentIntent(PendingIntent.getActivity(getBaseContext(), MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID, new Intent(getBaseContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         notification_builder.setShowWhen(false);

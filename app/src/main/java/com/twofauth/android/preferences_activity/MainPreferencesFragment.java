@@ -72,12 +72,12 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     }
 
     @Override
-    public void onServiceFinished() {
+    public void onServiceFinished(final boolean there_are_changes) {
         setSyncDetailsPreferenceState();
     }
 
     @Override
-    public void onDataSyncedFromServer() {}
+    public void onDataSyncedFromServer(final boolean there_are_changes) {}
 
     private void setSyncDetailsPreferenceState() {
         if (isAdded()) {

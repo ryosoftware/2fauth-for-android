@@ -28,7 +28,7 @@ import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
 import com.twofauth.android.ThreadUtils;
 import com.twofauth.android.VibratorUtils;
-import com.twofauth.android.main_service.ServerDataLoader;
+import com.twofauth.android.main_service.ServerDataSynchronizer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -130,7 +130,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         try {
             if (! object.has(TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY)) {
                 object.put(TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY, null);
-                final File file = ServerDataLoader.getTwoFactorAuthIconPath(context, object);
+                final File file = ServerDataSynchronizer.getTwoFactorAuthIconPath(context, object);
                 if ((file != null) && (file.exists())) {
                     object.put(TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY, BitmapFactory.decodeFile(file.getPath()));
                 }

@@ -7,8 +7,8 @@ import androidx.annotation.Nullable;
 import com.twofauth.android.BaseActivity;
 import com.twofauth.android.Constants;
 import com.twofauth.android.StringUtils;
-import com.twofauth.android.main_service.ServerDataLoader;
-import com.twofauth.android.main_service.ServerDataLoader.TwoAuthLoadedData;
+import com.twofauth.android.main_service.ServerDataSynchronizer;
+import com.twofauth.android.main_service.ServerDataSynchronizer.TwoAuthLoadedData;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -108,7 +108,7 @@ public class DataLoader extends Thread {
         TwoAuthLoadedData two_auth_loaded_data = null;
         List<String> groups = null;
         try {
-            two_auth_loaded_data = ServerDataLoader.getTwoFactorAuthCodes(mActivity);
+            two_auth_loaded_data = ServerDataSynchronizer.getTwoFactorAuthCodes(mActivity);
             groups = getGroups(two_auth_loaded_data.accounts);
             success = true;
         }

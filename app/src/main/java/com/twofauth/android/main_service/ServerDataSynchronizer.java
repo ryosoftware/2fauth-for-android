@@ -10,6 +10,7 @@ import android.util.Log;
 import com.twofauth.android.Constants;
 import com.twofauth.android.JsonUtils;
 import com.twofauth.android.HttpUtils;
+import com.twofauth.android.ListUtils;
 import com.twofauth.android.MainService;
 import com.twofauth.android.R;
 import com.twofauth.android.StringUtils;
@@ -23,10 +24,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ServerDataLoader extends Thread
+public class ServerDataSynchronizer extends Thread
 {
     private static final String GET_2FAUTH_CODES_LOCATION = "%SERVER%/api/v1/twofaccounts?withSecret=1";
     private static final String GET_2FAUTH_GROUPS_LOCATION = "%SERVER%/api/v1/groups";
@@ -64,7 +66,7 @@ public class ServerDataLoader extends Thread
     private final MainService mMainService;
     private final String mServer;
     private final String mToken;
-    public ServerDataLoader(@NotNull final MainService main_service) {
+    public ServerDataSynchronizer(@NotNull final MainService main_service) {
         mMainService = main_service;
         mServer = Constants.getDefaultSharedPreferences(main_service).getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, null);
         mToken = Constants.getDefaultSharedPreferences(main_service).getString(Constants.TWO_FACTOR_AUTH_TOKEN_KEY, null);
@@ -132,55 +134,102 @@ public class ServerDataLoader extends Thread
         return null;
     }
 
+    private boolean equals(@NotNull final JSONObject object1, @Nullable final JSONObject object2) {
+        if (object2 != null) {
+            boolean equals = true;
+            for (String key : Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_KEYS) {
+                final Object object1_value = object1.opt(key), object2_value = object2.opt(key);
+                if (((object1_value == null) && (object2_value != null)) || ((object1_value != null) && (! object1_value.equals(object2_value)))) {
+                    equals = false;
+                    break;
+                }
+            }
+            return equals;
+        }
+        return false;
+    }
+    private boolean equals(@Nullable final Map<Integer, JSONObject> loaded_accounts, @Nullable final Map<Integer, JSONObject> stored_accounts) throws Exception {
+        final int number_of_accounts_loaded = loaded_accounts == null ? 0 : loaded_accounts.size(), number_of_accounts_stored = stored_accounts == null ? 0 : stored_accounts.size();
+        if (number_of_accounts_loaded == number_of_accounts_stored) {
+            boolean equals = true;
+            if (number_of_accounts_loaded != 0) {
+                for (int key : loaded_accounts.keySet()) {
+                    if (! equals(loaded_accounts.get(key), stored_accounts.get(key))) {
+                        equals = false;
+                        break;
+                    }
+                }
+            }
+            return equals;
+        }
+        return false;
+    }
+
     @Override
     public void run() {
+        boolean there_are_changes = false;
         if ((mServer != null) && (mToken != null)) {
             final SharedPreferences.Editor editor = Constants.getDefaultSharedPreferences(mMainService).edit();
             try {
-                final String data = getTwoFactorAuthCodes(true);
-                if (data != null) {
-                    final Map<Integer, JSONObject> groups = JsonUtils.StringToJsonMap(getTwoFactorAuthGroups(true), Constants.TWO_FACTOR_AUTH_GROUP_ID_KEY), old_data = JsonUtils.StringToJsonMap(Constants.getDefaultSharedPreferences(mMainService).getString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, null), Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY), new_data = JsonUtils.StringToJsonMap(data, Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY);
-                    for (JSONObject object : new_data.values()) {
-                        final int group_id = object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY, -1);
-                        object.put(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY, groups.containsKey(group_id) ? groups.get(group_id).optString(Constants.TWO_FACTOR_AUTH_GROUP_NAME_KEY, "") : "");
+                final Map<Integer, JSONObject> loaded_accounts = JsonUtils.StringToJsonMap(getTwoFactorAuthCodes(true), Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY), stored_accounts = JsonUtils.StringToJsonMap(Constants.getDefaultSharedPreferences(mMainService).getString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, null), Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY), groups = JsonUtils.StringToJsonMap(getTwoFactorAuthGroups(true), Constants.TWO_FACTOR_AUTH_GROUP_ID_KEY);
+                for (JSONObject object : loaded_accounts.values()) {
+                    final int group_id = object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY, -1);
+                    object.put(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_GROUP_KEY, ((groups != null) && groups.containsKey(group_id)) ? groups.get(group_id).optString(Constants.TWO_FACTOR_AUTH_GROUP_NAME_KEY, "") : "");
+                }
+                if (! equals(loaded_accounts, stored_accounts)) {
+                    for (JSONObject object : loaded_accounts.values()) {
                         saveTwoFactorAuthIcon(object);
                     }
-                    for (Integer id : old_data.keySet()) {
-                        if (! new_data.containsKey(id)) {
-                            final JSONObject object = old_data.get(id);
+                    for (Integer id : stored_accounts.keySet()) {
+                        if (! loaded_accounts.containsKey(id)) {
+                            final JSONObject object = stored_accounts.get(id);
                             editor.remove(Constants.getTwoFactorAccountLastUseKey(object));
                             removeTwoFactorAuthIcon(object);
                         }
                     }
-                    editor.putString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, JsonUtils.JSonObjectsToString(new_data.values())).putInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_LENGTH_KEY, new_data.size()).putLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, System.currentTimeMillis()).remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY).remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY).apply();
+                    editor.putString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, JsonUtils.JSonObjectsToString(loaded_accounts.values())).putInt(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_LENGTH_KEY, loaded_accounts.size());
+                    there_are_changes = true;
                 }
-                mMainService.sendBroadcast(new Intent(MainService.ACTION_SERVICE_DATA_SYNCED));
+                editor.putLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_TIME_KEY, System.currentTimeMillis()).remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY).remove(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY).apply();
+                mMainService.sendBroadcast(new Intent(MainService.ACTION_SERVICE_DATA_SYNCED).putExtra(MainService.EXTRA_THERE_ARE_CHANGES, there_are_changes));
             }
             catch (Exception e) {
                 editor.putString(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_KEY, e.getMessage()).putLong(Constants.TWO_FACTOR_AUTH_CODES_LAST_SYNC_ERROR_TIME_KEY, System.currentTimeMillis()).apply();
                 Log.e(Constants.LOG_TAG_NAME, "Exception while processing downloaded 2FA codes", e);
             }
         }
-        mMainService.stopSelf();
+        mMainService.stopSelf(there_are_changes);
     }
 
     public static TwoAuthLoadedData getTwoFactorAuthCodes(@NotNull final Context context) throws Exception {
-        final List<JSONObject> list = new ArrayList<JSONObject>(JsonUtils.StringToJsonMap(Constants.getDefaultSharedPreferences(context).getString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, null), Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY).values());
+        final List<JSONObject> list = new ArrayList<JSONObject>();
+        final Map<Integer, JSONObject> stored_accounts = JsonUtils.StringToJsonMap(Constants.getDefaultSharedPreferences(context).getString(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY, null), Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY);
+        if (stored_accounts != null) {
+            ListUtils.setItems(list, stored_accounts.values());
+        }
         final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
         final boolean sort_using_last_use = preferences.getBoolean(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY, context.getResources().getBoolean(R.bool.sort_accounts_by_last_use_default));
-        list.sort(new Comparator<JSONObject>() {
-            @Override
-            public int compare(final JSONObject object1, final JSONObject object2) {
-                if (sort_using_last_use) {
-                    final int result = Long.compare(preferences.getLong(Constants.getTwoFactorAccountLastUseKey(object1), 0), preferences.getLong(Constants.getTwoFactorAccountLastUseKey(object2), 0));
-                    if (result != 0) {
-                        return -result;
-                    }
+        if (! list.isEmpty()) {
+            final Map<Integer, Long> last_uses = sort_using_last_use ? new HashMap<Integer, Long>() : null;
+            if (last_uses != null) {
+                for (JSONObject object : list) {
+                    last_uses.put(object.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY), preferences.getLong(Constants.getTwoFactorAccountLastUseKey(object), 0));
                 }
-                final int result = StringUtils.compare(object1.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY), object2.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY), true);
-                return result == 0 ? StringUtils.compare(object1.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY), object2.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY), true) : result;
             }
-        });
+            list.sort(new Comparator<JSONObject>() {
+                @Override
+                public int compare(final JSONObject object1, final JSONObject object2) {
+                    if (sort_using_last_use) {
+                        final int result = Long.compare(last_uses.get(object1.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY)), last_uses.get(object2.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ID_KEY)));
+                        if (result != 0) {
+                            return -result;
+                        }
+                    }
+                    final int result = StringUtils.compare(object1.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY), object2.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_SERVICE_KEY), true);
+                    return result == 0 ? StringUtils.compare(object1.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY), object2.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ACCOUNT_KEY), true) : result;
+                }
+            });
+        }
         return new TwoAuthLoadedData(list, ! sort_using_last_use);
     }
 

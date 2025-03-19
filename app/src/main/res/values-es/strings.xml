@@ -49,6 +49,7 @@
 
     <string name="sync_details">Detalles de sincronización</string>
     <string name="sync_is_in_progress">Hay una sincronización de datos en marcha</string>
+    <string name="sync_no_changes">No se han detectado cambios</string>
     <string name="click_to_sync_data">Haga clic para iniciar la sincronización</string>
     <string name="last_sync_error">La última sincronización fue el %2$s, pero no se completó debido al siguiente error: %1$s.\n\n%3$s</string>
 
