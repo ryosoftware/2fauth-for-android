@@ -52,12 +52,29 @@
                 android:layout_marginBottom="10dp"
                 layout="@layout/account_group" />
 
-            <TextView
-                android:id="@+id/otp"
+            <LinearLayout
+                android:id="@+id/otp_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="32sp"
-                style="@style/Base.TextAppearance.AppCompat.Headline" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/otp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="32sp"
+                    style="@style/Base.TextAppearance.AppCompat.Headline" />
+
+                <TextView
+                    android:id="@+id/otp_counter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:textColor="@color/gray"
+                    android:textSize="32sp"
+                    style="@style/Base.TextAppearance.AppCompat.Headline" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/otp_type_unsupported"

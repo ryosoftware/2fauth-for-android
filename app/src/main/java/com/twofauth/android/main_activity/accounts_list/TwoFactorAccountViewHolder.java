@@ -6,7 +6,6 @@ import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -22,6 +21,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bastiaanjansen.otp.HMACAlgorithm;
+import com.bastiaanjansen.otp.HOTPGenerator;
 import com.bastiaanjansen.otp.TOTPGenerator;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
@@ -40,7 +40,8 @@ import java.time.Duration;
 public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
     private static final String TWO_FACTOR_AUTH_DATA_CACHED_ICON_KEY = Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ICON_KEY + "_cached";
     private static final String TWO_FACTOR_AUTH_DATA_GENERATOR_KEY = Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_ALGORITHM_KEY + "_generator";
-    private static final String OTP_TYPE_TOTP_VALUE = "totp";
+    public static final String OTP_TYPE_TOTP_VALUE = "totp";
+    public static final String OTP_TYPE_HOTP_VALUE = "hotp";
     private static final String ALGORITHM_SHA512 = "sha512";
     private static final String ALGORITHM_SHA384 = "sha384";
     private static final String ALGORITHM_SHA256 = "sha256";
@@ -108,7 +109,9 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private final TextView mAccount;
     private final TextView mGroup;
     private final ImageView mIcon;
+    private final View mOtpContainer;
     private final TextView mOtp;
+    private final TextView mOtpCounter;
     private final TextView mOtpTypeUnsupported;
 
     private Animation mAnimation = null;
@@ -122,7 +125,9 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mAccount = (TextView) parent.findViewById(R.id.account);
         mGroup = (TextView) parent.findViewById(R.id.group);
         mIcon = (ImageView) parent.findViewById(R.id.icon);
+        mOtpContainer = parent.findViewById(R.id.otp_container);
         mOtp = (TextView) parent.findViewById(R.id.otp);
+        mOtpCounter = (TextView) parent.findViewById(R.id.otp_counter);
         mOtpTypeUnsupported = (TextView) parent.findViewById(R.id.otp_type_unsupported);
     }
 
@@ -143,7 +148,8 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     }
 
     private boolean isOtpSupported(@NotNull final JSONObject object) {
-        if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+        final String otp_type = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY);
+        if ((OTP_TYPE_TOTP_VALUE.equals(otp_type)) || (OTP_TYPE_HOTP_VALUE.equals(otp_type))) {
             final String algorithm = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_ALGORITHM_KEY);
             for (String supported_algorithm : new String[] { ALGORITHM_SHA512, ALGORITHM_SHA384, ALGORITHM_SHA256, ALGORITHM_SHA224, ALGORITHM_SHA1 }) {
                 if (supported_algorithm.equals(algorithm)) {
@@ -180,18 +186,25 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mIcon.setImageBitmap(icon);
         mIcon.setVisibility(icon == null ? View.INVISIBLE : View.VISIBLE);
         mOtp.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp) : otp);
-        final int otp_color = context.getResources().getColor(millis_until_next_otp < 0 ? R.color.otp_hidden : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : R.color.otp_visible_normal, context.getTheme());
-        final ColorStateList otp_color_state_list = ColorStateList.valueOf(otp_color);
+        final int otp_color = context.getResources().getColor((millis_until_next_otp < 0) ? R.color.otp_hidden : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : R.color.otp_visible_normal, context.getTheme());
         mOtp.setTextColor(otp_color);
         mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);
-        mOtp.setVisibility(otp == null ? View.GONE : View.VISIBLE);
-        Animation otp_animation = mOtp.getAnimation();
-        if ((otp_animation == null) && (millis_until_next_otp > 0) && (millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME)) {
-            mOtp.startAnimation(getOtpAnimation());
+        if (millis_until_next_otp == Long.MAX_VALUE) {
+            final String counter = getHtopCounter(context, object);
+            mOtpCounter.setText(context.getString(R.string.hotp_counter, counter));
+            mOtpCounter.setVisibility(counter == null ? View.GONE : View.VISIBLE);
         }
-        else if ((otp_animation != null) && ((millis_until_next_otp < 0) || (millis_until_next_otp > OTP_IS_ABOUT_TO_EXPIRE_TIME))) {
-            mOtp.clearAnimation();
+        else {
+            Animation otp_animation = mOtp.getAnimation();
+            if ((otp_animation == null) && (millis_until_next_otp > 0) && (millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME)) {
+                mOtp.startAnimation(getOtpAnimation());
+            }
+            else if ((otp_animation != null) && ((millis_until_next_otp < 0) || (millis_until_next_otp > OTP_IS_ABOUT_TO_EXPIRE_TIME))) {
+                mOtp.clearAnimation();
+            }
+            mOtpCounter.setVisibility(View.GONE);
         }
+        mOtpContainer.setVisibility(otp == null ? View.GONE : View.VISIBLE);
         mOtpTypeUnsupported.setVisibility(otp == null ? View.VISIBLE : View.GONE);
         mOtpTypeUnsupported.setText(context.getString(R.string.otp_type_is_unsupported, object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY).toUpperCase(), object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_ALGORITHM_KEY).toUpperCase()));
         itemView.setAlpha((otp != null) && (show_otp || (! showing_other_otp)) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
@@ -227,12 +240,17 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private static Object initializeOtpGenerator(@NotNull final JSONObject object) {
         try {
             if (! object.has(TWO_FACTOR_AUTH_DATA_GENERATOR_KEY)) {
-                if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+                final String otp_type = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY);
+                if (OTP_TYPE_TOTP_VALUE.equals(otp_type)) {
                     object.put(TWO_FACTOR_AUTH_DATA_GENERATOR_KEY, new TOTPGenerator.Builder(object.getString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_SECRET_KEY)).withHOTPGenerator(builder -> {
                         final String algorithm = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_ALGORITHM_KEY);
                         builder.withPasswordLength(object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_PASSWORD_LENGTH_KEY));
                         builder.withAlgorithm(ALGORITHM_SHA512.equals(algorithm) ? HMACAlgorithm.SHA512 : ALGORITHM_SHA384.equals(algorithm) ? HMACAlgorithm.SHA384 : ALGORITHM_SHA256.equals(algorithm) ? HMACAlgorithm.SHA256 : ALGORITHM_SHA224.equals(algorithm) ? HMACAlgorithm.SHA224 : HMACAlgorithm.SHA1);
                     }).withPeriod(Duration.ofSeconds(object.getInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_PERIOD_KEY))).build());
+                }
+                else if (OTP_TYPE_HOTP_VALUE.equals(otp_type)) {
+                    final String algorithm = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_ALGORITHM_KEY);
+                    object.put(TWO_FACTOR_AUTH_DATA_GENERATOR_KEY, new HOTPGenerator.Builder(object.getString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_SECRET_KEY)).withAlgorithm(ALGORITHM_SHA512.equals(algorithm) ? HMACAlgorithm.SHA512 : ALGORITHM_SHA384.equals(algorithm) ? HMACAlgorithm.SHA384 : ALGORITHM_SHA256.equals(algorithm) ? HMACAlgorithm.SHA256 : ALGORITHM_SHA224.equals(algorithm) ? HMACAlgorithm.SHA224 : HMACAlgorithm.SHA1).withPasswordLength(object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_PASSWORD_LENGTH_KEY)).build());
                 }
             }
         }
@@ -245,8 +263,12 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     public static long getOtpMillis(@NotNull final JSONObject object) {
         Object generator = initializeOtpGenerator(object);
         if (generator != null) {
-            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+            final String otp_type = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY);
+            if (OTP_TYPE_TOTP_VALUE.equals(otp_type)) {
                 return ((TOTPGenerator) generator).getPeriod().toMillis();
+            }
+            else if (OTP_TYPE_HOTP_VALUE.equals(otp_type)) {
+                return Long.MAX_VALUE;
             }
         }
         return -1;
@@ -255,8 +277,12 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     public static long getMillisUntilNextOtp(@NotNull final JSONObject object) {
         Object generator = initializeOtpGenerator(object);
         if (generator != null) {
-            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+            final String otp_type = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY);
+            if (OTP_TYPE_TOTP_VALUE.equals(otp_type)) {
                 return ((TOTPGenerator) generator).durationUntilNextTimeWindow().toMillis();
+            }
+            else if (OTP_TYPE_HOTP_VALUE.equals(otp_type)) {
+                return Long.MAX_VALUE;
             }
         }
         return -1;
@@ -265,8 +291,12 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     public static long getMillisUntilNextOtpCompleteCycle(@NotNull final JSONObject object) {
         Object generator = initializeOtpGenerator(object);
         if (generator != null) {
-            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+            final String otp_type = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY);
+            if (OTP_TYPE_TOTP_VALUE.equals(otp_type)) {
                 return ((TOTPGenerator) generator).durationUntilNextTimeWindow().toMillis() + ((TOTPGenerator) generator).getPeriod().toMillis();
+            }
+            else if (OTP_TYPE_HOTP_VALUE.equals(otp_type)) {
+                return Long.MAX_VALUE;
             }
         }
         return -1;
@@ -275,11 +305,38 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private static String getRevealedOtp(@NotNull final JSONObject object) {
         Object generator = initializeOtpGenerator(object);
         if (generator != null) {
-            if (OTP_TYPE_TOTP_VALUE.equals(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY))) {
+            final String otp_type = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY);
+            if (OTP_TYPE_TOTP_VALUE.equals(otp_type)) {
                 return ((TOTPGenerator) generator).now();
+            }
+            else if (OTP_TYPE_HOTP_VALUE.equals(otp_type)) {
+                return ((HOTPGenerator) generator).generate(object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_COUNTER_KEY));
             }
         }
         return null;
+    }
+
+    private String getHtopCounter(@NotNull final Context context, @NotNull final JSONObject object) {
+        String counter = null;
+        try {
+            final JSONObject updated_object = Constants.getTwoFactorAccountUpdatedData(context, object);
+            counter = String.valueOf(updated_object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_COUNTER_KEY, object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_COUNTER_KEY, 1)));
+        }
+        catch (Exception e) {
+            Log.d(Constants.LOG_TAG_NAME, "Exception while trying to get account counter", e);
+        }
+        return counter;
+    }
+
+    public static void increaseHtopCounter(@NotNull final Context context, @NotNull final JSONObject object) {
+        try {
+            final JSONObject updated_object = Constants.getTwoFactorAccountUpdatedData(context, object);
+            updated_object.put(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_COUNTER_KEY, updated_object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_COUNTER_KEY, object.optInt(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_COUNTER_KEY, 1)) + 1);
+            Constants.setTwoFactorAccountUpdatedData(context, updated_object);
+        }
+        catch (Exception e) {
+            Log.d(Constants.LOG_TAG_NAME, "Exception while trying to increase account counter", e);
+        }
     }
 
     public static boolean copyToClipboard(@NotNull final Activity activity, @NotNull final JSONObject object) {

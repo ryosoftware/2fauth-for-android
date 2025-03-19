@@ -1,10 +1,10 @@
 package com.twofauth.android.main_activity;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +42,8 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final Character NOT_LETTER_ITEMS_ENTRY_VALUE = '#';
 
     public interface OnOtpCodeVisibleStateChanged {
-        public abstract void onOtpCodeBecomesVisible();
-        public abstract void onOtpCodeShowAnimated(long interval_until_current_otp_cycle_ends, long cycle_time, boolean current_otp_cycle_ending);
+        public abstract void onOtpCodeBecomesVisible(String otp_type);
+        public abstract void onTotpCodeShowAnimated(long interval_until_current_otp_cycle_ends, long cycle_time, boolean current_otp_cycle_ending);
         public abstract void onOtpCodeHidden();
     }
 
@@ -222,10 +222,10 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private void onOtpCodeAnimated(final boolean becoming_visible, final JSONObject object) {
         if (becoming_visible) {
-            mOnOtpCodeVisibleStateChanged.onOtpCodeBecomesVisible();
+            mOnOtpCodeVisibleStateChanged.onOtpCodeBecomesVisible(object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY));
         }
         final long interval_until_current_otp_cycle_ends = TwoFactorAccountViewHolder.getMillisUntilNextOtp(object);
-        mOnOtpCodeVisibleStateChanged.onOtpCodeShowAnimated(interval_until_current_otp_cycle_ends, TwoFactorAccountViewHolder.getOtpMillis(object), interval_until_current_otp_cycle_ends <= TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME);
+        mOnOtpCodeVisibleStateChanged.onTotpCodeShowAnimated(interval_until_current_otp_cycle_ends, TwoFactorAccountViewHolder.getOtpMillis(object), interval_until_current_otp_cycle_ends <= TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME);
     }
 
     private void onOtpCodeHidden(final boolean force) {
@@ -268,11 +268,13 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
+
     public void onClick(final int position) {
         synchronized (mSynchronizationObject) {
             final Context context = mRecyclerView.getContext();
             final SharedPreferences preferences = Constants.getDefaultSharedPreferences(context);
             final int older_active_account_position = mActiveAccountPosition;
+            onOtpCodeHidden();
             mActiveAccountPosition = (older_active_account_position == position) ? RecyclerView.NO_POSITION : position;
             if ((older_active_account_position != RecyclerView.NO_POSITION) && (mActiveAccountPosition != RecyclerView.NO_POSITION)) {
                 RecyclerViewUtils.notifyItemChanged(this, mRecyclerView, older_active_account_position);
@@ -280,15 +282,18 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             else {
                 RecyclerViewUtils.notifyDataSetChanged(this, mRecyclerView);
             }
-            if (mActiveAccountPosition == RecyclerView.NO_POSITION) {
-                onOtpCodeHidden(older_active_account_position != RecyclerView.NO_POSITION);
-            }
-            else {
+            if (mActiveAccountPosition != RecyclerView.NO_POSITION) {
                 final JSONObject object = getItem(position);
                 preferences.edit().putLong(Constants.getTwoFactorAccountLastUseKey(object), System.currentTimeMillis()).apply();
                 RecyclerViewUtils.notifyItemChanged(this, mRecyclerView, mActiveAccountPosition);
-                onOtpCodeAnimated(older_active_account_position == RecyclerView.NO_POSITION, object);
-                RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object), object);
+                onOtpCodeAnimated(true, object);
+                final String otp_type = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_OTP_TYPE_KEY);
+                if (TwoFactorAccountViewHolder.OTP_TYPE_TOTP_VALUE.equals(otp_type)) {
+                    RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, TwoFactorAccountViewHolder.getMillisUntilNextOtpCompleteCycle(object), object);
+                }
+                else {
+                    TwoFactorAccountViewHolder.increaseHtopCounter(context, object);
+                }
             }
         }
     }

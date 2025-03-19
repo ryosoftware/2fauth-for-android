@@ -64,6 +64,7 @@
     <string name="appearance">Apariencia y usabilidad</string>
 
     <string name="otp_code">Código OTP</string>
+    <string name="hotp_counter">(#%1$s)</string>
 
     <string name="otp_type_is_unsupported">El algoritmo %2$s (%1$s) no está soportado</string>
 

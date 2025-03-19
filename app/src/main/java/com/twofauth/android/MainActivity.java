@@ -39,6 +39,7 @@ import com.twofauth.android.main_activity.CheckForAppUpdates;
 import com.twofauth.android.main_activity.DataFilterer;
 import com.twofauth.android.main_activity.DataLoader;
 import com.twofauth.android.main_activity.GroupsListAdapter;
+import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountViewHolder;
 import com.twofauth.android.main_service.StatusChangedBroadcastReceiver;
 import com.twofauth.android.MainService.SyncResultType;
 
@@ -261,15 +262,15 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
         }
     }
 
-    public void onOtpCodeBecomesVisible() {
-        findViewById(R.id.otp_time).setVisibility(View.VISIBLE);
+    public void onOtpCodeBecomesVisible(@NotNull final String otp_type) {
+        findViewById(R.id.otp_time).setVisibility(TwoFactorAccountViewHolder.OTP_TYPE_TOTP_VALUE.equals(otp_type) ? View.VISIBLE : View.INVISIBLE);
         if (mFabButtonShowOrHide.getDisplayState() != FabButtonShowOrHide.DisplayState.HIDDEN) {
             ((FloatingActionButton) findViewById(R.id.copy_to_clipboard)).show();
         }
         mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings), (FloatingActionButton) findViewById(R.id.copy_to_clipboard) });
     }
 
-    public void onOtpCodeShowAnimated(final long interval_until_current_otp_cycle_ends, final long cycle_time, final boolean current_otp_cycle_ending) {
+    public void onTotpCodeShowAnimated(final long interval_until_current_otp_cycle_ends, final long cycle_time, final boolean current_otp_cycle_ending) {
         final ProgressBar otp_time = (ProgressBar) findViewById(R.id.otp_time);
         otp_time.setProgress(Math.max(0, (int) ((100 * interval_until_current_otp_cycle_ends) / cycle_time)));
         otp_time.setProgressTintList(ColorStateList.valueOf(getResources().getColor(current_otp_cycle_ending ? R.color.otp_visible_last_seconds : R.color.otp_visible_normal, getTheme())));
