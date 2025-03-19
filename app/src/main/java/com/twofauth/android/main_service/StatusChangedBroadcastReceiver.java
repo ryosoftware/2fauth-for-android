@@ -1,4 +1,4 @@
-package com.twofauth.android.main_activity;
+package com.twofauth.android.main_service;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -15,7 +15,7 @@ import com.twofauth.android.MainService.SyncResultType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MainServiceStatusChangedBroadcastReceiver extends BroadcastReceiver {
+public class StatusChangedBroadcastReceiver extends BroadcastReceiver {
     public interface OnMainServiceStatusChanged {
         public abstract void onServiceStarted();
 
@@ -25,7 +25,7 @@ public class MainServiceStatusChangedBroadcastReceiver extends BroadcastReceiver
     }
     private final OnMainServiceStatusChanged mListener;
 
-    public MainServiceStatusChangedBroadcastReceiver(@NonNull final OnMainServiceStatusChanged listener) {
+    public StatusChangedBroadcastReceiver(@NonNull final OnMainServiceStatusChanged listener) {
         mListener = listener;
     }
     public synchronized void onReceive(@NotNull final Context context, @Nullable final Intent intent) {

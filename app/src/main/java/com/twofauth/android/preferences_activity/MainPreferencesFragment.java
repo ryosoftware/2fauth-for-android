@@ -27,13 +27,13 @@ import com.twofauth.android.VibratorUtils;
 import com.twofauth.android.main_activity.AuthenticWithBiometrics;
 import com.twofauth.android.main_activity.AuthenticWithPin;
 import com.twofauth.android.MainService.SyncResultType;
-import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
+import com.twofauth.android.main_service.StatusChangedBroadcastReceiver;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class MainPreferencesFragment extends PreferenceFragmentCompat implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener, AuthenticWithPin.OnPinAuthenticationFinished, AuthenticWithPin.OnPinRequestFinished, AuthenticWithBiometrics.OnBiometricAuthenticationFinished {
+public class MainPreferencesFragment extends PreferenceFragmentCompat implements StatusChangedBroadcastReceiver.OnMainServiceStatusChanged, Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener, AuthenticWithPin.OnPinAuthenticationFinished, AuthenticWithPin.OnPinRequestFinished, AuthenticWithBiometrics.OnBiometricAuthenticationFinished {
     public static final String EXTRA_CHANGED_SETTINGS = "changes";
 
     private static final String SYNC_DETAILS_KEY = "sync-details";
@@ -47,7 +47,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
 
     private final ArrayList<String> mChanges = new ArrayList<String>();
 
-    private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
+    private final StatusChangedBroadcastReceiver mReceiver = new StatusChangedBroadcastReceiver(this);
 
     @Override
     public void onCreatePreferences(@Nullable final Bundle saved_instance_state, @Nullable final String root_key) {

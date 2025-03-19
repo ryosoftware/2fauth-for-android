@@ -39,7 +39,7 @@ import com.twofauth.android.main_activity.CheckForAppUpdates;
 import com.twofauth.android.main_activity.DataFilterer;
 import com.twofauth.android.main_activity.DataLoader;
 import com.twofauth.android.main_activity.GroupsListAdapter;
-import com.twofauth.android.main_activity.MainServiceStatusChangedBroadcastReceiver;
+import com.twofauth.android.main_service.StatusChangedBroadcastReceiver;
 import com.twofauth.android.MainService.SyncResultType;
 
 import com.twofauth.android.main_activity.AccountsListAdapter;
@@ -62,7 +62,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements MainServiceStatusChangedBroadcastReceiver.OnMainServiceStatusChanged, AccountsListAdapter.OnOtpCodeVisibleStateChanged, GroupsListAdapter.OnSelectedGroupChanges, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
+public class MainActivity extends BaseActivity implements StatusChangedBroadcastReceiver.OnMainServiceStatusChanged, AccountsListAdapter.OnOtpCodeVisibleStateChanged, GroupsListAdapter.OnSelectedGroupChanges, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinished, AuthenticWithPin.OnPinAuthenticationFinished, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
     private static final String LAST_NOTIFIED_APP_UPDATED_VERSION_KEY = "last-notified-app-updated-version";
     private static final String LAST_NOTIFIED_APP_UPDATED_TIME_KEY = "last-notified-app-updated-time";
     private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
@@ -71,7 +71,7 @@ public class MainActivity extends BaseActivity implements MainServiceStatusChang
     private static final long SYNC_ACCOUNTS_VIBRATION_INTERVAL = 30;
     private static final long COPY_TO_CLIPBOARD_VIBRATION_INTERVAL = 60;
 
-    private final MainServiceStatusChangedBroadcastReceiver mReceiver = new MainServiceStatusChangedBroadcastReceiver(this);
+    private final StatusChangedBroadcastReceiver mReceiver = new StatusChangedBroadcastReceiver(this);
 
     private final AccountsListIndexAdapter mAccountsListIndexAdapter = new AccountsListIndexAdapter();
     private final AccountsListAdapter mAccountsListAdapter = new AccountsListAdapter(this,  mAccountsListIndexAdapter, false);;
