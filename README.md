@@ -28,15 +28,25 @@ The app signature certification can be checked by the following command:
 
 # OPEN SOURCE LIBRARIES WE USE
 
-We generate the OTP codes using the JAVA library from <A HREF="https://github.com/BastiaanJansen/otp-java">Bastiaan Jansen</A>.
+We generate the OTP codes using the JAVA library from <A HREF="https://github.com/BastiaanJansen/otp-java">Bastiaan Jansen</A> (<A HREF="https://github.com/BastiaanJansen/otp-java/blob/main/LICENSE">license summary</A>).
 
-Because Bubka 2FA uses SVG icons by default and Android does not natively support that graphic format, we use <A HREF="https://github.com/homarr-labs/dashboard-icons">Dashboard Icons</A> to download icons that are in that format (to search for icons we use the 2FA account service name, in lowercase and with blank spaces replaced by dashes).
+We use <A HREF="https://github.com/sqlcipher/sqlcipher-android">SQLCipher</A> to encrypt the Accounts database (<A HREF="https://github.com/sqlcipher/sqlcipher/blob/master/LICENSE.md">license summary</A>).
+
+Because Bubka 2FA uses SVG icons by default and Android does not natively support that graphic format, we use <A HREF="https://github.com/homarr-labs/dashboard-icons">Dashboard Icons</A> to download icons that are in that format (to search for icons we use the 2FA account service name, in lowercase and with blank spaces replaced by dashes) (<A HREF="https://github.com/homarr-labs/dashboard-icons/blob/main/LICENSE">license summary</A>).
+
+To design the app icon, we made modifications to the <A HREF="https://pictogrammers.com/library/mdi/icon/account-lock/">account-lock</A> icon available at <A HREF="https://pictogrammers.com">Pictogrammers.com</A> (<A HREF="https://pictogrammers.com/docs/general/license">license summary</A>).
 
 # DONATE
 
 If you want, you can invite me to a coffee or a seafood platter
 
 <A HREF="https://www.paypal.com/donate/?hosted_button_id=L46URT58CQNDJ"><IMG SRC="assets/paypal.png"></A>
+
+# DISCLAIMER
+
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+
+IN NO EVENT SHALL WE BE LIABLE FOR ANYONE DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF NO ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # LICENSE
 
