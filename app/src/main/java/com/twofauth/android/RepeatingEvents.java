@@ -11,12 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RepeatingEvents {
-    public interface OnTick {
+    public interface OnTickListener {
         public abstract void onTick(int identifier, long start_time, long end_time, long elapsed_time, Object data);
     }
 
     private static class RepeatingEventData {
-        private final OnTick listener;
+        private final OnTickListener listener;
 
         private final long startTime;
         private final long repeatInterval;
@@ -24,7 +24,7 @@ public class RepeatingEvents {
 
         private final Object mData;
 
-        RepeatingEventData(@NotNull final OnTick _listener, final long repeat_interval, final long end_time, @Nullable final Object data) {
+        RepeatingEventData(@NotNull final OnTickListener _listener, final long repeat_interval, final long end_time, @Nullable final Object data) {
             listener = _listener;
             startTime = SystemClock.elapsedRealtime();
             repeatInterval = repeat_interval;
@@ -59,6 +59,7 @@ public class RepeatingEvents {
             }
         }
     }
+
     private static final RepeatingEventsHandler mHandler = new RepeatingEventsHandler();
     private static final Map<Integer, RepeatingEventData> mData = new HashMap<Integer, RepeatingEventData>();
     private static int mIdentifier = 1;
@@ -70,7 +71,7 @@ public class RepeatingEvents {
         }
     }
 
-    public static void start(final int identifier, @NotNull final OnTick listener, final long repeat_interval, final long end_time, @Nullable final Object data) {
+    public static void start(final int identifier, @NotNull final OnTickListener listener, final long repeat_interval, final long end_time, @Nullable final Object data) {
         synchronized (mData) {
             cancel(identifier);
             mData.put(identifier, new RepeatingEventData(listener, repeat_interval, SystemClock.elapsedRealtime() + end_time, data));

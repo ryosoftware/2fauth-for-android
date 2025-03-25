@@ -15,7 +15,6 @@ import com.twofauth.android.UiUtils;
 import com.twofauth.android.VibratorUtils;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,12 +26,13 @@ public class AuthenticWithPin {
     private static final int MIN_PIN_LENGTH = 4;
     private static final int MAX_PIN_LENGTH = 8;
     private static final int MAX_ATTEMPTS = 3;
-    public interface OnPinAuthenticationFinished {
+
+    public interface OnPinAuthenticationFinishedListener {
         public abstract void onPinAuthenticationSucceeded();
         public abstract void onPinAuthenticationError(boolean cancelled);
     }
 
-    public interface OnPinRequestFinished {
+    public interface OnPinRequestFinishedListener {
         public abstract void onPinRequestDone(String value);
         public abstract void onPinRequestCancelled();
     }
@@ -46,7 +46,7 @@ public class AuthenticWithPin {
         PinData() {}
     }
 
-    public static void authenticate(@NotNull final FragmentActivity activity, @NotNull final OnPinAuthenticationFinished callback, final String current_pin) {
+    public static void authenticate(@NotNull final FragmentActivity activity, @NotNull final OnPinAuthenticationFinishedListener callback, final String current_pin) {
         final PinData pin_data = new PinData();
         final AlertDialog.Builder dialog_builder = new AlertDialog.Builder(activity);
         final LayoutInflater inflater = activity.getLayoutInflater();
@@ -132,7 +132,7 @@ public class AuthenticWithPin {
         button_delete.setEnabled(false);
     }
 
-    public static void request(@NotNull final FragmentActivity activity, @NotNull final OnPinRequestFinished callback) {
+    public static void request(@NotNull final FragmentActivity activity, @NotNull final OnPinRequestFinishedListener callback) {
         final PinData[] pins_data = new PinData[] { new PinData(), new PinData() };
         final AlertDialog.Builder dialog_builder = new AlertDialog.Builder(activity);
         final LayoutInflater inflater = activity.getLayoutInflater();

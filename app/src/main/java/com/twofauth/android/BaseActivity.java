@@ -46,4 +46,8 @@ public abstract class BaseActivity extends AppCompatActivity {
             return callback.synchronizedCode(object);
         }
     }
+
+    public Object executeSynchronized(@NotNull final SynchronizedCallback callback) {
+        return executeSynchronized(callback, null);
+    }
 }

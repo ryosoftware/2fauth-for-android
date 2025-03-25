@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.util.Log;
 import android.util.TypedValue;
@@ -15,6 +16,10 @@ import androidx.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 public class UiUtils {
+    public static boolean isDarkModeActive(@NotNull final Context context) {
+        return ((context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES);
+    }
+
     public static void showMessageDialog(@Nullable final Activity activity, final int message_id) {
         if ((message_id != 0) && (activity != null)) {
             try {

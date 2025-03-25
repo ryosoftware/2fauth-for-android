@@ -16,18 +16,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class StatusChangedBroadcastReceiver extends BroadcastReceiver {
-    public interface OnMainServiceStatusChanged {
+    public interface OnMainServiceStatusChangedListener {
         public abstract void onServiceStarted();
 
         public abstract void onServiceFinished(SyncResultType result_type);
 
         public abstract void onDataSyncedFromServer(SyncResultType result_type);
     }
-    private final OnMainServiceStatusChanged mListener;
 
-    public StatusChangedBroadcastReceiver(@NonNull final OnMainServiceStatusChanged listener) {
+    private final OnMainServiceStatusChangedListener mListener;
+
+    public StatusChangedBroadcastReceiver(@NonNull final OnMainServiceStatusChangedListener listener) {
         mListener = listener;
     }
+
     public synchronized void onReceive(@NotNull final Context context, @Nullable final Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();

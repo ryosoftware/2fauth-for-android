@@ -14,6 +14,7 @@ public class ListUtils {
             dest.addAll(source);
         }
     }
+
     public static <E> void setItems(@NotNull final List<E> dest, @Nullable final List<E> source) {
         dest.clear();
         if (source != null) {

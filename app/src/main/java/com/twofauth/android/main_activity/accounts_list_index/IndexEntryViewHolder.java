@@ -2,6 +2,7 @@ package com.twofauth.android.main_activity.accounts_list_index;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
@@ -38,6 +39,7 @@ public class IndexEntryViewHolder extends RecyclerView.ViewHolder implements Vie
         final Resources resources = context.getResources();
         mLetter.setText(letter.toString().toUpperCase());
         mLetter.setTextColor(is_active ? resources.getColor(R.color.accent_foreground, context.getTheme()) : UiUtils.getSystemColor(context, android.R.attr.textColorSecondary));
+        mLetter.setTypeface(null, is_active ? Typeface.BOLD : Typeface.NORMAL);
         mLetter.setSelected(is_active);
     }
 

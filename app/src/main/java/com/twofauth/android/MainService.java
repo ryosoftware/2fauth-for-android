@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.IBinder;
@@ -26,7 +27,7 @@ public class MainService extends Service {
     public static final String MAIN_SERVICE_NOTIFICATION_CHANNEL = "main-service";
     public static final int MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID = 1001;
 
-    public static enum SyncResultType { ERROR, NO_CHANGES, UPDATED };
+    public enum SyncResultType { ERROR, NO_CHANGES, UPDATED };
 
     private SyncResultType mSyncResultType = null;
 
@@ -40,7 +41,7 @@ public class MainService extends Service {
         else {
             startForeground(MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID, getNotification());
         }
-        (new ServerDataSynchronizer(this)).start();
+        startSynchronization();
     }
 
     @Override
@@ -54,10 +55,21 @@ public class MainService extends Service {
         return null;
     }
 
+    private void startSynchronization() {
+        final String server = SharedPreferencesUtilities.getEncryptedString(this, Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, null), token = SharedPreferencesUtilities.getEncryptedString(this, Constants.TWO_FACTOR_AUTH_TOKEN_KEY, null);
+        if ((server != null) && (token != null)) {
+            ServerDataSynchronizer.getBackgroundTask(this, server, token).start();
+        }
+        else {
+            stopSelf();
+        }
+    }
+
     public void stopSelf(@NonNull final SyncResultType result_type) {
         mSyncResultType = result_type;
         stopSelf();
     }
+
     private void createNotificationChannel() {
         final NotificationManager notification_manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (notification_manager.getNotificationChannel(MAIN_SERVICE_NOTIFICATION_CHANNEL) == null) {
@@ -71,7 +83,7 @@ public class MainService extends Service {
     private Notification getNotification() {
         createNotificationChannel();
         final NotificationCompat.Builder notification_builder = new NotificationCompat.Builder(getBaseContext(), MAIN_SERVICE_NOTIFICATION_CHANNEL);
-        notification_builder.setContentText(getString(Constants.getDefaultSharedPreferences(this).contains(Constants.TWO_FACTOR_AUTH_ACCOUNTS_DATA_KEY) ? R.string.trying_to_refresh_2fa_codes : R.string.trying_to_load_2fa_codes));
+        notification_builder.setContentText(getString(Database.TwoFactorAccountOperations.exists() ? R.string.trying_to_refresh_2fa_codes : R.string.trying_to_load_2fa_codes));
         notification_builder.setSmallIcon(R.drawable.ic_notification_syncing);
         notification_builder.setContentIntent(PendingIntent.getActivity(getBaseContext(), MAIN_SERVICE_PERSISTENT_NOTIFICATION_ID, new Intent(getBaseContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         notification_builder.setShowWhen(false);
@@ -89,8 +101,8 @@ public class MainService extends Service {
     }
 
     public static boolean canSyncServerData(@NonNull final Context context) {
-        final String server = Constants.getDefaultSharedPreferences(context).getString(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, null), token = Constants.getDefaultSharedPreferences(context).getString(Constants.TWO_FACTOR_AUTH_TOKEN_KEY, null);
-        return ((server != null) && (token != null));
+        final SharedPreferences preferences = SharedPreferencesUtilities.getDefaultSharedPreferences(context);
+        return (preferences.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY) && preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY));
     }
 
     public static boolean startService(@NonNull final Context context) {

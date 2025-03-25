@@ -33,6 +33,7 @@ public class HtmlActivity extends BaseActivity {
     private Activity getActivity() {
         return this;
     }
+
     private void initializeWebView(@NotNull final String url) {
         ((WebView) findViewById(R.id.web_view)).setWebChromeClient(new WebChromeClient());
         ((WebView) findViewById(R.id.web_view)).setWebViewClient(new WebViewClient()
@@ -62,7 +63,8 @@ public class HtmlActivity extends BaseActivity {
     public static void openInWebBrowser(@NotNull final Activity activity, @NotNull final Uri uri) {
         try {
             activity.startActivity(new Intent(Intent.ACTION_VIEW).setData(uri).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             Log.e(Constants.LOG_TAG_NAME, String.format("Exception trying to open Uri: %s", uri), e);
         }
     }

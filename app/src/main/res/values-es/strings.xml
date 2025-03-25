@@ -27,6 +27,9 @@
     <string name="server_location_has_changed_and_token_defined_and_no_downloaded_data_exists">Al cambiar la ubicación del servidor se eliminó también, por su seguridad, el token de acceso</string>
     <string name="server_location_has_changed_and_token_not_defined_and_no_downloaded_data_exists">La ubicación del servidor se ha actualizado</string>
 
+    <string name="open_server_location">Abrir en navegador</string>
+    <string name="open_server_location_summary">Abre el sitio web del servidor en una ventana del navegador web</string>
+
     <string name="token_value">Token de acceso</string>
     <string name="token_value_is_set_summary">Haga clic para actualizar el valor del token de acceso</string>
     <string name="token_value_is_not_set_summary">Haga clic para introducir el valor del token de acceso</string>
@@ -66,7 +69,7 @@
     <string name="appearance">Apariencia y usabilidad</string>
 
     <string name="otp_code">Código OTP</string>
-    <string name="hotp_counter">(#%1$s)</string>
+    <string name="hotp_counter">(#%1$d)</string>
 
     <string name="otp_type_is_unsupported">El algoritmo %2$s (%1$s) no está soportado</string>
 
@@ -86,8 +89,8 @@
     <string name="minimize_app_after_copy_to_clipboard">Minimizar al copiar</string>
     <string name="minimize_app_after_copy_to_clipboard_summary">Minimiza la app cuando un código OTP es copiado al portapapeles</string>
 
-    <string name="vibrate_on_some_actions">Respuesta de vibración</string>
-    <string name="vibrate_on_some_actions_summary">Hacer que el vibrador del teléfono vibre como feedback para algunas acciones</string>
+    <string name="haptic_feedback">Respuesta háptica</string>
+    <string name="haptic_feedback_summary">Hacer que el vibrador del teléfono vibre levemente como respuesta a algunas acciones, tales como pulsar un botón, mostrar u ocultar un código OTP o copiarlo en el portapapeles</string>
 
     <string name="security">Seguridad</string>
 
@@ -97,6 +100,9 @@
 
     <string name="hide_otp_codes_automatically">Ocultar códigos OTP automáticamente</string>
     <string name="hide_otp_codes_automatically_summary">Ocultar automáticamente el código OTP después de un ciclo de visualización completo (deberá presionar nuevamente para mostrar el siguiente)</string>
+
+    <string name="show_next_otp_code">Muestra el siguiente código</string>
+    <string name="show_next_otp_code_summary">Para códigos basados en tiempo (TOTP), al mostrar el código se mostrará también el siguiente.\n\nTenga en cuenta que la acción de "copiar al portapapeles" actuará solamente sobre el código actual</string>
 
     <string name="pin_access">PIN de acceso</string>
     <string name="pin_access_summary">Configurar un código para acceder a la app</string>
@@ -109,10 +115,13 @@
     <string name="pin_has_been_set">Se ha configurado un código de acceso</string>
     <string name="pin_has_been_removed">El código de acceso se ha eliminado</string>
 
-    <string name="fingerprint_access">Acceso con huella</string>
-    <string name="fingerprint_access_summary">Requerir la huella digital del usuario para acceder al aplicativo</string>
+    <string name="use_fingerprint_instead_of_pin_code">Acceso con huella</string>
+    <string name="use_fingerprint_instead_of_pin_code_summary">Requerir la huella digital del usuario para acceder al aplicativo</string>
     <string name="use_your_fingerprint_to_unlock_the_app">Verificación biométrica</string>
     <string name="fingerprint_is_not_valid">No se ha podido validar su identidad</string>
+    <string name="fingerprint_validation_disabled_due_to_biometric_enrollment">Validación por huella deshabilitada debido a un registro de nuevas huellas</string>
+
+    <string name="keystore_access_error">Se ha producido un error accediendo al almacén de claves</string>
 
     <string name="others">Otros</string>
 
@@ -122,9 +131,13 @@
     <string name="github_repo">Repositorio GitHub</string>
     <string name="github_repo_summary">Abra el repositorio GitHub de la aplicación para obtener información sobre las últimas versiones, reportar errores o contribuir al desarrollo</string>
 
-    <string name="auto_updates_app">Actualizaciones automáticas</string>
-    <string name="auto_updates_app_summary">Cuando inicie la app se conectará con el repositorio para comprobar si existen actualizaciones, procediendo a su descarga y a su instalación, si es el caso.</string>
+    <string name="auto_update_app">Actualizaciones automáticas</string>
+    <string name="auto_update_app_summary">Cuando inicie la app se conectará con el repositorio para comprobar si existen actualizaciones, procediendo a su descarga y a su instalación, si es el caso.</string>
     <string name="there_is_an_update_version">Está usando la versión %1$s de la aplicación, pero la versión %2$s ya está disponible.\n\n¿Desea actualizar ahora?</string>
+
+    <string name="auto_update_app_only_in_wifi">Actualizar sólo en redes WiFi</string>
+    <string name="auto_update_app_only_in_wifi_summary">Sólo comprueba, y descarga, las nuevas versiones de la app si hay una conexión WiFi activa</string>
+
 
     <string name="search">Escribe algo para filtrar&#8230;</string>
 

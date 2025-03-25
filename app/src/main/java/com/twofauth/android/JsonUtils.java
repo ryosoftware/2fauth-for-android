@@ -6,6 +6,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -69,11 +70,19 @@ public class JsonUtils {
         }
         return new_json_object;
     }
+    private static Gson getGSonBuilder() {
+        return (new GsonBuilder()).serializeNulls().create();
+    }
+
+    public static String JSonObjectToString(@NotNull final JSONObject object) throws Exception {
+        return getGSonBuilder().toJson(toJsonObject(object));
+    }
+
     public static String JSonObjectsToString(@NotNull final Collection<JSONObject> objects) throws Exception {
         final List<JsonObject> standardized_objects = new ArrayList<JsonObject>();
         for (JSONObject object : objects) {
             standardized_objects.add(toJsonObject(object));
         }
-        return new Gson().toJson(standardized_objects);
+        return getGSonBuilder().toJson(standardized_objects);
     }
 }

@@ -2,6 +2,7 @@ package com.twofauth.android.main_activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 
@@ -9,10 +10,12 @@ import java.util.List;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.ui.CollapsingToolbarOnDestinationChangedListener;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.twofauth.android.ListUtils;
+import com.twofauth.android.R;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,19 +25,29 @@ public class FabButtonShowOrHide {
 
     private static class RecyclerViewOnScrollListener extends RecyclerView.OnScrollListener {
         private final FabButtonShowOrHide mOwner;
+        private boolean mTakeIntoAccountAutomaticScrollEvents = true;
+
+        private boolean mShowOnIdle = false;
 
         RecyclerViewOnScrollListener(@NotNull final FabButtonShowOrHide owner) {
             mOwner = owner;
         }
 
+        public void setTakeIntoAccountAutomaticScrollEvents(final boolean take_into_account_automatic_scroll_events) {
+            mTakeIntoAccountAutomaticScrollEvents = take_into_account_automatic_scroll_events;
+        }
         @Override
         public void onScrollStateChanged(@NonNull final RecyclerView recycler_view, int new_state) {
             super.onScrollStateChanged(recycler_view, new_state);
-            if (new_state == RecyclerView.SCROLL_STATE_IDLE) {
+            if ((new_state == RecyclerView.SCROLL_STATE_IDLE) && mShowOnIdle) {
+                mShowOnIdle = false;
                 mOwner.show();
             }
-            else {
-                mOwner.hide();
+            else if ((new_state == RecyclerView.SCROLL_STATE_DRAGGING) || (new_state == RecyclerView.SCROLL_STATE_SETTLING)) {
+                mShowOnIdle |= ((new_state == RecyclerView.SCROLL_STATE_DRAGGING) || mTakeIntoAccountAutomaticScrollEvents);
+                if (mShowOnIdle) {
+                    mOwner.hide();
+                }
             }
         }
 
@@ -52,18 +65,11 @@ public class FabButtonShowOrHide {
     private DisplayState mDisplayState = null;
     private final RecyclerViewOnScrollListener mRecyclerViewOnScrollListener = new RecyclerViewOnScrollListener(this);
 
-    public FabButtonShowOrHide(@NotNull final RecyclerView recycler_view, @NotNull final FloatingActionButton[] floating_action_buttons, @Nullable final View[] other_views) {
+    public FabButtonShowOrHide(@NotNull final RecyclerView recycler_view, final boolean take_into_account_automatic_scroll_events, @NotNull final FloatingActionButton[] floating_action_buttons, @Nullable final View[] other_views) {
         setFloatingActionButtons(floating_action_buttons);
         setOtherViews(other_views);
+        mRecyclerViewOnScrollListener.setTakeIntoAccountAutomaticScrollEvents(take_into_account_automatic_scroll_events);
         recycler_view.addOnScrollListener(mRecyclerViewOnScrollListener);
-    }
-
-    public FabButtonShowOrHide(@NotNull final RecyclerView recycler_view, @NotNull final FloatingActionButton[] floating_action_buttons) {
-        this(recycler_view, floating_action_buttons, null);
-    }
-
-    public FabButtonShowOrHide(@NotNull final RecyclerView recycler_view) {
-        this(recycler_view, null);
     }
 
     private void cancelAnimations() {
@@ -104,16 +110,19 @@ public class FabButtonShowOrHide {
         });
         startAnimation(animation);
     }
+
     private void hide() {
         synchronized (mSynchronizationObject) {
-            for (final FloatingActionButton floating_action_button : mFloatingActionButtons) {
-                floating_action_button.hide();
+            if (mDisplayState != DisplayState.HIDDEN) {
+                for (final FloatingActionButton floating_action_button : mFloatingActionButtons) {
+                    floating_action_button.hide();
+                }
+                cancelAnimations();
+                for (final View view : mOtherViews) {
+                    hide(view);
+                }
+                mDisplayState = DisplayState.HIDDEN;
             }
-            cancelAnimations();
-            for (final View view : mOtherViews) {
-                hide(view);
-            }
-            mDisplayState = DisplayState.HIDDEN;
         }
     }
 
@@ -133,14 +142,16 @@ public class FabButtonShowOrHide {
 
     private void show() {
         synchronized (mSynchronizationObject) {
-            for (final FloatingActionButton floating_action_button : mFloatingActionButtons) {
-                floating_action_button.show();
+            if (mDisplayState != DisplayState.VISIBLE) {
+                for (final FloatingActionButton floating_action_button : mFloatingActionButtons) {
+                    floating_action_button.show();
+                }
+                cancelAnimations();
+                for (final View view : mOtherViews) {
+                    show(view);
+                }
+                mDisplayState = DisplayState.VISIBLE;
             }
-            cancelAnimations();
-            for (final View view : mOtherViews) {
-                show(view);
-            }
-            mDisplayState = DisplayState.VISIBLE;
         }
     }
 
