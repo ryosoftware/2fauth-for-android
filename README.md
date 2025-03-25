@@ -8,9 +8,18 @@ To do this, we have developed an Android App that reads 2FA accounts from a user
 
 # MAIN FEATURES
 
-Read the 2FA accounts for a user (identified by the server URL location and an access token) and generate OTP tokens offline.
-
-Protection level: PIN password and fingerprint access.
+- Free and open source
+- Secure 
+- The vault is encrypted (AES-256-GCM), and can be unlocked with:
+  * Password 
+  * Biometrics (Android Keystore)
+- We store server URL, token and app unlock PIN code encrypted with a secure key stored at Android Keystore
+- Screen capture prevention
+- Tap to reveal
+- Compatible with Google Authenticator
+- Supports industry standard algorithms: HOTP and TOTP
+- Alphabetic/last use sorting
+- Search by name/issuer
 
 # SCREENSHOTS
 
