@@ -6,6 +6,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -21,15 +22,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class JsonUtils {
     public static Map<Integer, JSONObject> StringToJsonMap(@Nullable final String data, @NotNull final String id_key) throws Exception {
-        final Map<Integer, JSONObject> map = new HashMap<Integer, JSONObject>();
+        Map<Integer, JSONObject> map = null;
         if (data != null) {
             final JSONArray array = new JSONArray(data);
-            for (int i = 0; i < array.length(); i ++) {
-                final JSONObject object = array.getJSONObject(i);
-                map.put(object.getInt(id_key), object);
+            if (array.length() > 0) {
+                map = new HashMap<Integer, JSONObject>();
+                for (int i = 0; i < array.length(); i ++) {
+                    final JSONObject object = array.getJSONObject(i);
+                    map.put(object.getInt(id_key), object);
+                }
             }
         }
         return map;
@@ -65,11 +70,19 @@ public class JsonUtils {
         }
         return new_json_object;
     }
+    private static Gson getGSonBuilder() {
+        return (new GsonBuilder()).serializeNulls().create();
+    }
+
+    public static String JSonObjectToString(@NotNull final JSONObject object) throws Exception {
+        return getGSonBuilder().toJson(toJsonObject(object));
+    }
+
     public static String JSonObjectsToString(@NotNull final Collection<JSONObject> objects) throws Exception {
         final List<JsonObject> standardized_objects = new ArrayList<JsonObject>();
         for (JSONObject object : objects) {
             standardized_objects.add(toJsonObject(object));
         }
-        return new Gson().toJson(standardized_objects);
+        return getGSonBuilder().toJson(standardized_objects);
     }
 }

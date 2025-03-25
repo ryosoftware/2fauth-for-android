@@ -2,9 +2,11 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <EditTextPreference android:key="server" android:title="@string/server_location" android:dialogTitle="@string/server_location_dialog_title" android:dialogMessage="@string/server_location_dialog_message" android:singleLine="true" android:inputType="textUri|textNoSuggestions" android:persistent="false" />
+    <com.twofauth.android.CancellableEditTextPreference android:key="server" android:title="@string/server_location" android:dialogTitle="@string/server_location_dialog_title" android:dialogMessage="@string/server_location_dialog_message" android:singleLine="true" android:inputType="textUri|textNoSuggestions" android:persistent="false" />
 
-    <EditTextPreference android:key="token" android:title="@string/token_value" android:dialogTitle="@string/token_value_dialog_title" android:dialogMessage="@string/token_value_dialog_message" android:singleLine="true" android:inputType="textNoSuggestions" android:persistent="false" />
+    <com.twofauth.android.CancellableEditTextPreference android:key="token" android:title="@string/token_value" android:dialogTitle="@string/token_value_dialog_title" android:dialogMessage="@string/token_value_dialog_message" android:singleLine="true" android:inputType="textNoSuggestions" android:persistent="false" />
+
+    <Preference android:key="open-server-location" android:title="@string/open_server_location" android:summary="@string/open_server_location_summary" />
 
     <Preference android:key="sync-details" android:title="@string/sync_details" />
 
@@ -20,7 +22,7 @@
 
         <CheckBoxPreference android:key="minimize-app-after-copy-to-clipboard" android:title="@string/minimize_app_after_copy_to_clipboard" android:summary="@string/minimize_app_after_copy_to_clipboard_summary" android:defaultValue="@bool/minimize_app_after_copy_to_clipboard_default" />
 
-        <CheckBoxPreference android:key="vibrate-on-some-actions" android:title="@string/vibrate_on_some_actions" android:summary="@string/vibrate_on_some_actions_summary" android:defaultValue="@bool/vibrate_on_some_actions_default" />
+        <CheckBoxPreference android:key="haptic-feedback" android:title="@string/haptic_feedback" android:summary="@string/haptic_feedback_summary" android:defaultValue="@bool/haptic_feedback_default" />
 
     </PreferenceCategory>
 
@@ -30,9 +32,11 @@
 
         <CheckBoxPreference android:key="hide-otp-codes-automatically" android:title="@string/hide_otp_codes_automatically" android:summary="@string/hide_otp_codes_automatically_summary" android:defaultValue="@bool/hide_otp_codes_automatically_default" />
 
-        <CheckBoxPreference android:key="pin-access-enabled" android:title="@string/pin_access" android:summary="@string/pin_access_summary" android:defaultValue="false" />
+        <CheckBoxPreference android:key="show-next-otp-code" android:title="@string/show_next_otp_code" android:summary="@string/show_next_otp_code_summary" android:defaultValue="@bool/show_next_otp_code_default" />
 
-        <CheckBoxPreference android:key="fingerprint-access" android:title="@string/fingerprint_access" android:summary="@string/fingerprint_access_summary" android:defaultValue="false" />
+        <CheckBoxPreference android:key="pin-access" android:title="@string/pin_access" android:summary="@string/pin_access_summary" android:defaultValue="false" />
+
+        <CheckBoxPreference android:key="use-fingerprint-instead-of-pin-code" android:title="@string/use_fingerprint_instead_of_pin_code" android:summary="@string/use_fingerprint_instead_of_pin_code_summary" android:defaultValue="false" />
 
     </PreferenceCategory>
 
@@ -40,7 +44,9 @@
 
         <Preference android:key="github-repo" android:title="@string/github_repo" android:summary="@string/github_repo_summary" />
 
-        <CheckBoxPreference android:key="auto-updates-app" android:title="@string/auto_updates_app" android:summary="@string/auto_updates_app_summary" android:defaultValue="@bool/auto_updates_app_default" />
+        <CheckBoxPreference android:key="auto-update-app" android:title="@string/auto_update_app" android:summary="@string/auto_update_app_summary" android:defaultValue="@bool/auto_update_app_default" />
+
+        <CheckBoxPreference android:key="auto-update-app-only-in-wifi" android:title="@string/auto_update_app_only_in_wifi" android:summary="@string/auto_update_app_only_in_wifi_summary" android:defaultValue="@bool/auto_update_app_only_in_wifi_default" android:dependency="auto-update-app" />
 
         <Preference android:key="open-source-licenses" android:title="@string/open_source_licenses" android:summary="@string/open_source_licenses_summary" />
 

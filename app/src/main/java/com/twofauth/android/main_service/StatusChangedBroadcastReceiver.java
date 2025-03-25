@@ -1,4 +1,4 @@
-package com.twofauth.android.main_activity;
+package com.twofauth.android.main_service;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -10,23 +10,26 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 
 import com.twofauth.android.MainService;
+import com.twofauth.android.MainService.SyncResultType;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MainServiceStatusChangedBroadcastReceiver extends BroadcastReceiver {
-    public interface OnMainServiceStatusChanged {
+public class StatusChangedBroadcastReceiver extends BroadcastReceiver {
+    public interface OnMainServiceStatusChangedListener {
         public abstract void onServiceStarted();
 
-        public abstract void onServiceFinished();
+        public abstract void onServiceFinished(SyncResultType result_type);
 
-        public abstract void onDataSyncedFromServer();
+        public abstract void onDataSyncedFromServer(SyncResultType result_type);
     }
-    private final OnMainServiceStatusChanged mListener;
 
-    public MainServiceStatusChangedBroadcastReceiver(@NonNull final OnMainServiceStatusChanged listener) {
+    private final OnMainServiceStatusChangedListener mListener;
+
+    public StatusChangedBroadcastReceiver(@NonNull final OnMainServiceStatusChangedListener listener) {
         mListener = listener;
     }
+
     public synchronized void onReceive(@NotNull final Context context, @Nullable final Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
@@ -34,10 +37,12 @@ public class MainServiceStatusChangedBroadcastReceiver extends BroadcastReceiver
                 mListener.onServiceStarted();
             }
             else if (MainService.ACTION_SERVICE_FINISHED.equals(action)) {
-                mListener.onServiceFinished();
+                final String result_type = intent.getStringExtra(MainService.EXTRA_RESULT_TYPE);
+                mListener.onServiceFinished(result_type == null ? null : SyncResultType.valueOf(result_type));
             }
             else if (MainService.ACTION_SERVICE_DATA_SYNCED.equals(action)) {
-                mListener.onDataSyncedFromServer();
+                final String result_type = intent.getStringExtra(MainService.EXTRA_RESULT_TYPE);
+                mListener.onDataSyncedFromServer(result_type == null ? null : SyncResultType.valueOf(result_type));
             }
         }
     }

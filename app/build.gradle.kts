@@ -34,7 +34,7 @@ android {
         minSdk = 29
         targetSdk = 35
         versionCode = increaseVersionCode()
-        versionName = "1.12"
+        versionName = "2.0"
     }
 
     buildTypes {
@@ -75,5 +75,7 @@ dependencies {
     implementation(libs.cardview)
     implementation(libs.bastiaanjansen.otp)
     implementation(libs.gson)
+    implementation(libs.sql.cypher)
+    implementation(libs.sqlite)
 }
 

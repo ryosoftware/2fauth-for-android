@@ -1,6 +1,5 @@
 package com.twofauth.android.main_activity;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -22,22 +21,22 @@ import java.util.List;
 public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements GroupViewHolder.OnViewHolderClickListener {
     private static final int GROUP = 1;
     private final List<String> mItems = new ArrayList<String>();
-    private final OnSelectedGroupChanges mOnSelectedGroupChanges;
+    private final OnSelectedGroupChangesListener mOnSelectedGroupChangesListener;
     private final Object mSynchronizationObject = new Object();
 
     private RecyclerView mRecyclerView = null;
     private int mActiveGroupPosition = RecyclerView.NO_POSITION;
 
-    public interface OnSelectedGroupChanges {
+    public interface OnSelectedGroupChangesListener {
         public abstract void onSelectedGroupChanges(final String selected_group, final String previous_selected_group);
     }
 
-    public GroupsListAdapter(@NotNull final OnSelectedGroupChanges on_selected_group_changes) {
-        mOnSelectedGroupChanges = on_selected_group_changes;
+    public GroupsListAdapter(@NotNull final OnSelectedGroupChangesListener on_selected_group_changes_listener) {
+        mOnSelectedGroupChangesListener = on_selected_group_changes_listener;
     }
 
-    public GroupsListAdapter(@Nullable final List<String> items, @NotNull final OnSelectedGroupChanges on_selected_group_changes) {
-        this(on_selected_group_changes);
+    public GroupsListAdapter(@Nullable final List<String> items, @NotNull final OnSelectedGroupChangesListener on_selected_group_changes_listener) {
+        this(on_selected_group_changes_listener);
         setItems(items);
     }
 
@@ -105,7 +104,7 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             final int older_active_group_position = mActiveGroupPosition;
             mActiveGroupPosition = (older_active_group_position == position) ? RecyclerView.NO_POSITION : position;
             RecyclerViewUtils.notifyItemChanged(this, mRecyclerView, new int[] { older_active_group_position, mActiveGroupPosition });
-            mOnSelectedGroupChanges.onSelectedGroupChanges(mActiveGroupPosition == RecyclerView.NO_POSITION ? null : getItem(mActiveGroupPosition), older_active_group_position == RecyclerView.NO_POSITION ? null : getItem(older_active_group_position));
+            mOnSelectedGroupChangesListener.onSelectedGroupChanges(mActiveGroupPosition == RecyclerView.NO_POSITION ? null : getItem(mActiveGroupPosition), older_active_group_position == RecyclerView.NO_POSITION ? null : getItem(older_active_group_position));
         }
     }
 

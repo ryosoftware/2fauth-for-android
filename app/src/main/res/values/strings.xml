@@ -26,6 +26,9 @@
     <string name="server_location_has_changed_and_token_defined_and_no_downloaded_data_exists">Due to the server location update, for your safety, access token was also removed</string>
     <string name="server_location_has_changed_and_token_not_defined_and_no_downloaded_data_exists">The server location has been updated</string>
 
+    <string name="open_server_location">Open in Browser</string>
+    <string name="open_server_location_summary">Open the server\'s website in a web browser window</string>
+
     <string name="token_value">Token value</string>
     <string name="token_value_is_set_summary">Click to set a new token</string>
     <string name="token_value_is_not_set_summary">Click to set the token value</string>
@@ -35,6 +38,8 @@
 
     <string name="token_has_changed_and_downloaded_data_exists">The server access token has been updated.\n\nAdditionally, we recommend that you delete any previously downloaded account data from the app.\n\nDo you want to delete the data now?</string>
     <string name="token_has_changed_and_no_downloaded_data_exists">The server access token has been updated</string>
+
+    <string name="not_synced_changes_will_be_lost">There are unsynced changes that will be lost if you continue with this operation without first performing a data synchronization.\n\nAre you sure you want to continue?</string>
 
     <plurals name="number_of_accounts">
         <item quantity="one">There are one account listed</item>
@@ -49,6 +54,9 @@
     <string name="sync_details">Sync details</string>
     <string name="click_to_sync_data">Click to sync data</string>
     <string name="sync_is_in_progress">Data synchronization is in progress</string>
+    <string name="sync_no_changes">No changes have been detected</string>
+    <string name="sync_error">There was an error during synchronization process</string>
+    <string name="sync_completed">Synchronization completed</string>
     <string name="last_sync_error">Last synchronization was on %2$s but not completed due to the following error: %1$s.\n\n%3$s</string>
 
     <plurals name="sync_details">
@@ -60,8 +68,9 @@
     <string name="appearance">Appearance &amp; usability</string>
 
     <string name="otp_code">OTP code</string>
+    <string name="hotp_counter">(#%1$d)</string>
 
-    <string name="otp_type_is_unsupported">%1$s algorithm is not supported</string>
+    <string name="otp_type_is_unsupported">%2$s (%1$s) algorithm is not supported</string>
 
     <string name="sort_accounts_by_last_use">Sort accounts by usage</string>
     <string name="sort_accounts_by_last_use_summary">Sort accounts by usage (list first the last accounts for which an OTP code has been displayed) instead of just sorting by service name</string>
@@ -79,8 +88,8 @@
     <string name="minimize_app_after_copy_to_clipboard">Minimize after Copy to Clipboard</string>
     <string name="minimize_app_after_copy_to_clipboard_summary">Minimizes the app when an OTP code is copied to the Clipboard</string>
 
-    <string name="vibrate_on_some_actions">Vibration feedback</string>
-    <string name="vibrate_on_some_actions_summary">Make phone vibrate as feedback for some actions</string>
+    <string name="haptic_feedback">Haptic vibration</string>
+    <string name="haptic_feedback_summary">Make your phone vibrate slightly in response to some actions, such as pressing a button, showing or hiding an OTP code, or copying it to the clipboard</string>
 
     <string name="security">Security</string>
 
@@ -90,6 +99,9 @@
 
     <string name="hide_otp_codes_automatically">Hide OTP codes automatically</string>
     <string name="hide_otp_codes_automatically_summary">Automatically hide the OTP code after a complete display cycle (you must press it again to display the next one)</string>
+
+    <string name="show_next_otp_code">Show next OTP code</string>
+    <string name="show_next_otp_code_summary">For time-based codes (TOTP), displaying the code will also display the next one.\n\nPlease note that the \"copy to clipboard\" function will only work on the current code.</string>
 
     <string name="pin_access">PIN access</string>
     <string name="pin_access_summary">Require a PIN code to access the App</string>
@@ -102,10 +114,13 @@
     <string name="pin_has_been_set">PIN has been set</string>
     <string name="pin_has_been_removed">PIN has been removed</string>
 
-    <string name="fingerprint_access">Fingerprint access</string>
-    <string name="fingerprint_access_summary">Require user\'s fingerprint to access the App</string>
+    <string name="use_fingerprint_instead_of_pin_code">Fingerprint access</string>
+    <string name="use_fingerprint_instead_of_pin_code_summary">Require user\'s fingerprint to access the App</string>
     <string name="use_your_fingerprint_to_unlock_the_app">Biometric verification</string>
     <string name="fingerprint_is_not_valid">We cannot validate your identity</string>
+    <string name="fingerprint_validation_disabled_due_to_biometric_enrollment">Fingerprint validation disabled due to biometric enrollment</string>
+
+    <string name="keystore_access_error">An error occurred while accessing the KeyStore</string>
 
     <string name="others">Others</string>
 
@@ -115,14 +130,18 @@
     <string name="github_repo">GitHub repo</string>
     <string name="github_repo_summary">Open the app\'s GitHub repository to get information about the latest releases, report bugs, or contribute to development</string>
 
-    <string name="auto_updates_app">Automatic updates</string>
-    <string name="auto_updates_app_summary">When you enter the app, it will connect to the repository to check for updates, downloading and installing them if necessary.</string>
+    <string name="auto_update_app">Automatic updates</string>
+    <string name="auto_update_app_summary">When you enter the app, it will connect to the repository to check for updates, downloading and installing them if necessary.</string>
     <string name="there_is_an_update_version">You\'re using version %1$s of the app, but version %2$s has already been released. Would you like to update now?</string>
+
+    <string name="auto_update_app_only_in_wifi">Update only in WiFi Networks</string>
+    <string name="auto_update_app_only_in_wifi_summary">Only check for and download new versions of the app if there is an active WiFi connection.</string>
 
     <string name="search">Enter a text to filter accounts&#8230;</string>
 
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
     <string name="ok">OK</string>
     <string name="install_now">Install now</string>
 

@@ -11,6 +11,7 @@ public class RecyclerViewUtils {
             recycler_view.post(() -> adapter.notifyDataSetChanged());
         }
     }
+
     public static void notifyItemChanged(@NotNull final RecyclerView.Adapter adapter, @Nullable final RecyclerView recycler_view, final int position) {
         if ((recycler_view != null) && (position != RecyclerView.NO_POSITION)) {
             recycler_view.post(() -> adapter.notifyItemChanged(position));

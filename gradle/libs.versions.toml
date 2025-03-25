@@ -16,6 +16,8 @@ bastiaanJansenOtp = "2.1.0"
 androidxBiometric = "1.4.0-alpha02"
 androidxLifecycle = "2.2.0"
 gson = "2.12.1"
+sqlCipher = "4.6.0"
+sqlite = "2.2.0"
 
 [libraries]
 
@@ -32,7 +34,10 @@ recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version
 cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardView" }
 bastiaanjansen-otp = { group = "com.github.bastiaanjansen", name = "otp-java", version.ref = "bastiaanJansenOtp" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+sql-cypher = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "sqlCipher" }
+sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlite" }
 
 [plugins]
 
 android-application = { id = "com.android.application", version.ref = "agp" }
+

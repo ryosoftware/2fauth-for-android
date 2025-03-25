@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.twofauth.android.ListUtils;
@@ -32,6 +34,7 @@ public class AccountsListIndexAdapter extends RecyclerView.Adapter<RecyclerView.
     private int mActiveIndexPosition = RecyclerView.NO_POSITION;
     private RecyclerView mRecyclerView = null;
     private OnIndexEntryClickListener mOnIndexEntryClickListener = null;
+
     public AccountsListIndexAdapter() {}
 
     public AccountsListIndexAdapter(@Nullable final List<Character> items) {
@@ -118,7 +121,10 @@ public class AccountsListIndexAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public void setActiveIndexEntry(final char letter) {
         synchronized (mSynchronizationObject) {
-            setActiveIndexEntry(mItems.indexOf(letter));
+            if (setActiveIndexEntry(mItems.indexOf(letter))) {
+                final LinearLayoutManager layout_manager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
+                mRecyclerView.smoothScrollToPosition(mActiveIndexPosition);
+            }
         }
     }
 
