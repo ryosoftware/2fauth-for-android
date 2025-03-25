@@ -15,7 +15,7 @@ To do this, we have developed an Android App that reads 2FA accounts from a user
   * Biometrics (Android Keystore)
 - We store server URL, token and app unlock PIN code encrypted with a secure key stored at Android Keystore
 - Screen capture prevention
-- Tap to reveal
+- Tap to reveal (capable to show current and next TOTP code)
 - Compatible with Google Authenticator
 - Supports industry standard algorithms: HOTP and TOTP
 - Alphabetic/last use sorting
