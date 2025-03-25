@@ -34,4 +34,4 @@ jobs:
           VERSION_NAME: ${{ env.versionName }}
         run: |
           gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
-          gh release edit ${{ github.event.release.tag_name }} --notes "{ \"version\": { \"code\": $VERSION_CODE, \"name\": \"$VERSION_NAME\" }" 
+          gh release edit ${{ github.event.release.tag_name }} --notes "{ \"version\": { \"code\": $VERSION_CODE, \"name\": \"$VERSION_NAME\" } }" 
