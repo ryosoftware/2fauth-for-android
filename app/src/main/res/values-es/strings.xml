@@ -18,7 +18,7 @@
 
     <string name="server_location">URL del servidor</string>
     <string name="server_location_dialog_title">@string/server_location</string>
-    <string name="server_location_dialog_message">Por favor, introduzca la dirección del servidor (incluyendo la parte correspondiente al protocolo http/https).\n\nEjemplo: https://demo.2fauth.app</string>
+    <string name="server_location_dialog_message">Por favor, introduzca la dirección del servidor (incluyendo la parte correspondiente al protocolo http/https y el puerto, en caso de que éste no sea el estándar).\n\nEjemplo: https://demo.2fauth.app</string>
     <string name="server_location_is_not_set">Server location is not set</string>
     <string name="server_http_is_insecure_warning">La ubicación del servidor que ha especificado no es segura.\n\nLe recomendamos encarecidamente que lo traslade a una ubicación segura (quizás tenga que instalar traefik, nginx-proxy o similar) excepto para realizar pruebas y si conoce los riesgos.</string>
 
@@ -28,7 +28,7 @@
     <string name="server_location_has_changed_and_token_not_defined_and_no_downloaded_data_exists">La ubicación del servidor se ha actualizado</string>
 
     <string name="open_server_location">Abrir en navegador</string>
-    <string name="open_server_location_summary">Abre el sitio web del servidor en una ventana del navegador web</string>
+    <string name="open_server_location_summary">Abre el sitio del servidor en una ventana del navegador web</string>
 
     <string name="token_value">Token de acceso</string>
     <string name="token_value_is_set_summary">Haga clic para actualizar el valor del token de acceso</string>
