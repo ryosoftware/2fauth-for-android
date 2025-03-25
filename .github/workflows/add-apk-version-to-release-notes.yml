@@ -1,0 +1,37 @@
+name: Add APK version to release notes
+
+on:
+  release:
+    push:
+      types:
+      - published
+      
+permissions:
+  contents: write
+
+jobs:
+  extract-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download APK
+        run: |
+          curl -L -o app-release.apk ${{ github.event.release.assets[0].browser_download_url }}
+
+      - name: Extract versionCode and versionName from APK
+        run: |
+          sudo apt-get install -y aapt
+          versionCode=$(aapt dump badging app-release.apk | grep -oP "versionCode='\\d+'" | cut -d"'" -f2)
+          versionName=$(aapt dump badging app-release.apk | grep -oP "versionName='.+'" | cut -d"'" -f2)          
+          echo "versionCode=$versionCode" >> $GITHUB_ENV
+          echo "versionName=$versionName" >> $GITHUB_ENV
+
+      - name: Update release notes
+        env:
+          VERSION_CODE: ${{ env.versionCode }}
+          VERSION_NAME: ${{ env.versionName }}
+        run: |
+          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+          gh release edit ${{ github.event.release.tag_name }} --notes "{ \"version\": { \"code\": $VERSION_CODE, \"name\": \"$VERSION_NAME\" }" 
