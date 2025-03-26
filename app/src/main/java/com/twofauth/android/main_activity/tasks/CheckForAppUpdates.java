@@ -2,6 +2,7 @@ package com.twofauth.android.main_activity.tasks;
 
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Build;
 import android.util.Log;
 
 import com.twofauth.android.BaseActivity;
@@ -28,16 +29,20 @@ public class CheckForAppUpdates {
     private static final String LATEST_RELEASE_URL = "https://api.github.com/repos/kslcsdalsadg/2fauth-for-android/releases/latest";
     private static final String DRAFT_ENTRY_NAME = "draft";
     private static final String PRE_RELEASE_ENTRY_NAME = "prerelease";
-    private static final String NOTES_ENTRY_NAME = "body";
+    
     private static final String APP_VERSION_ENTRY_NAME = "version";
     private static final String APP_VERSION_NAME_ENTRY_NAME = "name";
     private static final String APP_VERSION_CODE_ENTRY_NAME = "code";
+    private static final String APP_APKS_ENTRY_NAME = "apks";
+    private static final String APP_DEFAULT_APK_ENTRY_NAME = "default";
     
     private static final String ASSETS_ENTRY_NAME = "assets";
     private static final String ASSET_NAME_ENTRY_NAME = "name";
-    private static final String APK_ENTRY_LOCATION_ENTRY_NAME = "browser_download_url";
-    private static final String APK_ENTRY_SIZE_ENTRY_NAME = "size";
-    private static final String APK_NAME = "app-release.apk";
+    private static final String ENTRY_LOCATION_ENTRY_NAME = "browser_download_url";
+    private static final String ENTRY_SIZE_ENTRY_NAME = "size";
+
+
+    private static final String APK_VERSION_DETAILS_NAME = "app-release-data.json";
 
     public interface OnCheckForUpdatesListener {
         public abstract void onCheckForUpdatesFinished(File downloaded_app_file, AppVersionData downloaded_app_version);
@@ -63,6 +68,16 @@ public class CheckForAppUpdates {
         }
     }
 
+    private static class DownloadeableAppVersionData {
+        private final String name;
+        private final AppVersionData version;
+
+        DownloadeableAppVersionData(@NotNull final String _name, @NotNull final AppVersionData _version) {
+            name = _name;
+            version = _version;
+        }
+    }
+
     private static class CheckForAppUpdatesImplementation implements Main.OnBackgroundTaskExecutionListener {
         private final BaseActivity mActivity;
         private final OnCheckForUpdatesListener mListener;
@@ -83,23 +98,12 @@ public class CheckForAppUpdates {
             return null;
         }
 
-        private AppVersionData getLatestReleaseVersionData(@NotNull final JSONObject object) throws Exception {
-            if (object.has(NOTES_ENTRY_NAME)) {
-                final JSONObject notes_object = JsonUtils.StringToJsonObject(object.optString(NOTES_ENTRY_NAME, null));
-                if ((notes_object != null) && (notes_object.has(APP_VERSION_ENTRY_NAME))) {
-                    final JSONObject version_object = notes_object.getJSONObject(APP_VERSION_ENTRY_NAME);
-                    return new AppVersionData(version_object.optString(APP_VERSION_NAME_ENTRY_NAME, null), version_object.optInt(APP_VERSION_CODE_ENTRY_NAME, 0));
-                }
-            }
-            return null;
-        }
-
-        private JSONObject getLatestApkFileData(@NotNull final JSONObject object) throws Exception {
+        private JSONObject getReleaseAssetFileData(@NotNull final JSONObject object, @NotNull final String asset_name) throws Exception {
             final JSONArray assets = object.optJSONArray(ASSETS_ENTRY_NAME);
             if (assets != null) {
                 for (int i = 0; i < assets.length(); i ++) {
                     final JSONObject asset = assets.getJSONObject(i);
-                    if (asset.optString(ASSET_NAME_ENTRY_NAME).equals(APK_NAME)) {
+                    if (asset.optString(ASSET_NAME_ENTRY_NAME).equals(asset_name)) {
                         return asset;
                     }
                 }
@@ -107,23 +111,58 @@ public class CheckForAppUpdates {
             return null;
         }
 
-        private boolean downloadLatestApkFileData(@NotNull final JSONObject apk_asset_object, @NotNull final File file) throws Exception {
-            final String location = apk_asset_object.optString(APK_ENTRY_LOCATION_ENTRY_NAME);
+        private HttpURLConnection getAssetFileConnection(@NotNull final JSONObject object, final boolean raise_exception_on_error) throws Exception {
+            final String location = object.optString(ENTRY_LOCATION_ENTRY_NAME);
             if (! location.isEmpty()) {
                 final HttpURLConnection connection = HttpUtils.get(new URL(location));
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    return connection;
+                }
+                else if (raise_exception_on_error) {
+                    throw new Exception(connection.getResponseMessage());
+                }
+            }
+            return null;
+        }
+
+        private String getAssetFileContents(@NotNull final JSONObject object, @NotNull final String asset_name, final boolean raise_exception_on_error) throws Exception {
+            final JSONObject asset_data_object = getReleaseAssetFileData(object, asset_name);
+            final HttpURLConnection connection = asset_data_object == null ? null : getAssetFileConnection(asset_data_object, raise_exception_on_error);
+            return connection == null ? null : HttpUtils.getContentString(connection);
+
+        }
+
+        private boolean downloadAssetFile(@NotNull final JSONObject object, @NotNull final String asset_name, @NotNull final File file, final boolean raise_exception_on_error) throws Exception {
+            final JSONObject asset_data_object = getReleaseAssetFileData(object, asset_name);
+            if (asset_data_object != null) {
+                final HttpURLConnection connection = getAssetFileConnection(asset_data_object, raise_exception_on_error);
+                if (connection != null) {
                     HttpUtils.saveContent(connection, file);
-                    if (file.length() == apk_asset_object.optInt(APK_ENTRY_SIZE_ENTRY_NAME)) {
+                    if (file.length() == asset_data_object.optInt(ENTRY_SIZE_ENTRY_NAME)) {
                         return true;
                     }
                     file.delete();
+                }
+                else if (raise_exception_on_error) {
+                    throw new Exception(connection.getResponseMessage());
                 }
             }
             return false;
         }
 
+        private DownloadeableAppVersionData getLatestReleaseVersionData(@NotNull final JSONObject object, final boolean raise_exception_on_error) throws Exception {
+            final JSONObject release_data_object = JsonUtils.StringToJsonObject(getAssetFileContents(object, APK_VERSION_DETAILS_NAME, raise_exception_on_error));
+            if ((release_data_object != null) && (release_data_object.has(APP_VERSION_ENTRY_NAME)) && (release_data_object.has(APP_APKS_ENTRY_NAME))) {
+                final JSONObject version_object = release_data_object.getJSONObject(APP_VERSION_ENTRY_NAME), apks_object = release_data_object.getJSONObject(APP_APKS_ENTRY_NAME);
+                final String[] supported_abis = Build.SUPPORTED_ABIS;
+                final String apk_asset_name = ((supported_abis == null) || (supported_abis.length == 0)) ? APP_DEFAULT_APK_ENTRY_NAME : apks_object.optString(supported_abis[0], apks_object.getString(APP_DEFAULT_APK_ENTRY_NAME));
+                return new DownloadeableAppVersionData(apk_asset_name, new AppVersionData(version_object.getString(APP_VERSION_NAME_ENTRY_NAME), version_object.getInt(APP_VERSION_CODE_ENTRY_NAME)));
+            }
+            return null;
+        }
+        
         private File getApkLocalFile() throws Exception {
-            return new File(mActivity.getExternalFilesDir("downloads"), APK_NAME);
+            return new File(mActivity.getExternalFilesDir("downloads"), "app-release.apk");
         }
 
         private AppVersionData getLastDownloadedAppVersionData(@NotNull final SharedPreferences preferences) {
@@ -152,21 +191,18 @@ public class CheckForAppUpdates {
                         final JSONObject object = getLatestReleaseData(true);
                         if ((! object.optBoolean(DRAFT_ENTRY_NAME, true)) && (! object.optBoolean(PRE_RELEASE_ENTRY_NAME, true))) {
                             final int installed_app_version_code = resources.getInteger(R.integer.app_version_number_value);
-                            final AppVersionData latest_release_version_data = getLatestReleaseVersionData(object);
+                            final DownloadeableAppVersionData latest_release_version_data = getLatestReleaseVersionData(object, true);
                             AppVersionData latest_downloaded_version_data = getLastDownloadedAppVersionData(preferences);
-                            if ((latest_downloaded_version_data != null) && ((latest_downloaded_version_data.code < installed_app_version_code) || ((latest_release_version_data != null) && (latest_downloaded_version_data.code < latest_release_version_data.code)))) {
+                            if ((latest_downloaded_version_data != null) && ((latest_downloaded_version_data.code < installed_app_version_code) || ((latest_release_version_data != null) && (latest_downloaded_version_data.code < latest_release_version_data.version.code)))) {
                                 deleteLastDownloadedAppData(preferences, apk_local_file);        
                                 latest_downloaded_version_data = null;                 
                             }
-                            if ((latest_release_version_data != null) && (latest_release_version_data.code > installed_app_version_code)) {
+                            if ((latest_release_version_data != null) && (latest_release_version_data.version.code > installed_app_version_code)) {
                                 boolean there_is_an_app_update = (latest_downloaded_version_data != null);
-                                if (latest_downloaded_version_data == null) {
-                                    final JSONObject apk_asset = getLatestApkFileData(object);
-                                    if ((apk_asset != null) && (downloadLatestApkFileData(apk_asset, apk_local_file))) {
-                                        setLastDownloadedAppData(preferences, latest_release_version_data);
-                                        latest_downloaded_version_data = latest_release_version_data;
-                                        there_is_an_app_update = true;
-                                    }
+                                if ((latest_downloaded_version_data == null) && (downloadAssetFile(object, latest_release_version_data.name, apk_local_file, true))) {
+                                    setLastDownloadedAppData(preferences, latest_release_version_data.version);
+                                    latest_downloaded_version_data = latest_release_version_data.version;
+                                    there_is_an_app_update = true;
                                 }
                                 if (there_is_an_app_update) {
                                     return new DownloadedAppVersionData(apk_local_file, latest_downloaded_version_data);
