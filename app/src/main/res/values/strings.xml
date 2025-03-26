@@ -17,7 +17,7 @@
 
     <string name="server_location">Server URL</string>
     <string name="server_location_dialog_title">@string/server_location</string>
-    <string name="server_location_dialog_message">Please, enter the server location (including the http/https part).\n\nExample: https://demo.2fauth.app</string>
+    <string name="server_location_dialog_message">Please, enter the server location (including the http/https part and the port, in case this is not the standard).\n\nExample: https://demo.2fauth.app</string>
     <string name="server_location_is_not_set">Server location is not set</string>
     <string name="server_http_is_insecure_warning">The server location you specified is not secure.\n\nWe strongly recommend that you move it to a secure location (you may need to install traefik, nginx-proxy, or similar) except for testing purposes and if you are aware of the risks.</string>
 
@@ -103,7 +103,7 @@
     <string name="show_next_otp_code">Show next OTP code</string>
     <string name="show_next_otp_code_summary">For time-based codes (TOTP), displaying the code will also display the next one.\n\nPlease note that the \"copy to clipboard\" function will only work on the current code.</string>
 
-    <string name="pin_access">PIN access</string>
+    <string name="pin_access">Secret PIN</string>
     <string name="pin_access_summary">Require a PIN code to access the App</string>
     <string name="pin_access_dialog_title">@string/pin_access</string>
     <string name="pin_access_enter_current_pin">Please, enter current PIN</string>

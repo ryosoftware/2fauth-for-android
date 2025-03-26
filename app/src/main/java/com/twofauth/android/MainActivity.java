@@ -48,6 +48,7 @@ import com.twofauth.android.Database.TwoFactorAccount;
 
 import com.twofauth.android.main_activity.AccountsListAdapter;
 import com.twofauth.android.main_activity.FabButtonShowOrHide;
+import com.twofauth.android.main_activity.FabButtonShowOrHide.DisplayState;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 
 import android.view.ViewGroup;
@@ -170,8 +171,10 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
     }
 
     private void setAccountsListIndexVisibility() {
-        final boolean is_portrait = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
-        findViewById(R.id.accounts_list_index_container).setVisibility((mLoadedAccountsData == null) || (mLoadedAccountsData.accounts == null) || (mLoadedAccountsData.accounts.isEmpty()) || (! mLoadedAccountsData.alphaSorted) || (! mUnlocked) || (! is_portrait) ? View.GONE : View.VISIBLE);
+        final View accounts_list_index_container = findViewById(R.id.accounts_list_index_container);
+        final boolean accounts_list_index_container_will_be_visible = ((mLoadedAccountsData != null) && (mLoadedAccountsData.accounts != null) && (! mLoadedAccountsData.accounts.isEmpty()) && mLoadedAccountsData.alphaSorted && mUnlocked && (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
+        accounts_list_index_container.setVisibility((accounts_list_index_container_will_be_visible && (mFabButtonShowOrHide.getDisplayState() != DisplayState.HIDDEN)) ? View.VISIBLE : View.GONE);
+        mFabButtonShowOrHide.setOtherViews(accounts_list_index_container_will_be_visible ? new View[] { findViewById(R.id.accounts_list_index_container) } : null); 
     }
 
     private void setAccountsListIndexBounds() {
@@ -386,7 +389,6 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
     public void onDataLoadSuccess(@Nullable LoadedAccountsData data) {
         synchronized (mSynchronizationObject) {
             mLoadedAccountsData = data;
-            mFabButtonShowOrHide.setOtherViews(((data != null) && data.alphaSorted) ? new View[] { findViewById(R.id.accounts_list_index_container) } : null);
             onDataLoaded(true);
         }
     }
