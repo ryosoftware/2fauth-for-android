@@ -18,20 +18,18 @@ jobs:
 
       - name: Download APK
         run: |
-          curl -L -o app-release.apk ${{ github.event.release.assets[0].browser_download_url }}
+          apk_url=$(curl https://api.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }}/assets | jq -r '.[] | select(.name=="app-release.apk") | .browser_download_url')
+          curl -L -o app-release.apk ${apk_url}
 
       - name: Extract versionCode and versionName from APK
         run: |
           sudo apt-get install -y aapt
-          versionCode=$(aapt dump badging app-release.apk | grep -oP "versionCode='\\d+'" | cut -d"'" -f2)
-          versionName=$(aapt dump badging app-release.apk | grep -oP "versionName='.+'" | cut -d"'" -f2)          
-          echo "versionCode=$versionCode" >> $GITHUB_ENV
-          echo "versionName=$versionName" >> $GITHUB_ENV
+          version_code=$(aapt dump badging app-release.apk | grep -oP "versionCode='\\d+'" | cut -d"'" -f2)
+          version_name=$(aapt dump badging app-release.apk | grep -oP "versionName='.+'" | cut -d"'" -f2)          
+          echo "{ \"version\": { \"code\": ${version_code}, \"name\": \"${version_name}\" }, \"apks\": { \"default\": \"app-release.apk\" } }" > app-release-data.json
 
-      - name: Update release notes
-        env:
-          VERSION_CODE: ${{ env.versionCode }}
-          VERSION_NAME: ${{ env.versionName }}
-        run: |
-          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
-          gh release edit ${{ github.event.release.tag_name }} --notes "{ \"version\": { \"code\": $VERSION_CODE, \"name\": \"$VERSION_NAME\" } }" 
+      - name: Add release data file to release
+        uses: softprops/action-gh-release@v1
+        with:
+            files: ./app-release-data.json
+            token: ${{ secrets.GITHUB_TOKEN }}
