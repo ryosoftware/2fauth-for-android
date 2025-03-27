@@ -97,7 +97,7 @@ public class FabButtonShowOrHide {
     }
 
     private void hide(@NotNull final View view) {
-        final int cx = view.getMeasuredWidth() / 2, cy = view.getMeasuredHeight() / 2, radius = view.getWidth() / 2;
+        final int cx = view.getMeasuredWidth() / 2, cy = view.getMeasuredHeight() / 2, radius = Math.max(view.getWidth(), view.getHeight()) / 2;
         Animator animation = ViewAnimationUtils.createCircularReveal(view, cx, cy, radius, 0);
         animation.addListener(new AnimatorListenerAdapter() {
             @Override
