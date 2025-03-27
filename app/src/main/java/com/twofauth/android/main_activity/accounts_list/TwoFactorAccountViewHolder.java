@@ -37,6 +37,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
 
     private static final float OTP_BLINK_ITEM_VISIBLE_ALPHA = 1.0f;
     private static final float OTP_BLINK_ITEM_NOT_VISIBLE_ALPHA = 0.3f;
+    public static final long OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME = 10 * DateUtils.SECOND_IN_MILLIS;
     public static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
 
     private static final long ON_CLICK_VIBRATION_INTERVAL = 30;
@@ -169,7 +170,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mIcon.setImageBitmap(icon);
         mIcon.setVisibility(icon == null ? View.INVISIBLE : View.VISIBLE);
         mOtp.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp) : otp);
-        mOtp.setTextColor(context.getResources().getColor((millis_until_next_otp < 0) ? R.color.otp_hidden : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : R.color.otp_visible_normal, context.getTheme()));
+        mOtp.setTextColor(context.getResources().getColor((millis_until_next_otp < 0) ? R.color.otp_hidden : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : millis_until_next_otp < OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, context.getTheme()));
         mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);
         mOtpNext.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp_next) : otp_next);
         mOtpNext.setVisibility((otp_next == null) || (millis_until_next_otp == Long.MAX_VALUE) ? View.GONE : View.VISIBLE);

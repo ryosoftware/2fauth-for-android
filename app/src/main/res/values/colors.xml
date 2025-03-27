@@ -15,6 +15,9 @@
 
     <color name="otp_hidden">@color/gray</color>
     <color name="otp_visible_normal">@color/light_blue</color>
+    <color name="light_yellow">#FFF7DC6F</color>
+
+    <color name="otp_visible_near_of_last_seconds">@color/light_yellow</color>
     <color name="otp_visible_last_seconds">@color/light_red</color>
 
     <color name="edit_text_background">#FFFFFFFF</color>

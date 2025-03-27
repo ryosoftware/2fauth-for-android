@@ -8,6 +8,7 @@
     <color name="accent_foreground">@color/white</color>
 
     <color name="light_blue">#FFBABFFC</color>
+    <color name="light_yellow">#FFFCF3CF</color>
     <color name="light_red">#FFFCBABF</color>
 
     <color name="edit_text_background">#FF393939</color>

@@ -35,6 +35,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.twofauth.android.main_activity.AccountsListIndexAdapter;
 import com.twofauth.android.main_activity.AuthenticWithBiometrics;
 import com.twofauth.android.main_activity.AuthenticWithPin;
+import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountViewHolder;
 import com.twofauth.android.main_activity.tasks.CheckForAppUpdates;
 import com.twofauth.android.main_activity.tasks.CheckForAppUpdates.AppVersionData;
 import com.twofauth.android.main_activity.tasks.DataFilterer;
@@ -300,10 +301,10 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
         mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings), (FloatingActionButton) findViewById(R.id.copy_to_clipboard) });
     }
 
-    public void onTotpCodeShowAnimated(final long interval_until_current_otp_cycle_ends, final long cycle_time, final boolean current_otp_cycle_ending) {
+    public void onTotpCodeShowAnimated(final long interval_until_current_otp_cycle_ends, final long cycle_time) {
         final ProgressBar otp_time = (ProgressBar) findViewById(R.id.otp_time);
         otp_time.setProgress(Math.max(0, (int) ((100 * interval_until_current_otp_cycle_ends) / cycle_time)));
-        otp_time.setProgressTintList(ColorStateList.valueOf(getResources().getColor(current_otp_cycle_ending ? R.color.otp_visible_last_seconds : R.color.otp_visible_normal, getTheme())));
+        otp_time.setProgressTintList(ColorStateList.valueOf(getResources().getColor(interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, getTheme())));
     }
 
     public void onOtpCodeHidden() {
