@@ -16,10 +16,11 @@ To do this, we have developed an Android App that reads 2FA accounts from a user
 - We store server URL, token and app unlock PIN code encrypted with a secure key stored at Android Keystore
 - Screen capture prevention
 - Tap to reveal (capable to show current and next TOTP code)
-- Compatible with Google Authenticator
-- Supports industry standard algorithms: HOTP and TOTP
+- Clic to copy to clipboard (app can be configured to auto be minimized after the OTP has been copied)
+- Supports standard algorithms: HOTP and TOTP
 - Alphabetic/last use sorting
 - Search by name/issuer
+- Shortcuts to fast access to accounts by first service name letter or by group
 
 # SCREENSHOTS
 
