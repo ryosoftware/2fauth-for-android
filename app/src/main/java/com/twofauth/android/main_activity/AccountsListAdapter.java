@@ -315,7 +315,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 }
                 RecyclerViewUtils.notifyItemChanged(this, mRecyclerView, mActiveAccountPosition);
                 onOtpCodeAnimated(true, account);
-                if (TwoFactorAccount.OTP_TYPE_TOTP_VALUE.equals(otp_type)) {
+                if (TwoFactorAccount.OTP_TYPE_TOTP_VALUE.equals(otp_type) || TwoFactorAccount.OTP_TYPE_STEAM_VALUE.equals(otp_type)) {
                     RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, account.getMillisUntilNextOtpCompleteCycle(), account);
                 }
             }

@@ -42,7 +42,7 @@ public class TwoFactorAccountOptions {
 
     public String ungroupOtp(@Nullable final String otp) {
         if ((isUngroupOtpCodeEnabled()) && (otp != null)) {
-            final int first_part_length = (int) (otp.length() * 0.5f), last_part_length = otp.length() - first_part_length;
+            final int first_part_length = otp.length() / 2 + (otp.length() % 2 == 0 ? 0 : 1);
             return String.format("%s %s", otp.substring(0, first_part_length), otp.substring(first_part_length));
         }
         return null;

@@ -9,9 +9,9 @@ To do this, we have developed an Android App that reads 2FA accounts from a user
 # MAIN FEATURES
 
 - Free and open source
-- Secure 
+- Secure
 - The vault is encrypted (AES-256-GCM), and can be unlocked with:
-  * Password 
+  * Password
   * Biometrics (Android Keystore)
 - We store server URL, token and app unlock PIN code encrypted with a secure key stored at Android Keystore
 - Screen capture prevention
@@ -37,7 +37,8 @@ The app signature certification can be checked by the following command:
 
 # OPEN SOURCE LIBRARIES WE USE
 
-We generate the OTP codes using the JAVA library from <A HREF="https://github.com/BastiaanJansen/otp-java">Bastiaan Jansen</A> (<A HREF="https://github.com/BastiaanJansen/otp-java/blob/main/LICENSE">license summary</A>).
+We generate the TOTP/HOTP codes using the JAVA library from <A HREF="https://github.com/BastiaanJansen/otp-java">Bastiaan Jansen</A> (<A HREF="https://github.com/BastiaanJansen/otp-java/blob/main/LICENSE">license summary</A>).
+To generate STEAM OTP codes we have translated to Java the Python Algorithm from <A HREF="https://github.com/Art-em1s/Steam-OTP">Art-em1s</A> (<A HREF="https://github.com/Art-em1s/Steam-OTP/blob/master/LICENSE.md">license summary</A>).
 
 We use <A HREF="https://github.com/sqlcipher/sqlcipher-android">SQLCipher</A> to encrypt the Accounts database (<A HREF="https://github.com/sqlcipher/sqlcipher/blob/master/LICENSE.md">license summary</A>).
 
@@ -53,7 +54,7 @@ If you want, you can invite me to a coffee or a seafood platter
 
 # DISCLAIMER
 
-THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
 
 IN NO EVENT SHALL WE BE LIABLE FOR ANYONE DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF NO ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 

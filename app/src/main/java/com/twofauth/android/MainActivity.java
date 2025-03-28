@@ -294,7 +294,7 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
     }
 
     public void onOtpCodeBecomesVisible(@NotNull final String otp_type) {
-        findViewById(R.id.otp_time).setVisibility(TwoFactorAccount.OTP_TYPE_TOTP_VALUE.equals(otp_type) ? View.VISIBLE : View.INVISIBLE);
+        findViewById(R.id.otp_time).setVisibility((TwoFactorAccount.OTP_TYPE_TOTP_VALUE.equals(otp_type) || TwoFactorAccount.OTP_TYPE_STEAM_VALUE.equals(otp_type)) ? View.VISIBLE : View.INVISIBLE);
         if (mFabButtonShowOrHide.getDisplayState() != FabButtonShowOrHide.DisplayState.HIDDEN) {
             ((FloatingActionButton) findViewById(R.id.copy_to_clipboard)).show();
         }
