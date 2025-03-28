@@ -211,6 +211,62 @@ public class Database {
         }
     }
 
+    private static class HotpCodesGeneratorBasedOnMD5 {
+
+        private final byte[] mSecret;
+        private final int mDigits;
+
+        HotpCodesGeneratorBasedOnMD5(@NotNull final String secret, final int digits) {
+            mSecret = Base32Utils.decode(secret);
+            mDigits = digits;
+        }
+
+        public String getOtp(final long counter) {
+            try {
+                final ByteBuffer buffer = ByteBuffer.allocate(8);
+                buffer.putLong(counter);
+                final Mac hmac = Mac.getInstance("HmacMD5");
+                hmac.init(new SecretKeySpec(mSecret, "HmacMD5"));
+                final byte[] hmac_bytes = hmac.doFinal(buffer.array());
+                final int offset = hmac_bytes[hmac_bytes.length - 1] & 0x0F;
+                final int binary_code = ((hmac_bytes[offset] & 0x7F) << 24) | ((hmac_bytes[offset + 1] & 0xFF) << 16) | ((hmac_bytes[offset + 2] & 0xFF) << 8) | (hmac_bytes[offset + 3] & 0xFF);
+                return String.format("%0" + mDigits + "d", binary_code % (int) Math.pow(10, mDigits));
+            }
+            catch (Exception e) {
+                Log.e(Constants.LOG_TAG_NAME, "Exception while generating a MD5 OTP Code", e);
+            }
+            return null;
+        }
+    }
+
+    private static class TotpCodesGeneratorBasedOnMD5 extends HotpCodesGeneratorBasedOnMD5 {
+        private final long mPeriod;
+
+        TotpCodesGeneratorBasedOnMD5(@NotNull final String secret, final int digits, final int period_in_seconds) {
+            super(secret, digits);
+            mPeriod = period_in_seconds * DateUtils.SECOND_IN_MILLIS;
+        }
+
+        @Override
+        public String getOtp(long time) {
+            return super.getOtp(time / mPeriod);
+        }
+
+        public String getOtp(@NotNull final Date date) {
+            return getOtp(date.getTime());
+        }
+
+        public String getOtp() {
+            return getOtp(new Date());
+        }
+
+        public long getPeriodInMillis() { return mPeriod; }
+
+        public long getPeriodUntilNextTimeWindowInMillis() {
+            return mPeriod - System.currentTimeMillis() % mPeriod;
+        }
+    }
+
     public static class ApplicationDatabase extends SQLiteOpenHelper {
         ApplicationDatabase(@NotNull final Context context, @NotNull final String password) {
             super(context, DATABASE_NAME, password, null, DATABASE_VERSION, 1, null, null, false);
@@ -256,6 +312,7 @@ public class Database {
         private static final String ALGORITHM_SHA256 = "sha256";
         private static final String ALGORITHM_SHA224 = "sha224";
         private static final String ALGORITHM_SHA1 = "sha1";
+        private static final String ALGORITHM_MD5 = "md5";
 
         private long _id;
 
@@ -325,13 +382,23 @@ public class Database {
         private Object getOtpGenerator() {
             if (mPasswordGenerator == null) {
                 if (OTP_TYPE_TOTP_VALUE.equals(mOtpType)) {
-                    mPasswordGenerator = new TOTPGenerator.Builder(mSecret).withHOTPGenerator(builder -> {
-                        builder.withPasswordLength(mPasswordLength);
-                        builder.withAlgorithm(ALGORITHM_SHA512.equals(mAlgorithm) ? HMACAlgorithm.SHA512 : ALGORITHM_SHA384.equals(mAlgorithm) ? HMACAlgorithm.SHA384 : ALGORITHM_SHA256.equals(mAlgorithm) ? HMACAlgorithm.SHA256 : ALGORITHM_SHA224.equals(mAlgorithm) ? HMACAlgorithm.SHA224 : HMACAlgorithm.SHA1);
-                    }).withPeriod(Duration.ofSeconds(mPeriod)).build();
+                    if (ALGORITHM_MD5.equals(mAlgorithm)) {
+                        mPasswordGenerator = new TotpCodesGeneratorBasedOnMD5(mSecret, mPasswordLength, mPeriod);
+                    }
+                    else {
+                        mPasswordGenerator = new TOTPGenerator.Builder(mSecret).withHOTPGenerator(builder -> {
+                            builder.withPasswordLength(mPasswordLength);
+                            builder.withAlgorithm(ALGORITHM_SHA512.equals(mAlgorithm) ? HMACAlgorithm.SHA512 : ALGORITHM_SHA384.equals(mAlgorithm) ? HMACAlgorithm.SHA384 : ALGORITHM_SHA256.equals(mAlgorithm) ? HMACAlgorithm.SHA256 : ALGORITHM_SHA224.equals(mAlgorithm) ? HMACAlgorithm.SHA224 : HMACAlgorithm.SHA1);
+                        }).withPeriod(Duration.ofSeconds(mPeriod)).build();
+                    }
                 }
                 else if (OTP_TYPE_HOTP_VALUE.equals(mOtpType)) {
-                    mPasswordGenerator = new HOTPGenerator.Builder(mSecret).withAlgorithm(ALGORITHM_SHA512.equals(mAlgorithm) ? HMACAlgorithm.SHA512 : ALGORITHM_SHA384.equals(mAlgorithm) ? HMACAlgorithm.SHA384 : ALGORITHM_SHA256.equals(mAlgorithm) ? HMACAlgorithm.SHA256 : ALGORITHM_SHA224.equals(mAlgorithm) ? HMACAlgorithm.SHA224 : HMACAlgorithm.SHA1).withPasswordLength(mPasswordLength).build();
+                    if (ALGORITHM_MD5.equals(mAlgorithm)) {
+                        mPasswordGenerator = new HotpCodesGeneratorBasedOnMD5(mSecret, mPasswordLength);
+                    }
+                    else {
+                        mPasswordGenerator = new HOTPGenerator.Builder(mSecret).withAlgorithm(ALGORITHM_SHA512.equals(mAlgorithm) ? HMACAlgorithm.SHA512 : ALGORITHM_SHA384.equals(mAlgorithm) ? HMACAlgorithm.SHA384 : ALGORITHM_SHA256.equals(mAlgorithm) ? HMACAlgorithm.SHA256 : ALGORITHM_SHA224.equals(mAlgorithm) ? HMACAlgorithm.SHA224 : HMACAlgorithm.SHA1).withPasswordLength(mPasswordLength).build();
+                    }
                 }
                 else if (OTP_TYPE_STEAM_VALUE.equals(mOtpType)) {
                     mPasswordGenerator = new SteamOtpCodesGenerator(mSecret, mPeriod);
@@ -412,7 +479,7 @@ public class Database {
 
         public boolean isOtpTypeSupported() {
             if ((OTP_TYPE_TOTP_VALUE.equals(mOtpType)) || (OTP_TYPE_HOTP_VALUE.equals(mOtpType))) {
-                for (String supported_algorithm : new String[] { ALGORITHM_SHA512, ALGORITHM_SHA384, ALGORITHM_SHA256, ALGORITHM_SHA224, ALGORITHM_SHA1 }) {
+                for (String supported_algorithm : new String[] { ALGORITHM_SHA512, ALGORITHM_SHA384, ALGORITHM_SHA256, ALGORITHM_SHA224, ALGORITHM_SHA1, ALGORITHM_MD5 }) {
                     if (supported_algorithm.equals(mAlgorithm)) {
                         return true;
                     }
@@ -529,6 +596,9 @@ public class Database {
             Object generator = getOtpGenerator();
             if (generator != null) {
                 if (OTP_TYPE_TOTP_VALUE.equals(mOtpType)) {
+                    if (ALGORITHM_MD5.equals(mAlgorithm)) {
+                        return ((TotpCodesGeneratorBasedOnMD5) generator).getPeriodInMillis();
+                    }
                     return ((TOTPGenerator) generator).getPeriod().toMillis();
                 }
                 else if (OTP_TYPE_HOTP_VALUE.equals(mOtpType)) {
@@ -545,6 +615,9 @@ public class Database {
             Object generator = getOtpGenerator();
             if (generator != null) {
                 if (OTP_TYPE_TOTP_VALUE.equals(mOtpType)) {
+                    if (ALGORITHM_MD5.equals(mAlgorithm)) {
+                        return ((TotpCodesGeneratorBasedOnMD5) generator).getPeriodUntilNextTimeWindowInMillis();
+                    }
                     return ((TOTPGenerator) generator).durationUntilNextTimeWindow().toMillis();
                 }
                 else if (OTP_TYPE_HOTP_VALUE.equals(mOtpType)) {
@@ -561,6 +634,9 @@ public class Database {
             Object generator = getOtpGenerator();
             if (generator != null) {
                 if (OTP_TYPE_TOTP_VALUE.equals(mOtpType)) {
+                    if (ALGORITHM_MD5.equals(mAlgorithm)) {
+                        return ((TotpCodesGeneratorBasedOnMD5) generator).getPeriodUntilNextTimeWindowInMillis() + ((TotpCodesGeneratorBasedOnMD5) generator).getPeriodInMillis();
+                    }
                     return ((TOTPGenerator) generator).durationUntilNextTimeWindow().toMillis() + ((TOTPGenerator) generator).getPeriod().toMillis();
                 }
                 else if (OTP_TYPE_HOTP_VALUE.equals(mOtpType)) {
@@ -577,9 +653,15 @@ public class Database {
             Object generator = getOtpGenerator();
             if (generator != null) {
                 if (OTP_TYPE_TOTP_VALUE.equals(mOtpType)) {
+                    if (ALGORITHM_MD5.equals(mAlgorithm)) {
+                        return ((TotpCodesGeneratorBasedOnMD5) generator).getOtp();
+                    }
                     return ((TOTPGenerator) generator).now();
                 }
                 else if (OTP_TYPE_HOTP_VALUE.equals(mOtpType)) {
+                    if (ALGORITHM_MD5.equals(mAlgorithm)) {
+                        return ((HotpCodesGeneratorBasedOnMD5) generator).getOtp(mCounter);
+                    }
                     return ((HOTPGenerator) generator).generate(mCounter);
                 }
                 else if (OTP_TYPE_STEAM_VALUE.equals(mOtpType)) {
@@ -593,6 +675,9 @@ public class Database {
             Object generator = getOtpGenerator();
             if (generator != null) {
                 if (OTP_TYPE_TOTP_VALUE.equals(mOtpType)) {
+                    if (ALGORITHM_MD5.equals(mAlgorithm)) {
+                        return ((TotpCodesGeneratorBasedOnMD5) generator).getOtp(date);
+                    }
                     return ((TOTPGenerator) generator).at(date);
                 }
                 else if (OTP_TYPE_STEAM_VALUE.equals(mOtpType)) {
