@@ -909,7 +909,7 @@ public class Database {
         public enum SortMode { SORT_BY_LAST_USE, SORT_BY_SERVICE};
 
         private static List<TwoFactorAccount> get(@NotNull final SQLiteDatabase database, @Nullable final SortMode sort_mode, final boolean only_not_synced_accounts) {
-            try (final Cursor cursor = database.query(true, TWO_FACTOR_ACCOUNTS_TABLE_NAME, TWO_FACTOR_ACCOUNT_PROJECTION, only_not_synced_accounts ? String.format("%s=?", TWO_FACTOR_ACCOUNT_NOT_SYNCED) : null, only_not_synced_accounts ? new String[] { "1" } : null, null, null, sort_mode == SortMode.SORT_BY_LAST_USE ? String.format("%S DESC", TWO_FACTOR_ACCOUNT_LAST_USE) : sort_mode == SortMode.SORT_BY_SERVICE ? String.format("%s ASC, %s ASC", TWO_FACTOR_ACCOUNT_SERVICE, TWO_FACTOR_ACCOUNT_USER) : null, null)) {
+            try (final Cursor cursor = database.query(true, TWO_FACTOR_ACCOUNTS_TABLE_NAME, TWO_FACTOR_ACCOUNT_PROJECTION, only_not_synced_accounts ? String.format("%s=?", TWO_FACTOR_ACCOUNT_NOT_SYNCED) : null, only_not_synced_accounts ? new String[] { "1" } : null, null, null, sort_mode == SortMode.SORT_BY_LAST_USE ? String.format("%S DESC", TWO_FACTOR_ACCOUNT_LAST_USE) : sort_mode == SortMode.SORT_BY_SERVICE ? String.format("%s COLLATE NOCASE ASC, %s COLLATE NOCASE ASC", TWO_FACTOR_ACCOUNT_SERVICE, TWO_FACTOR_ACCOUNT_USER) : null, null)) {
                 if (cursor.getCount() > 0) {
                     final List<TwoFactorAccount> accounts = new ArrayList<TwoFactorAccount>();
                     cursor.moveToFirst();
