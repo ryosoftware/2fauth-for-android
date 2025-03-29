@@ -660,9 +660,9 @@ public class Database {
                 }
                 else if (OTP_TYPE_HOTP_VALUE.equals(mOtpType)) {
                     if (ALGORITHM_MD5.equals(mAlgorithm)) {
-                        return ((HotpCodesGeneratorBasedOnMD5) generator).getOtp(mCounter);
+                        return ((HotpCodesGeneratorBasedOnMD5) generator).getOtp(mCounter - 1);
                     }
-                    return ((HOTPGenerator) generator).generate(mCounter);
+                    return ((HOTPGenerator) generator).generate(mCounter - 1);
                 }
                 else if (OTP_TYPE_STEAM_VALUE.equals(mOtpType)) {
                     return ((SteamOtpCodesGenerator) generator).getOtp();
