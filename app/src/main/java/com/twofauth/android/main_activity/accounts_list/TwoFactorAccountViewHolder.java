@@ -183,7 +183,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mOtpCounter.setVisibility(millis_until_next_otp == Long.MAX_VALUE ? View.VISIBLE : View.GONE);
         mDataNotSynced.setVisibility(account.isNotSynced() ? View.VISIBLE : View.GONE);
         final boolean error = ((! is_otp_type_supported) || (otp == null));
-        mOtpError.setText(context.getString(is_otp_type_supported ? R.string.otp_generation_error : R.string.otp_type_is_unsupported, account.getOtpType().toUpperCase(), account.getAlgorithm().toUpperCase()));
+        mOtpError.setText(is_otp_type_supported ? context.getString(millis_until_next_otp == Long.MAX_VALUE ? R.string.otp_generation_error_for_counter : R.string.otp_generation_error, account.getCounter()) : context.getString(R.string.otp_type_is_unsupported, account.getOtpType().toUpperCase(), account.getAlgorithm().toUpperCase()));
         mOtpError.setVisibility(error ? View.VISIBLE : View.GONE);
         mOtpContainer.setVisibility(error ? View.GONE : View.VISIBLE);
         itemView.setAlpha((show_otp || (! showing_other_otp)) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
