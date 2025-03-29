@@ -53,6 +53,7 @@ import com.twofauth.android.main_activity.FabButtonShowOrHide.DisplayState;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -67,7 +68,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements StatusChangedBroadcastReceiver.OnMainServiceStatusChangedListener, AccountsListAdapter.OnOtpCodeVisibleStateChangedListener, AccountsListAdapter.OnAccountNeedsToBeSynchronizedListener, GroupsListAdapter.OnSelectedGroupChangesListener, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinishedListener, AuthenticWithPin.OnPinAuthenticationFinishedListener, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher {
+public class MainActivity extends BaseActivity implements StatusChangedBroadcastReceiver.OnMainServiceStatusChangedListener, AccountsListAdapter.OnOtpCodeVisibleStateChangedListener, AccountsListAdapter.OnAccountNeedsToBeSynchronizedListener, GroupsListAdapter.OnSelectedGroupChangesListener, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinishedListener, AuthenticWithPin.OnPinAuthenticationFinishedListener, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher, ViewTreeObserver.OnGlobalLayoutListener {
     private static final String LAST_NOTIFIED_APP_UPDATED_VERSION_KEY = "last-notified-app-updated-version";
     private static final String LAST_NOTIFIED_APP_UPDATED_TIME_KEY = "last-notified-app-updated-time";
     private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
@@ -99,6 +100,7 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
     private boolean mRotatingSyncingAccountsFab = false;
 
     private boolean mFirstAccess = true;
+    private boolean mKeyboardVisible = false;
 
     @SuppressLint("CutPasteId")
     @Override
@@ -135,6 +137,7 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
         mRotateAnimation.setDuration(SYNC_BUTTON_ROTATION_DURATION);
         mRotateAnimation.setInterpolator(new LinearInterpolator());
         mRotateAnimation.setRepeatCount(Animation.INFINITE);
+        findViewById(android.R.id.content).getViewTreeObserver().addOnGlobalLayoutListener(this);
         checkForAppUpdates();
     }
 
@@ -173,7 +176,7 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
 
     private void setAccountsListIndexVisibility() {
         final View accounts_list_index_container = findViewById(R.id.accounts_list_index_container);
-        final boolean accounts_list_index_container_will_be_visible = ((mLoadedAccountsData != null) && (mLoadedAccountsData.accounts != null) && (! mLoadedAccountsData.accounts.isEmpty()) && mLoadedAccountsData.alphaSorted && mUnlocked && (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
+        final boolean accounts_list_index_container_will_be_visible = ((mLoadedAccountsData != null) && (mLoadedAccountsData.accounts != null) && (! mLoadedAccountsData.accounts.isEmpty()) && mLoadedAccountsData.alphaSorted && mUnlocked && (! mKeyboardVisible) && (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
         accounts_list_index_container.setVisibility((accounts_list_index_container_will_be_visible && (mFabButtonShowOrHide.getDisplayState() != DisplayState.HIDDEN)) ? View.VISIBLE : View.GONE);
         mFabButtonShowOrHide.setOtherViews(accounts_list_index_container_will_be_visible ? new View[] { findViewById(R.id.accounts_list_index_container) } : null); 
     }
@@ -197,6 +200,24 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
         ((GridLayoutManager) recycler_view.getLayoutManager()).setSpanCount(new_config.orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2);
         recycler_view.getAdapter().notifyDataSetChanged();
         setAccountsListIndexBounds();
+    }
+
+    private void onKeyboardVisibilityChanged(final boolean visible) {
+        synchronized (mSynchronizationObject) {
+            if (mKeyboardVisible != visible) {
+                mKeyboardVisible = visible;
+                setAccountsListIndexVisibility();
+            }
+        }
+    }
+
+    @Override
+    public void onGlobalLayout() {
+        final Rect rect = new Rect();
+        final View root_view = findViewById(android.R.id.content);
+        root_view.getWindowVisibleDisplayFrame(rect);
+        final int screen_height = root_view.getRootView().getHeight(), keypad_height = screen_height - rect.bottom;
+        onKeyboardVisibilityChanged(keypad_height > screen_height * 0.15);
     }
 
     private void onAuthenticationSucceeded() {
