@@ -156,7 +156,6 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
     public void onResume() {
         super.onResume();
         mReceiver.enable(this);
-        setAccountsListIndexBounds();
         setSyncDataButtonAvailability();
         loadData();
         unlock();
@@ -181,25 +180,12 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
         mFabButtonShowOrHide.setOtherViews(accounts_list_index_container_will_be_visible ? new View[] { findViewById(R.id.accounts_list_index_container) } : null); 
     }
 
-    private void setAccountsListIndexBounds() {
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            final LinearLayout accounts_index_recycler_view_container = (LinearLayout) findViewById(R.id.accounts_list_index_container);
-            final ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) accounts_index_recycler_view_container.getLayoutParams();
-            final FloatingActionButton open_app_settings_button = (FloatingActionButton) findViewById(R.id.open_app_settings);
-            params.width = UiUtils.getWidth(open_app_settings_button);
-            params.setMargins(0, params.topMargin, params.rightMargin, UiUtils.getPixelsFromDp(this, 16) + 3 * (UiUtils.getHeight(open_app_settings_button) + Math.abs((int) open_app_settings_button.getTranslationY())));
-            accounts_index_recycler_view_container.setLayoutParams(params);
-        }
-        setAccountsListIndexVisibility();
-    }
-
     @SuppressLint("NotifyDataSetChanged")
     public void onConfigurationChanged(@NotNull final Configuration new_config) {
         super.onConfigurationChanged(new_config);
         final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.accounts_list);
         ((GridLayoutManager) recycler_view.getLayoutManager()).setSpanCount(new_config.orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2);
         recycler_view.getAdapter().notifyDataSetChanged();
-        setAccountsListIndexBounds();
     }
 
     private void onKeyboardVisibilityChanged(final boolean visible) {
