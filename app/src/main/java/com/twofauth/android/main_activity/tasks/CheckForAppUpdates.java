@@ -156,7 +156,7 @@ public class CheckForAppUpdates {
             if ((release_data_object != null) && (release_data_object.has(APP_VERSION_ENTRY_NAME)) && (release_data_object.has(APP_APKS_ENTRY_NAME))) {
                 final JSONObject version_object = release_data_object.getJSONObject(APP_VERSION_ENTRY_NAME), apks_object = release_data_object.getJSONObject(APP_APKS_ENTRY_NAME);
                 final String[] supported_abis = Build.SUPPORTED_ABIS;
-                final String apk_asset_name = ((supported_abis == null) || (supported_abis.length == 0) || (! apks_object.has(supported_abis[0])) || StringUtils.isEmptyOrNull(apks_object.optString(supported_abis[0], ""))) ? APP_DEFAULT_APK_ENTRY_NAME : apks_object.getString(supported_abis[0]);
+                final String apk_asset_name = ((supported_abis == null) || (supported_abis.length == 0) || (! apks_object.has(supported_abis[0])) || StringUtils.isEmptyOrNull(apks_object.optString(supported_abis[0], ""))) ? apks_object.getString(APP_DEFAULT_APK_ENTRY_NAME) : apks_object.getString(supported_abis[0]);
                 return new DownloadeableAppVersionData(apk_asset_name, new AppVersionData(version_object.getString(APP_VERSION_NAME_ENTRY_NAME), version_object.getInt(APP_VERSION_CODE_ENTRY_NAME)));
             }
             return null;
