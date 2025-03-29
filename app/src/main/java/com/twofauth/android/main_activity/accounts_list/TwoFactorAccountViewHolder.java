@@ -37,6 +37,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
 
     private static final float OTP_BLINK_ITEM_VISIBLE_ALPHA = 1.0f;
     private static final float OTP_BLINK_ITEM_NOT_VISIBLE_ALPHA = 0.3f;
+    public static final long OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME = 10 * DateUtils.SECOND_IN_MILLIS;
     public static final long OTP_IS_ABOUT_TO_EXPIRE_TIME = 5 * DateUtils.SECOND_IN_MILLIS;
 
     private static final long ON_CLICK_VIBRATION_INTERVAL = 30;
@@ -109,9 +110,8 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private final TextView mOtp;
     private final TextView mOtpNext;
     private final TextView mOtpCounter;
-    private final TextView mOtpTypeUnsupported;
-
     private final View mDataNotSynced;
+    private final TextView mOtpError;
 
     private Animation mAnimation = null;
 
@@ -128,8 +128,8 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mOtp = (TextView) parent.findViewById(R.id.otp);
         mOtpNext = (TextView) parent.findViewById(R.id.otp_next);
         mOtpCounter = (TextView) parent.findViewById(R.id.otp_counter);
-        mOtpTypeUnsupported = (TextView) parent.findViewById(R.id.otp_type_unsupported);
         mDataNotSynced = parent.findViewById(R.id.account_data_not_synced);
+        mOtpError = (TextView) parent.findViewById(R.id.otp_error);
     }
 
     private String getHiddenOtp(@NotNull final TwoFactorAccount account) {
@@ -168,8 +168,9 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         final Bitmap icon = account.getIconBitmap(context);
         mIcon.setImageBitmap(icon);
         mIcon.setVisibility(icon == null ? View.INVISIBLE : View.VISIBLE);
+
         mOtp.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp) : otp);
-        mOtp.setTextColor(context.getResources().getColor((millis_until_next_otp < 0) ? R.color.otp_hidden : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : R.color.otp_visible_normal, context.getTheme()));
+        mOtp.setTextColor(context.getResources().getColor((millis_until_next_otp < 0) ? R.color.otp_hidden : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : millis_until_next_otp < OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, context.getTheme()));
         mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);
         mOtpNext.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp_next) : otp_next);
         mOtpNext.setVisibility((otp_next == null) || (millis_until_next_otp == Long.MAX_VALUE) ? View.GONE : View.VISIBLE);
@@ -180,11 +181,12 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
             setOtpAnimationByState(millis_until_next_otp);
         }
         mOtpCounter.setVisibility(millis_until_next_otp == Long.MAX_VALUE ? View.VISIBLE : View.GONE);
-        mOtpContainer.setVisibility(otp == null ? View.GONE : View.VISIBLE);
-        mOtpTypeUnsupported.setVisibility(otp == null ? View.VISIBLE : View.GONE);
-        mOtpTypeUnsupported.setText(context.getString(R.string.otp_type_is_unsupported, account.getOtpType().toUpperCase(), account.getAlgorithm().toUpperCase()));
         mDataNotSynced.setVisibility(account.isNotSynced() ? View.VISIBLE : View.GONE);
-        itemView.setAlpha((otp != null) && (show_otp || (! showing_other_otp)) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
+        final boolean error = ((! is_otp_type_supported) || (otp == null));
+        mOtpError.setText(is_otp_type_supported ? context.getString(millis_until_next_otp == Long.MAX_VALUE ? R.string.otp_generation_error_for_counter : R.string.otp_generation_error, account.getCounter()) : context.getString(R.string.otp_type_is_unsupported, account.getOtpType().toUpperCase(), account.getAlgorithm().toUpperCase()));
+        mOtpError.setVisibility(error ? View.VISIBLE : View.GONE);
+        mOtpContainer.setVisibility(error ? View.GONE : View.VISIBLE);
+        itemView.setAlpha((show_otp || (! showing_other_otp)) ? ACTIVE_ITEM_OR_NO_OTHER_ACTIVE_ITEM_ALPHA : NOT_ACTIVE_ITEM_ALPHA);
     }
 
     public boolean copyToClipboard(@NotNull final View view) {

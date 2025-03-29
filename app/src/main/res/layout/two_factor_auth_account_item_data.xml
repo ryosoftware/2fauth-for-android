@@ -108,10 +108,11 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/otp_type_unsupported"
+                android:id="@+id/otp_error"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?android:textColorSecondary"
+                android:textColor="@color/light_red"
+                android:textStyle="italic"
                 style="@style/Base.TextAppearance.AppCompat.Caption" />
 
         </LinearLayout>

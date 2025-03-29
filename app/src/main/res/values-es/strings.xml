@@ -72,6 +72,8 @@
     <string name="hotp_counter">(#%1$d)</string>
 
     <string name="otp_type_is_unsupported">El algoritmo %2$s (%1$s) no está soportado</string>
+    <string name="otp_generation_error">Error generando el código OTP</string>
+    <string name="otp_generation_error_for_counter">Error generando el código OTP para el contador #%1$d</string>
 
     <string name="sort_accounts_by_last_use">Ordenar cuentas según uso</string>
     <string name="sort_accounts_by_last_use_summary">Ordenar las cuentas según el uso (primero las últimas cuentas para las que se ha mostrado un código OTP) en lugar de ordenarlas simplemente por el nombre de servicio</string>

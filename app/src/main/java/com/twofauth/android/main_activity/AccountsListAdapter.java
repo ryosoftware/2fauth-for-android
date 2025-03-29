@@ -46,7 +46,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public interface OnOtpCodeVisibleStateChangedListener {
         public abstract void onOtpCodeBecomesVisible(String otp_type);
-        public abstract void onTotpCodeShowAnimated(long interval_until_current_otp_cycle_ends, long cycle_time, boolean current_otp_cycle_ending);
+        public abstract void onTotpCodeShowAnimated(long interval_until_current_otp_cycle_ends, long cycle_time);
         public abstract void onOtpCodeHidden();
     }
 
@@ -249,7 +249,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
         if (mOnOtpCodeVisibleStateChangedListener != null) {
             final long interval_until_current_otp_cycle_ends = account.getMillisUntilNextOtp();
-            mOnOtpCodeVisibleStateChangedListener.onTotpCodeShowAnimated(interval_until_current_otp_cycle_ends, account.getOtpMillis(), interval_until_current_otp_cycle_ends <= TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME);
+            mOnOtpCodeVisibleStateChangedListener.onTotpCodeShowAnimated(interval_until_current_otp_cycle_ends, account.getOtpMillis());
         }
     }
 
@@ -315,7 +315,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 }
                 RecyclerViewUtils.notifyItemChanged(this, mRecyclerView, mActiveAccountPosition);
                 onOtpCodeAnimated(true, account);
-                if (TwoFactorAccount.OTP_TYPE_TOTP_VALUE.equals(otp_type)) {
+                if (TwoFactorAccount.OTP_TYPE_TOTP_VALUE.equals(otp_type) || TwoFactorAccount.OTP_TYPE_STEAM_VALUE.equals(otp_type)) {
                     RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, account.getMillisUntilNextOtpCompleteCycle(), account);
                 }
             }
