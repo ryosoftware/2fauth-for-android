@@ -103,8 +103,8 @@ public class ServerDataSynchronizer
         }
 
         private void saveTwoFactorAuthIcon(@NotNull final JSONObject object) throws Exception {
-            final String server_icon_file = object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ICON_KEY, "");
-            final boolean is_server_icon_supported = ((! server_icon_file.isEmpty()) && (! server_icon_file.toLowerCase().endsWith(".svg")));
+            final String server_icon_file = (object.has(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ICON_KEY) && (! object.isNull(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ICON_KEY))) ? object.optString(Constants.TWO_FACTOR_AUTH_ACCOUNT_DATA_ICON_KEY, null) : null;
+            final boolean is_server_icon_supported = ((server_icon_file != null) && (! server_icon_file.isEmpty()) && (! server_icon_file.toLowerCase().endsWith(".svg")));
             final DashBoardIconsUtils.Mode[] modes = new DashBoardIconsUtils.Mode[] { DashBoardIconsUtils.Mode.DARK_MODE, DashBoardIconsUtils.Mode.LIGHT_MODE, null };
             for (DashBoardIconsUtils.Mode mode : modes) {
                 final File file = getTwoFactorAuthIconPath(mService, object, mode);
