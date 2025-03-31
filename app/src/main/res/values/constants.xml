@@ -1,5 +1,7 @@
 <resources>
 
+    <bool name="sync_on_startup_default">false</bool>
+
     <bool name="sort_accounts_by_last_use_default">false</bool>
     
     <bool name="ungroup_otp_code_default">true</bool>

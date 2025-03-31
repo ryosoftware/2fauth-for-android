@@ -66,6 +66,9 @@
         <item quantity="many">La última sincronización fue el %2$s y se leyeron los datos de %21$d cuentas.\n\n%3$s</item>
     </plurals>
 
+    <string name="sync_on_startup">Sincronizar al iniciar</string>
+    <string name="sync_on_startup_summary">Intenta sincronizar los datos del servidor cada vez que se inicia la app</string>
+
     <string name="appearance">Apariencia y usabilidad</string>
 
     <string name="otp_code">Código OTP</string>

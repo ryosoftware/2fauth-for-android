@@ -65,6 +65,9 @@
         <item quantity="many">The last sync was on %2$s and %1$d accounts were loaded.\n\n%3$s</item>
     </plurals>
 
+    <string name="sync_on_startup">Sync on startup</string>
+    <string name="sync_on_startup_summary">Attempts to sync server data every time the app starts</string>
+
     <string name="appearance">Appearance &amp; usability</string>
 
     <string name="otp_code">OTP code</string>

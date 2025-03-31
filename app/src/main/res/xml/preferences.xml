@@ -6,6 +6,8 @@
 
     <com.twofauth.android.CancellableEditTextPreference android:key="token" android:title="@string/token_value" android:dialogTitle="@string/token_value_dialog_title" android:dialogMessage="@string/token_value_dialog_message" android:singleLine="true" android:inputType="textNoSuggestions" android:persistent="false" />
 
+    <CheckBoxPreference android:key="sync-on-startup" android:title="@string/sync_on_startup" android:summary="@string/sync_on_startup_summary" android:defaultValue="@bool/sync_on_startup_default" />
+
     <Preference android:key="open-server-location" android:title="@string/open_server_location" android:summary="@string/open_server_location_summary" />
 
     <Preference android:key="sync-details" android:title="@string/sync_details" />

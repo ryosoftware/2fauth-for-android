@@ -120,9 +120,11 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                 final SharedPreferences preferences = SharedPreferencesUtilities.getDefaultSharedPreferences(context);
                 final Preference server_location_preference = findPreference(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY), token_preference = findPreference(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
                 server_location_preference.setSummary(SharedPreferencesUtilities.getEncryptedString(context, preferences, Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, getString(R.string.server_location_is_not_set)));
-                token_preference.setEnabled(preferences.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY));
-                token_preference.setSummary(preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY) ? R.string.token_value_is_set_summary : R.string.token_value_is_not_set_summary);
-                findPreference(OPEN_SERVER_LOCATION_KEY).setEnabled(preferences.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY));
+                final boolean server_location_set = preferences.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY), token_value_set = preferences.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY);
+                token_preference.setEnabled(server_location_set);
+                token_preference.setSummary(token_value_set ? R.string.token_value_is_set_summary : R.string.token_value_is_not_set_summary);
+                findPreference(Constants.SYNC_ON_STARTUP_KEY).setEnabled(server_location_set && token_value_set);
+                findPreference(OPEN_SERVER_LOCATION_KEY).setEnabled(server_location_set);
                 setSyncDetailsPreferenceState();
                 ((CheckBoxPreference) findPreference(PIN_ACCESS_ENABLED_KEY)).setChecked(preferences.getBoolean(PIN_ACCESS_ENABLED_KEY, false));
                 final CheckBoxPreference fingerprint_access_preference = (CheckBoxPreference) findPreference(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY);
@@ -158,6 +160,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             }
         });
         token_preference.setOnPreferenceChangeListener(this);
+        findPreference(Constants.SYNC_ON_STARTUP_KEY).setOnPreferenceChangeListener(this);
         findPreference(OPEN_SERVER_LOCATION_KEY).setOnPreferenceClickListener(this);
         findPreference(SYNC_DETAILS_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY).setOnPreferenceChangeListener(this);
@@ -335,6 +338,10 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                 onTokenChanged(context, trimmed_new_value);
                 return true;
             }
+        }
+        else if (Constants.SYNC_ON_STARTUP_KEY.equals(preference.getKey())) {
+            onSettingValueChanged(preference.getKey());
+            return true;
         }
         else if (Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY.equals(preference.getKey())) {
             onSettingValueChanged(preference.getKey());

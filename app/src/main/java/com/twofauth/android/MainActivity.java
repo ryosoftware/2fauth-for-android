@@ -138,6 +138,9 @@ public class MainActivity extends BaseActivity implements StatusChangedBroadcast
         mRotateAnimation.setInterpolator(new LinearInterpolator());
         mRotateAnimation.setRepeatCount(Animation.INFINITE);
         findViewById(android.R.id.content).getViewTreeObserver().addOnGlobalLayoutListener(this);
+        if (SharedPreferencesUtilities.getDefaultSharedPreferences(this).getBoolean(Constants.SYNC_ON_STARTUP_KEY, getResources().getBoolean(R.bool.sync_on_startup_default))) {
+            MainService.startService(this);
+        }
         checkForAppUpdates();
     }
 

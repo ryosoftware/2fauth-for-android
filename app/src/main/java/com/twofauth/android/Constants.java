@@ -25,6 +25,7 @@ public class Constants {
 
     // App options
 
+    public static final String SYNC_ON_STARTUP_KEY = "sync-on-startup";
     public static final String SORT_ACCOUNTS_BY_LAST_USE_KEY = "sort-accounts-by-last-use";
     public static final String UNGROUP_OTP_CODE_KEY = "ungroup-otp-code";
     public static final String DISPLAY_ACCOUNT_GROUP_KEY = "display-account-group";
