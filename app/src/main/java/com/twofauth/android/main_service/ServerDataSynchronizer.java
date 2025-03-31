@@ -248,17 +248,19 @@ public class ServerDataSynchronizer
                     result_type = pending_updates_synced ? SyncResultType.UPDATED : SyncResultType.NO_CHANGES;
                 }
                 else {
-                    for (JSONObject object : loaded_accounts.values()) {
-                        saveTwoFactorAuthIcon(object);
+                    if (loaded_accounts != null) {
+                        for (JSONObject object : loaded_accounts.values()) {
+                            saveTwoFactorAuthIcon(object);
+                        }
                     }
                     if (stored_accounts != null) {
                         for (Integer id : stored_accounts.keySet()) {
-                            if (! loaded_accounts.containsKey(id)) {
+                            if ((loaded_accounts == null) || (! loaded_accounts.containsKey(id))) {
                                 stored_accounts.get(id).delete();
                             }
                         }
                     }
-                    if (! Database.TwoFactorAccountAtomicOperations.set(loaded_accounts.values(), loaded_groups.values())) {
+                    if (! Database.TwoFactorAccountAtomicOperations.set(loaded_accounts == null ? null : loaded_accounts.values(), loaded_groups == null ? null : loaded_groups.values())) {
                         throw new Exception("Unexpected error when saving data to internal app database");
                     }
                     result_type = SyncResultType.UPDATED;
