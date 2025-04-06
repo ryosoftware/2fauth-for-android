@@ -4,6 +4,8 @@ on:
   release:
     push:
       types:
+      - created
+      - edited
       - published
       
 permissions:
