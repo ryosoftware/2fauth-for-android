@@ -277,10 +277,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     }
 
     private void enableEdition() {
-        mEditing = true;
         UI.animateIconChange(mEditOrSaveAccountDataButton, R.drawable.ic_actionbar_accept, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, true);
         UI.hideSubmenuAndRelatedOptions(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, mSubmenuButtons);
-        renableViews();
+        setViewsAvailability(mEditing = true);
     }
 
     private void copySecretToClipboard() {
@@ -490,7 +489,6 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mAdvancedDataLayout.setVisibility(adding_new_account ? View.VISIBLE : View.GONE);
         final String otp_type = mCurrentAccountData.getOtpType();
         ViewUtils.setSelected(this, mOtpTypeContainer, otp_type);
-        mCopySecretButton.setVisibility(adding_new_account ? View.GONE : View.VISIBLE);
         mSecretEditText.setInputType(adding_new_account ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD : InputType.TYPE_TEXT_VARIATION_PASSWORD);
         mSecretEditText.setTransformationMethod(adding_new_account ? null : new PasswordTransformationMethod());
         mSecretEditText.setText(mCurrentAccountData.getSecret());
@@ -524,66 +522,45 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             mEditing = ! mCurrentAccountData.inDatabase();
             mEditOrSaveAccountDataButton.setImageResource(mEditing ? R.drawable.ic_actionbar_accept : R.drawable.ic_actionbar_edit);
             mToggleSubmenuVisibilityButton.setVisibility(mEditing ? View.GONE : View.VISIBLE);
+            if (mEditing) { for (final FloatingActionButton button : mSubmenuButtons) { button.setVisibility(View.GONE); } }
             setEditableAccountData();
-            if (mEditing) { renableViews(); for (final FloatingActionButton button : mSubmenuButtons) { button.setVisibility(View.GONE); } }
-            else { disableViews(); }
+            setViewsAvailability(mEditing);
             setButtonsAvailability();
         }
     }
 
     // Disables (and reenables) the form inputs when data is trying to be updated or already updated
 
-    private void disableViews() {
-        mEditOrSaveAccountDataButton.setEnabled(false);
-        mToggleSubmenuVisibilityButton.setEnabled(false);
-        mDeleteOrUndeleteAccountDataButton.setEnabled(false);
-        mServerIdentitySpinner.setEnabled(false);
-        mServiceEditText.setEnabled(false);
-        mAccountEditText.setEnabled(false);
-        mGroupSpinner.setEnabled(false);
-        mIconImageView.setEnabled(false);
-        ViewUtils.setEnabled(mOtpTypeContainer, false);
-        mSecretEditText.setEnabled(false);
-        ViewUtils.setEnabled(mDigitsContainer, false);
-        ViewUtils.setEnabled(mAlgorithmContainer, false);
-        mPeriodEditText.setEnabled(false);
-        mCounterEditText.setEnabled(false);
+    private void setViewsAvailability(final boolean enable) {
+        mEditOrSaveAccountDataButton.setEnabled(enable && mEditing);
+        mToggleSubmenuVisibilityButton.setEnabled(enable && mEditing);
+        mDeleteOrUndeleteAccountDataButton.setEnabled(enable && mEditing);
+        mServerIdentitySpinner.setEnabled(enable && mEditing);
+        mServiceEditText.setEnabled(enable && mEditing);
+        mAccountEditText.setEnabled(enable && mEditing);
+        mGroupSpinner.setEnabled(enable && mEditing);
+        mIconImageView.setEnabled(enable && mEditing);
+        ViewUtils.setEnabled(mOtpTypeContainer, enable && mEditing);
+        mSecretEditText.setInputType(enable && mEditing ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD : InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        mSecretEditText.setTransformationMethod(enable && mEditing ? null : new PasswordTransformationMethod());
+        mSecretEditText.setEnabled(enable && mEditing);
+        mCopySecretButton.setEnabled((mWorking.getVisibility() != View.VISIBLE) && (! Strings.isEmptyOrNull(mCurrentAccountData.getSecret())));
+        ViewUtils.setEnabled(mDigitsContainer, enable && mEditing);
+        ViewUtils.setEnabled(mAlgorithmContainer, enable && mEditing);
+        mPeriodEditText.setEnabled(enable && mEditing);
+        mCounterEditText.setEnabled(enable && mEditing);
     }
 
     private void onSyncingDataStarted() {
         mWorking.setVisibility(View.VISIBLE);
         mContents.setAlpha(Constants.BLUR_ALPHA);
-        disableViews();
-    }
-
-    private void setSecretEditable() {
-        mSecretEditText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-        mSecretEditText.setTransformationMethod(null);
-        mSecretEditText.setEnabled(mEditing);
-        mCopySecretButton.setVisibility(View.GONE);
-    }
-
-    private void renableViews() {
-        mEditOrSaveAccountDataButton.setEnabled(true);
-        mToggleSubmenuVisibilityButton.setEnabled(true);
-        mDeleteOrUndeleteAccountDataButton.setEnabled(true);
-        mServerIdentitySpinner.setEnabled(true);
-        mServiceEditText.setEnabled(true);
-        mAccountEditText.setEnabled(true);
-        mGroupSpinner.setEnabled(true);
-        mIconImageView.setEnabled(true);
-        ViewUtils.setEnabled(mOtpTypeContainer, true);
-        setSecretEditable();
-        ViewUtils.setEnabled(mDigitsContainer, true);
-        ViewUtils.setEnabled(mAlgorithmContainer, true);
-        mPeriodEditText.setEnabled(true);
-        mCounterEditText.setEnabled(true);
+        setViewsAvailability(false);
     }
 
     private void onSyncingDataFinished() {
         mWorking.setVisibility(View.GONE);
         mContents.setAlpha(1.0f);
-        if (mEditing) { renableViews(); }
+        setViewsAvailability(true);
     }
 
     // Clones current account data
