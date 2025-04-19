@@ -399,7 +399,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             final int view_id = edittext.getId();
             if (view_id == R.id.service) { mCurrentAccountData.setService(editable.toString()); }
             else if (view_id == R.id.account) { mCurrentAccountData.setAccount(editable.toString()); }
-            else if (view_id == R.id.secret) { mCurrentAccountData.setSecret(editable.toString()); }
+            else if (view_id == R.id.secret) { mCurrentAccountData.setSecret(editable.toString()); mCopySecretButton.setEnabled(! Strings.isEmptyOrNull(mCurrentAccountData.getSecret())); }
             else if (view_id == R.id.period) { mCurrentAccountData.setPeriod(Integer.parseInt(editable.toString())); }
             else if (view_id == R.id.counter) { mCurrentAccountData.setCounter(Integer.parseInt(editable.toString())); }
             setButtonsAvailability();
