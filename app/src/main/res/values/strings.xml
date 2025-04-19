@@ -1,69 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">2FAuth</string>
 
     <string name="app_version">App version</string>
     <string name="app_build_version_number">%1$s (build number %2$d)</string>
-    <string name="app_version_is_debug_release">%1$s\n\nDevelopment version</string>
+    <string name="app_build_version_number_prerelease">%1$s (build number %2$d, pre-release)</string>
+    <string name="app_version_is_debug_release">%1$s\n\nThis is a Development release</string>
+
+    <string name="how_interact_with_accounts">(This message will only be displayed once)\n\nWe\'ve modified the way you can interact with accounts:\n\nWhen an account\'s 2FA code isn\'t visible, a click will show it, while a long click will take you to the account editing activity.\n\nConversely, when an account\'s 2FA code is visible, a click in the account area will hide it, while a long click will copy it to the clipboard and, depending on your settings, minimizes the app</string>
 
     <string name="settings">Settings</string>
-    <string name="action_settings">@string/settings</string>
 
     <string name="sync_service_notifications_channel">Synchronization Service Notifications</string>
 
-    <string name="trying_to_load_2fa_codes">Trying to load 2FA codes</string>
-    <string name="trying_to_refresh_2fa_codes">Trying to refresh 2FA codes</string>
+    <string name="syncing_2fa_codes">Syncing user 2FA codes</string>
 
     <string name="no_2fa_codes">No 2FA accounts</string>
+
+    <string name="server_identities">Identities</string>
+    <string name="server_identities_summary">Click to manager your identities</string>
+    <string name="no_server_identities">No defined identities</string>
+    <string name="select_a_server_identity_to_filter">Select the identity whose accounts you want to view</string>
+    <string name="no_filter_by_server_identity">Do not filter by identity</string>
+
+    <string name="add_new_server_identity">Add one server identity</string>
+
+    <string name="server_identity_will_be_removed">The identity will be deleted.\n\n\This action has no effect on data stored on your server.\n\nAre you sure you want to continue?</string>
+    <string name="server_identity_and_accounts_will_be_removed">The identity and related accounts will be deleted.\n\nThis action has no effect on data stored on your server.\n\nAre you sure you want to continue?</string>
+    <string name="server_identity_and_accounts_and_not_synced_accounts_will_be_removed">The identity and related accounts, including not synced accounts, will be deleted.\n\nThis action has no effect on data stored on your server.\n\nAre you sure you want to continue?</string>
+
+    <string name="server_identity_data_saved">Server identity data has been saved</string>
+
+    <string name="accounts_will_be_removed">The related accounts will be deleted.\n\nThis action has no effect on data stored on your server.\n\nAre you sure you want to continue?</string>
+    <string name="accounts_and_not_synced_accounts_will_be_removed">The related accounts, including not synced accounts, will be deleted.\n\nThis action has no effect on data stored on your server.\n\nAre you sure you want to continue?</string>
+
+    <string name="cancel_identity_edition_message">Server identity data has been changed.\n\nWhat do you want to do?</string>
+    <string name="cancel_identity_creation_message">@string/cancel_account_edition_message</string>
+
+    <string name="label">Label</string>
+    <string name="label_dialog_title">@string/label</string>
+    <string name="label_dialog_message">Enter a name for the server identity that will allow you to identify it in the list of identities (otherwise, the name set for the account on the server will be used, if available)</string>
+    <string name="label_not_set">Label is not set</string>
 
     <string name="server_location">Server URL</string>
     <string name="server_location_dialog_title">@string/server_location</string>
     <string name="server_location_dialog_message">Please, enter the server location (including the http/https part and the port, in case this is not the standard).\n\nExample: https://demo.2fauth.app</string>
     <string name="server_location_is_not_set">Server location is not set</string>
-    <string name="server_http_is_insecure_warning">The server location you specified is not secure.\n\nWe strongly recommend that you move it to a secure location (you may need to install traefik, nginx-proxy, or similar) except for testing purposes and if you are aware of the risks.</string>
-
-    <string name="server_location_has_changed_and_token_defined_and_downloaded_data_exists">Due to the server location change, for your safety, access token was also removed.\n\nAdditionally, we recommend that you delete any previously downloaded account data from the app.\n\nDo you want to delete the data now?</string>
-    <string name="server_location_has_changed_and_token_not_defined_but_downloaded_data_exists">When changing the server location, we recommend that you delete any previously downloaded account data from the app.\n\nDo you want to delete the data now?</string>
-    <string name="server_location_has_changed_and_token_defined_and_no_downloaded_data_exists">Due to the server location update, for your safety, access token was also removed</string>
-    <string name="server_location_has_changed_and_token_not_defined_and_no_downloaded_data_exists">The server location has been updated</string>
-
-    <string name="open_server_location">Open in Browser</string>
-    <string name="open_server_location_summary">Open the server\'s website in a web browser window</string>
+    <string name="server_http_is_insecure_warning">The server location you specified is not secure.\n\nWe strongly recommend that you move it to a secure location (you may need to install traefik, nginx-proxy, or similar) except for testing purposes and if you are aware of the risks</string>
 
     <string name="token_value">Token value</string>
     <string name="token_value_is_set_summary">Click to set a new token</string>
     <string name="token_value_is_not_set_summary">Click to set the token value</string>
     <string name="token_value_dialog_title">@string/token_value</string>
-    <string name="token_value_dialog_message">Please, enter the token value.\n\nTo obtain a token go the server URL in a web browser, log in to your user account, navigate to "OAuth Settings" under "Settings" and finally click "generate a token" then copy the value and paste here.</string>
+    <string name="token_value_dialog_message">Please, enter the token value.\n\nTo obtain a token go the server URL in a web browser, log in to your user account, navigate to "OAuth Settings" under "Settings" and finally click "generate a token" then copy the value and paste here</string>
     <string name="token_unchanged">(Token value unchanged)</string>
-
-    <string name="token_has_changed_and_downloaded_data_exists">The server access token has been updated.\n\nAdditionally, we recommend that you delete any previously downloaded account data from the app.\n\nDo you want to delete the data now?</string>
-    <string name="token_has_changed_and_no_downloaded_data_exists">The server access token has been updated</string>
-
-    <string name="not_synced_changes_will_be_lost">There are unsynced changes that will be lost if you continue with this operation without first performing a data synchronization.\n\nAre you sure you want to continue?</string>
-
-    <plurals name="number_of_accounts">
-        <item quantity="one">There are one account listed</item>
-        <item quantity="other">There are %1$d accounts listed</item>
-        <item quantity="many">There are %1$d accounts listed</item>
-    </plurals>
 
     <string name="date_time">%1$s at %2$s</string>
 
-    <string name="last_server_sync_data_time">Data last synced on %1$s</string>
-
-    <string name="sync_details">Sync details</string>
-    <string name="click_to_sync_data">Click to sync data</string>
-    <string name="sync_is_in_progress">Data synchronization is in progress</string>
     <string name="sync_no_changes">No changes have been detected</string>
     <string name="sync_error">There was an error during synchronization process</string>
     <string name="sync_completed">Synchronization completed</string>
-    <string name="last_sync_error">Last synchronization was on %2$s but not completed due to the following error: %1$s.\n\n%3$s</string>
+    <string name="last_sync_error">Last synchronization was on %2$s but not completed due to the following error: %1$s</string>
+    <string name="account_never_synced">Account has never been synced</string>
 
     <plurals name="sync_details">
-        <item quantity="one">The last sync was on %2$s and one accounts were loaded.\n\n%3$s</item>
-        <item quantity="other">The last sync was on %2$s and %1$d accounts were loaded.\n\n%3$s</item>
-        <item quantity="many">The last sync was on %2$s and %1$d accounts were loaded.\n\n%3$s</item>
+        <item quantity="one">Last sync was on %2$s and one accounts were loaded</item>
+        <item quantity="other">Last sync was on %2$s and %1$d accounts were loaded</item>
+        <item quantity="many">Last sync was on %2$s and %1$d accounts were loaded</item>
     </plurals>
+
+    <string name="sync_on_startup">Sync on startup</string>
+    <string name="sync_on_startup_summary">Attempts to sync server data every time the app starts</string>
+
+    <string name="sync_immediately">Sync items immediately</string>
+    <string name="sync_immediately_summary">Attempt to immediately sync data to the server when it\'s added, updated, or deleted in the app.\n\nIn any case, not synced items are updated on global sync process</string>
 
     <string name="appearance">Appearance &amp; usability</string>
 
@@ -80,18 +91,33 @@
     <string name="reset_accounts_last_use_data">Reset accounts usage</string>
     <string name="reset_accounts_last_use_data_summary">Removes last used data from accounts and sorting is reset</string>
     <string name="data_usage_has_been_deleted">Usage data has been deleted</string>
+    <string name="data_usage_has_not_been_deleted">Usage data hasn\'t been deleted</string>
+
+    <string name="accounts_list_columns_portrait">Columns in portrait mode</string>
+    <string name="accounts_list_columns_landscape">Columns in landscape mode</string>
 
     <string name="ungroup_otp_codes">Ungroup 2FA codes</string>
-    <string name="ungroup_otp_codes_summary">Ungroup codes for better reading</string>
+    <string name="ungroup_otp_codes_summary">Ungroup 2FA codes for easier reading</string>
+
+    <string name="display_account_server_identity">Display identity label</string>
+    <string name="display_account_server_identity_summary">If you have added more than one identities, the label of the server identity to which the account belongs will be displayed</string>
 
     <string name="display_account_group">Display account group</string>
-    <string name="display_account_group_summary">The name of the group to which the account belongs will be displayed, if applicable.</string>
+    <string name="display_account_group_summary">The name of the group to which the account belongs will be displayed, if applicable</string>
 
-    <string name="minimize_app_after_copy_to_clipboard">Minimize after Copy to Clipboard</string>
+    <string name="minimize_app_after_copy_to_clipboard">Minimize after copy to clipboard</string>
     <string name="minimize_app_after_copy_to_clipboard_summary">Minimizes the app when an OTP code is copied to the Clipboard</string>
 
-    <string name="haptic_feedback">Haptic vibration</string>
+    <string name="haptic_feedback">Haptic feedback</string>
     <string name="haptic_feedback_summary">Make your phone vibrate slightly in response to some actions, such as pressing a button, showing or hiding an OTP code, or copying it to the clipboard</string>
+
+    <string name="allow_animations">Allow animations</string>
+    <string name="allow_animations_summary">Show animations for certain buttons, which adds a minimal delay to some actions in exchange for greater visual impact</string>
+
+    <string name="theme">Theme</string>
+    <string name="light_theme">Light theme</string>
+    <string name="dark_theme">Dark theme</string>
+    <string name="follow_system_theme">Follow system theme</string>
 
     <string name="security">Security</string>
 
@@ -103,26 +129,34 @@
     <string name="hide_otp_codes_automatically_summary">Automatically hide the OTP code after a complete display cycle (you must press it again to display the next one)</string>
 
     <string name="show_next_otp_code">Show next OTP code</string>
-    <string name="show_next_otp_code_summary">For time-based codes (TOTP), displaying the code will also display the next one.\n\nPlease note that the \"copy to clipboard\" function will only work on the current code.</string>
+    <string name="show_next_otp_code_summary">For time-based codes (TOTP), displaying the code will also display the next one.\n\nPlease note that the \"copy to clipboard\" function will only work on the current code</string>
 
     <string name="pin_access">Secret PIN</string>
-    <string name="pin_access_summary">Require a PIN code to access the App</string>
+    <string name="pin_access_summary">Require a PIN code to access the app or perform some especially relevant actions</string>
     <string name="pin_access_dialog_title">@string/pin_access</string>
     <string name="pin_access_enter_current_pin">Please, enter current PIN</string>
-    <string name="pin_access_enter_new_pin">Please enter the PIN you will use to access the app.\n\nPIN length will be from 4 to 8 digits.\n\nYou will not be able to access the app if you forget it.</string>
-    <string name="pin_access_enter_new_pin_again">Please, enter new PIN again.\n\nRemember that you will not be able to access the app if you forget it.</string>
+    <string name="pin_access_enter_new_pin">Please enter the PIN you will use to access the app.\n\nPIN length will be from 4 to 8 digits.\n\nYou will not be able to access the app if you forget it</string>
+    <string name="pin_access_enter_new_pin_again">Please, enter new PIN again.\n\nRemember that you will not be able to access the app if you forget it</string>
     <string name="pin_is_not_valid">The PIN you\'ve entered isn\'t valid</string>
     <string name="pin_and_its_repeat_does_not_match">The PIN and it\'s repeat do not match</string>
     <string name="pin_has_been_set">PIN has been set</string>
     <string name="pin_has_been_removed">PIN has been removed</string>
 
     <string name="use_fingerprint_instead_of_pin_code">Fingerprint access</string>
-    <string name="use_fingerprint_instead_of_pin_code_summary">Require user\'s fingerprint to access the App</string>
+    <string name="use_fingerprint_instead_of_pin_code_summary">Use the user\'s fingerprint instead of the PIN code</string>
     <string name="use_your_fingerprint_to_unlock_the_app">Biometric verification</string>
     <string name="fingerprint_is_not_valid">We cannot validate your identity</string>
     <string name="fingerprint_validation_disabled_due_to_biometric_enrollment">Fingerprint validation disabled due to biometric enrollment</string>
 
     <string name="keystore_access_error">An error occurred while accessing the KeyStore</string>
+
+    <string name="allow_copy_server_access_tokens">Allow copy access token</string>
+    <string name="allow_copy_server_access_tokens_summary">Include a button in the identity data edition screen to copy the server access token to the clipboard (highly unrecommended if a secure access method is not activated)</string>
+
+    <string name="privacy">Privacy</string>
+  
+    <string name="download_icons_from_external_sources">Download icons from external sources</string>
+    <string name="download_icons_from_external_sources_summary">We will attempt to download icons that was not found on your server, or was an incompatible format, from open source repositories using the service name, which may leak some private data, such as the 2FA services you use or your IP address</string>
 
     <string name="others">Others</string>
 
@@ -133,19 +167,90 @@
     <string name="github_repo_summary">Open the app\'s GitHub repository to get information about the latest releases, report bugs, or contribute to development</string>
 
     <string name="auto_update_app">Automatic updates</string>
-    <string name="auto_update_app_summary">When you enter the app, it will connect to the repository to check for updates, downloading and installing them if necessary.</string>
+    <string name="auto_update_app_summary">When you enter the app, it will connect to the repository to check for updates, downloading and installing them if necessary</string>
     <string name="there_is_an_update_version">You\'re using version %1$s of the app, but version %2$s has already been released. Would you like to update now?</string>
 
+    <string name="auto_update_app_include_prereleases">Include pre-releases</string>
+    <string name="auto_update_app_include_prereleases_summary">Pre-releases includes new features, which may be unstable.\nPlease, do not forget to report any bugs you encounter</string>
+
     <string name="auto_update_app_only_in_wifi">Update only in WiFi Networks</string>
-    <string name="auto_update_app_only_in_wifi_summary">Only check for and download new versions of the app if there is an active WiFi connection.</string>
+    <string name="auto_update_app_only_in_wifi_summary">Only check for and download new versions of the app if there is an active WiFi connection</string>
 
     <string name="search">Enter a text to filter accounts&#8230;</string>
 
+    <string name="how_do_you_want_to_add_account_data">How do you want to add account data?</string>
+    <string name="add_account_data_from_a_qr_code">From a QR code</string>
+    <string name="add_account_data_from_a_form">Use a form</string>
+    <string name="camera_permission_is_optional">You can select the QR code from the gallery or use the device camera, but in that case you will need to grant camera access permission if prompted</string>
+    <string name="no_external_qr_libraries_be_used">To protect your privacy, we will not use any external library to obtain the QR data but we will send it to your server for decoding, with the drawback that it will only be able to do so if you are connected to the server\'s network</string>
+    <string name="you_can_edit_qr_data_when_decoded">When the QR code you select was decoded by your server, we will redirect you to the editing form to validate or edit the data</string>
+    <string name="select_server_identity_header">Select below the identity that will be used to decode the QR code:</string>
+    <string name="select_a_image">Select an image</string>
+    <string name="cannot_load_selected_image">Cannot load selected image</string>
+    <string name="cannot_decode_selected_image">Cannot decode selected image</string>
+
+    <string name="server_identity">Server identity</string>
+    <string name="service">Service</string>
+    <string name="cloned_service">%1$s (copy)</string>
+    <string name="account">Account</string>
+    <string name="group">Group</string>
+    <string name="no_group">None</string>
+    <string name="show_advanced_data">Show advanced data</string>
+    <string name="otp_type">OTP Type</string>
+    <string name="otp_type_totp">TOTP</string>
+    <string name="otp_type_hotp">HOTP</string>
+    <string name="otp_type_steam">STEAM</string>
+    <string name="secret">Secret</string>
+    <string name="digits">Digits</string>
+    <string name="algorithm">Algorithm</string>
+    <string name="algorithm_sha1">SHA1</string>
+    <string name="algorithm_sha256">SHA256</string>
+    <string name="algorithm_sha512">SHA512</string>
+    <string name="algorithm_md5">MD5</string>
+    <string name="period">Period</string>
+    <string name="counter">Counter</string>
+
+    <string name="server_loaded_data">Server loaded data</string>
+    <string name="name">Name</string>
+    <string name="email">E-mail</string>
+    <string name="is_admin">Service Administrator</string>
+
+    <string name="icon_source_bubka">Icon downloaded from your 2FA server</string>
+    <string name="icon_source_dashboard_icons">Icon downloaded from "Dashboard icons"</string>
+
+    <string name="cannot_load_account_data">Cannot load account data</string>
+    <string name="cancel_account_edition_message">Account data has been changed.\n\nWhat do you want to do?</string>
+    <string name="cancel_account_creation_message">@string/cancel_account_edition_message</string>
+    <string name="server_identity_changed_message">The identity associated with the account has changed, which will cause the account to be removed from the previous identity and added to the new one.\n\nIf synchronization cannot be completed immediately, an extra account (marked as removed) may temporarily appear in the accounts list.\n\nAre you sure you want to continue?</string>
+    <string name="delete_account_data_message">This operation cannot be undone.\n\nAre you sure that you want to delete account data?</string>
+    <string name="undelete_account_data_message">Account data will be restored to the state it was in when you deleted it.\n\nIf there was unsynced changes at the account data when you deleted it, these changes will be lost when data synced to the server</string>
+    <string name="error_while_loading_account_data">Error trying to load account data</string>
+    <string name="account_data_has_been_saved_and_synced">Account data has been saved and synced</string>
+    <string name="account_data_has_been_saved_but_not_synced">Account data has been saved but not synced</string>
+    <string name="error_while_saving_account_data">Error trying to save account data</string>
+    <string name="account_data_has_been_deleted_and_synced">Account data has been deleted locally and remotely</string>
+    <string name="account_data_has_been_deleted_but_not_synced">Account data has been deleted locally but not remotely</string>
+    <string name="error_while_deleting_account_data">Error trying to delete account data</string>
+    <string name="account_data_has_been_undeleted">Account data has been undeleted</string>
+    <string name="error_while_undeleting_account_data">Error trying to undelete account data</string>
+    <string name="you_need_to_be_connected_to_server_to_download_qr_code_message">QR codes are downloaded from the server \"on the fly\" using the data stored there, so we need to connect to download it.\n\nDo you want to download the QR code now?</string>
+    <string name="you_need_to_be_connected_to_server_to_download_qr_code_but_account_updated_message">QR codes are downloaded from the server \"on the fly\" using the data stored there, so we need to connect to download it.\n\nBecause you\'ve updated some of the account details, the data included in the QR code might not be what you see on the screen.\n\nWhat do you want to do?</string>
+    <string name="error_retrieving_qr_code">Error retrieving QR code</string>
+
+    <string name="server_identity_and_group_label">%2$s @ %1$s</string>
+    <string name="server_identity_label">\@ %1$s</string>
+    <string name="group_label">%2$s</string>
+
+    <string name="loading_data">Loading data&#8230;</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
-    <string name="yes">Yes</string>
     <string name="ok">OK</string>
+    <string name="yes">Yeah!</string>
+    <string name="no">No</string>
     <string name="install_now">Install now</string>
+    <string name="exit">Exit</string>
+    <string name="continue_editing">Continue editing</string>
+    <string name="get_qr_now">Get QR</string>
 
     <string name="information">Information</string>
     <string name="warning">Warning</string>
@@ -160,6 +265,8 @@
     <string name="number_7">7</string>
     <string name="number_8">8</string>
     <string name="number_9">9</string>
+    <string name="number_10">10</string>
     <string name="key_delete">\u232B</string>
 
+    <string name="cannot_process_request_due_to_an_internal_error">Cannot process request due to an internal error</string>
 </resources>

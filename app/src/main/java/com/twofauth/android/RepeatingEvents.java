@@ -2,6 +2,7 @@ package com.twofauth.android;
 
 import android.os.Handler;
 import android.os.Message;
+import android.os.Looper;
 import android.os.SystemClock;
 
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +42,7 @@ public class RepeatingEvents {
 
     private static class RepeatingEventsHandler extends Handler {
         RepeatingEventsHandler() {
-            super();
+            super(Looper.getMainLooper());
         }
 
         @Override

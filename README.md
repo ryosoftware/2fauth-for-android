@@ -25,6 +25,10 @@ To do this, we have developed an Android App that reads 2FA accounts from a user
 
 <IMG WIDTH="30%" SRC="assets/Screenshots/1.jpg"> <IMG WIDTH="30%" SRC="assets/Screenshots/2.jpg">
 
+# CONTACT
+
+To report issues, you can use Github or the dedicated Telegram channel we've created, where we'll also publish nightly versions of the app: https://t.me/TwoFAuthForAndroid
+
 # CERTIFICATE SIGNATURE VERIFICATION
 
 The SHA-256 digest of the certificate used to sign the app is as follows, and remains constant regardless of the version:

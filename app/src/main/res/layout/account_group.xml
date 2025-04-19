@@ -9,5 +9,5 @@
     android:gravity="center"
     android:maxLines="1"
     android:textColor="?android:textColorSecondary"
-    android:background="@drawable/border_frame"
+    android:background="@drawable/border_frame_clickable"
     style="@style/Base.TextAppearance.AppCompat.Body2" />

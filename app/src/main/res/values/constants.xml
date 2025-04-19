@@ -1,22 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
 
-    <bool name="sort_accounts_by_last_use_default">false</bool>
-    
-    <bool name="ungroup_otp_code_default">true</bool>
+    <bool name="sync_on_startup">false</bool>
+    <bool name="sync_immediately">true</bool>
 
-    <bool name="disable_screenshots_default">true</bool>
+    <bool name="sort_accounts_by_last_use">false</bool>
 
-    <bool name="minimize_app_after_copy_to_clipboard_default">true</bool>
+    <integer name="accounts_list_min_columns">1</integer>
+    <integer name="accounts_list_max_columns">3</integer>
+    <integer name="accounts_list_columns_portrait">1</integer>
+    <integer name="accounts_list_columns_landscape">2</integer>
 
-    <bool name="haptic_feedback_default">true</bool>
+    <bool name="ungroup_otp_code">true</bool>
 
-    <bool name="hide_otp_codes_automatically_default">true</bool>
+    <bool name="disable_screenshots">true</bool>
 
-    <bool name="show_next_otp_code_default">false</bool>
+    <bool name="minimize_app_after_copy_to_clipboard">true</bool>
 
-    <bool name="display_account_group_default">true</bool>
+    <bool name="haptic_feedback">true</bool>
 
-    <bool name="auto_update_app_default">true</bool>
-    <bool name="auto_update_app_only_in_wifi_default">false</bool>
+    <bool name="allow_animations">true</bool>
+
+    <bool name="hide_otp_codes_automatically">true</bool>
+
+    <bool name="show_next_otp_code">false</bool>
+
+    <bool name="display_account_server_identity">true</bool>
+    <bool name="display_account_group">true</bool>
+
+    <bool name="allow_copy_server_access_tokens">false</bool>
+
+    <bool name="download_icons_from_external_sources">true</bool>
+
+    <bool name="auto_update_app">true</bool>
+    <bool name="auto_update_app_include_prereleases">false</bool>
+    <bool name="auto_update_app_only_in_wifi">false</bool>
 
 </resources>

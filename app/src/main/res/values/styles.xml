@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <style name="SmallFab" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="fabCustomSize">40dp</item>
+    </style>
+
+</resources>
+

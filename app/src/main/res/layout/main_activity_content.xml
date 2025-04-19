@@ -25,22 +25,39 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <EditText
-                android:id="@+id/filter_text"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:maxLines="1"
-                android:drawableStart="@drawable/ic_editset_search"
-                android:drawablePadding="5dp"
-                android:inputType="text"
-                android:hint="@string/search"
-                android:background="@drawable/border_frame_transparent" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/filter_text"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:maxLines="1"
+                    android:drawableStart="@drawable/ic_editset_search"
+                    android:drawablePadding="5dp"
+                    android:inputType="text"
+                    android:hint="@string/search"
+                    android:background="@drawable/border_frame_transparent" />
+
+                <ImageButton
+                    android:id="@+id/server_identity_selector"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/ic_server_identity"
+                    android:scaleType="centerInside"
+                    android:background="@drawable/border_frame_clickable" />
+
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/groups_list"
@@ -80,7 +97,7 @@
             android:layout_below="@id/accounts_list_header"
             android:layout_marginEnd="@dimen/fab_margin"
             android:layout_marginTop="@dimen/fab_margin"
-            android:layout_marginBottom="260dp"
+            android:layout_marginBottom="345dp"
             android:layout_alignWithParentIfMissing="true"
             android:elevation="6dp"
             android:stateListAnimator="@null"
