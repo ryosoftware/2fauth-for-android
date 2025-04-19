@@ -583,7 +583,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private void onSyncingDataFinished() {
         mWorking.setVisibility(View.GONE);
         mContents.setAlpha(1.0f);
-        renableViews();
+        if (mEditing) { renableViews(); }
     }
 
     // Clones current account data
