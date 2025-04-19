@@ -12,34 +12,45 @@
     <include
         layout="@layout/main_activity_content" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/sync_server_data"
+    <LinearLayout
+        android:id="@+id/actions_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_actionbar_sync" />
+        android:layout_gravity="end|bottom"
+        android:padding="@dimen/fab_margin"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/open_app_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:translationY="-25dp"
-        app:layout_anchor="@id/sync_server_data"
-        app:layout_anchorGravity="top"
-        app:srcCompat="@drawable/ic_actionbar_settings" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/copy_to_clipboard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/fab_margin"
+            app:srcCompat="@drawable/ic_actionbar_copy"
+            android:visibility="gone" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/copy_to_clipboard"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:translationY="-25dp"
-        app:layout_anchor="@id/open_app_settings"
-        app:layout_anchorGravity="top"
-        app:srcCompat="@drawable/ic_actionbar_copy"
-        android:visibility="gone" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/open_app_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/fab_margin"
+            app:srcCompat="@drawable/ic_actionbar_settings" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_account_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/fab_margin"
+            app:srcCompat="@drawable/ic_actionbar_add" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/sync_server_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_actionbar_sync" />
+
+    </LinearLayout>            
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -13,9 +13,13 @@
     
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <uses-feature android:name="android. hardware. camera" android:required="false" />
 
     <application
         android:name=".Main"
@@ -45,6 +49,16 @@
 
         <activity
             android:name=".PreferencesActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppTheme" />
+
+        <activity
+            android:name=".SelectHowAddAccountDataActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppTheme" />
+
+        <activity
+            android:name=".EditAccountDataActivity"
             android:exported="true"
             android:theme="@style/Theme.AppTheme" />
 

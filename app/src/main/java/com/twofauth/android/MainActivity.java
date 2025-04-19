@@ -8,22 +8,18 @@ import android.content.SharedPreferences;
 
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 
-import androidx.annotation.NonNull;
-import androidx.biometric.BiometricPrompt;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,485 +28,524 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import com.twofauth.android.Authenticator.OnAuthenticatorFinishListener;
+import com.twofauth.android.api_tasks.SaveAccountData;
+import com.twofauth.android.database.TwoFactorAccount;
+import com.twofauth.android.database.TwoFactorGroup;
+import com.twofauth.android.database.TwoFactorServerIdentity;
+import com.twofauth.android.main_activity.AccountsListAdapter.OnOtpAccountClickListener;
+import com.twofauth.android.main_activity.AccountsListAdapter.OnOtpCodeVisibleStateChangedListener;
+import com.twofauth.android.main_activity.AccountsListAdapter.OnAccountNeedsToBeSynchronizedListener;
 import com.twofauth.android.main_activity.AccountsListIndexAdapter;
-import com.twofauth.android.main_activity.AuthenticWithBiometrics;
-import com.twofauth.android.main_activity.AuthenticWithPin;
+import com.twofauth.android.main_activity.AppearanceOptions;
 import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountViewHolder;
+import com.twofauth.android.main_activity.GroupsListAdapter.OnSelectedGroupChangesListener;
 import com.twofauth.android.main_activity.tasks.CheckForAppUpdates;
 import com.twofauth.android.main_activity.tasks.CheckForAppUpdates.AppVersionData;
-import com.twofauth.android.main_activity.tasks.DataFilterer;
-import com.twofauth.android.main_activity.tasks.DataLoader;
-import com.twofauth.android.main_activity.tasks.DataLoader.LoadedAccountsData;
+import com.twofauth.android.main_activity.tasks.DataLoaderAndFilterer;
+import com.twofauth.android.main_activity.tasks.DataLoaderAndFilterer.OnDataLoadedListener;
+import com.twofauth.android.main_activity.tasks.DataLoaderAndFilterer.OnDataFilteredListener;
+import com.twofauth.android.main_activity.tasks.CheckForAppUpdates.OnCheckForUpdatesListener;
+import com.twofauth.android.api_tasks.SaveAccountData.OnDataSavedListener;
 import com.twofauth.android.main_activity.GroupsListAdapter;
-import com.twofauth.android.main_activity.tasks.SingleAccoutDataSynchronizer;
-import com.twofauth.android.main_service.StatusChangedBroadcastReceiver;
 import com.twofauth.android.MainService.SyncResultType;
-import com.twofauth.android.Database.TwoFactorAccount;
+import com.twofauth.android.MainService.OnMainServiceStatusChangedListener;
 
 import com.twofauth.android.main_activity.AccountsListAdapter;
 import com.twofauth.android.main_activity.FabButtonShowOrHide;
-import com.twofauth.android.main_activity.FabButtonShowOrHide.DisplayState;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
+import com.twofauth.android.utils.Lists;
+import com.twofauth.android.utils.Preferences;
+import com.twofauth.android.utils.Strings;
+import com.twofauth.android.utils.Threads;
+import com.twofauth.android.utils.UI;
+import com.twofauth.android.utils.UI.OnSelectionDialogItemSelected;
+import com.twofauth.android.utils.Vibrator;
 
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class MainActivity extends BaseActivity implements StatusChangedBroadcastReceiver.OnMainServiceStatusChangedListener, AccountsListAdapter.OnOtpCodeVisibleStateChangedListener, AccountsListAdapter.OnAccountNeedsToBeSynchronizedListener, GroupsListAdapter.OnSelectedGroupChangesListener, DataLoader.OnDataLoadListener, DataFilterer.OnDataFilteredListener, CheckForAppUpdates.OnCheckForUpdatesListener, AuthenticWithBiometrics.OnBiometricAuthenticationFinishedListener, AuthenticWithPin.OnPinAuthenticationFinishedListener, ActivityResultCallback<ActivityResult>, View.OnClickListener, TextWatcher, ViewTreeObserver.OnGlobalLayoutListener {
+public class MainActivity extends BaseActivityWithTextController implements OnMainServiceStatusChangedListener, OnOtpCodeVisibleStateChangedListener, OnAccountNeedsToBeSynchronizedListener, OnOtpAccountClickListener, OnSelectedGroupChangesListener, OnDataLoadedListener, OnDataFilteredListener, OnCheckForUpdatesListener, OnDataSavedListener, OnAuthenticatorFinishListener, ActivityResultCallback<ActivityResult>, OnClickListener {
     private static final String LAST_NOTIFIED_APP_UPDATED_VERSION_KEY = "last-notified-app-updated-version";
     private static final String LAST_NOTIFIED_APP_UPDATED_TIME_KEY = "last-notified-app-updated-time";
     private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
-    private static final long SYNC_BUTTON_ROTATION_DURATION = (long) (2.5f * DateUtils.SECOND_IN_MILLIS);
-    private static final long OPEN_SETTINGS_VIBRATION_INTERVAL = 30;
-    private static final long SYNC_ACCOUNTS_VIBRATION_INTERVAL = 30;
-    private static final long COPY_TO_CLIPBOARD_VIBRATION_INTERVAL = 60;
 
-    private final StatusChangedBroadcastReceiver mReceiver = new StatusChangedBroadcastReceiver(this);
+    private static final String HOW_INTERACT_WITH_ACCOUNTS_MESSAGE_ALREADY_DISPLAYED_KEY = "how-interact-with-accounts-message-already-displayed";
 
     private final AccountsListIndexAdapter mAccountsListIndexAdapter = new AccountsListIndexAdapter();
-    private final AccountsListAdapter mAccountsListAdapter = new AccountsListAdapter(this, this, mAccountsListIndexAdapter, false);;
-
+    private final AccountsListAdapter mAccountsListAdapter = new AccountsListAdapter(this, this, this, mAccountsListIndexAdapter, false);;
     private final GroupsListAdapter mGroupsListAdapter = new GroupsListAdapter(this);
 
-    private Thread mDataLoader = null;
-    private Thread mDataFilterer = null;
+    private Thread mDataLoaderAndFilterer = null;
 
-    private LoadedAccountsData mLoadedAccountsData = null;
-    private String mActiveGroup = null;
+    private long mLastLoadTime = 0;
 
-    private final ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this);
+    private Authenticator mAuthenticator;
+
+    private List<TwoFactorServerIdentity> mServerIdentities = null;
+    private Map<Long, List<TwoFactorGroup>> mGroups = null;
+    private Map<Long, List<TwoFactorAccount>> mAccounts = null;
+    private boolean mAlphaSortedAccounts = false;
+
+    private TwoFactorServerIdentity mActiveServerIdentity = null;
+    private TwoFactorGroup mActiveGroup = null;
+    private String mText = null;
+    private List<TwoFactorAccount> mFilteredAccounts = null;
+
     private String mStartedActivityForResult;
 
     private boolean mUnlocked = false;
 
     private FabButtonShowOrHide mFabButtonShowOrHide;
-    private final RotateAnimation mRotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);;
-    private boolean mRotatingSyncingAccountsFab = false;
 
-    private boolean mFirstAccess = true;
-    private boolean mKeyboardVisible = false;
+    private boolean mAnimatingSyncDataButton = false;
+
+    private FloatingActionButton mSyncServerDataButton;
+    private FloatingActionButton mOpenAppSettingsButton;
+    private FloatingActionButton mCopyToClipboardButton;
+    private FloatingActionButton mAddAccountDataButton;
+    private RecyclerView mAccountsListRecyclerView;
+    private RecyclerView mGroupsListRecyclerView;
+    private View mEmptyView;
+    private ProgressBar mRemainingOtpTimeProgressBar;
+    private View mServerIdentitySelector;
+    private EditText mFilterTextEditText;
+    private View mAccountsListHeader;
+    private View mAccountsListIndexContainer;
 
     @SuppressLint("CutPasteId")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (SharedPreferencesUtilities.getDefaultSharedPreferences(this).getBoolean(Constants.DISABLE_SCREENSHOTS_KEY, getResources().getBoolean(R.bool.disable_screenshots_default))) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        }
+        mAuthenticator = new Authenticator(this);
+        final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(this);
+        if (preferences.getBoolean(Constants.DISABLE_SCREENSHOTS_KEY, getResources().getBoolean(R.bool.disable_screenshots))) { getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE); }
         setContentView(R.layout.main_activity);
+        mAccountsListHeader = findViewById(R.id.accounts_list_header);
+        mAccountsListIndexContainer = findViewById(R.id.accounts_list_index_container);
         final RecyclerView accounts_index_recycler_view = (RecyclerView) findViewById(R.id.accounts_list_index);
         accounts_index_recycler_view.setLayoutManager(new LinearLayoutManager(this));
         accounts_index_recycler_view.setAdapter(mAccountsListIndexAdapter);
         ((SimpleItemAnimator) accounts_index_recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
-        final RecyclerView accounts_recycler_view = (RecyclerView) findViewById(R.id.accounts_list);
-        accounts_recycler_view.setLayoutManager(new GridLayoutManager(this, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2));
-        accounts_recycler_view.setAdapter(mAccountsListAdapter);
-        ((SimpleItemAnimator) accounts_recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
-        final RecyclerView groups_recycler_view = (RecyclerView) findViewById(R.id.groups_list);
-        groups_recycler_view.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        groups_recycler_view.setAdapter(mGroupsListAdapter);
-        ((SimpleItemAnimator) groups_recycler_view.getItemAnimator()).setSupportsChangeAnimations(false);
-        groups_recycler_view.addItemDecoration(new RecyclerView.ItemDecoration() {
+        mAccountsListRecyclerView = (RecyclerView) findViewById(R.id.accounts_list);
+        final Resources resources = getResources();
+        mAccountsListRecyclerView.setLayoutManager(new GridLayoutManager(this, resources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? preferences.getInt(Constants.ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY, resources.getInteger(R.integer.accounts_list_columns_portrait)) : preferences.getInt(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY, resources.getInteger(R.integer.accounts_list_columns_landscape))));
+        mAccountsListRecyclerView.setAdapter(mAccountsListAdapter);
+        ((SimpleItemAnimator) mAccountsListRecyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+        mGroupsListRecyclerView = (RecyclerView) findViewById(R.id.groups_list);
+        mGroupsListRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        mGroupsListRecyclerView.setAdapter(mGroupsListAdapter);
+        ((SimpleItemAnimator) mGroupsListRecyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+        mGroupsListRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
-            public void getItemOffsets(@NonNull final Rect out_rect, @NonNull final View view, @NonNull final RecyclerView parent, @NonNull final RecyclerView.State state) {
-                super.getItemOffsets(out_rect, view, parent, state);
-                out_rect.right = (parent.getChildAdapterPosition(view) == parent.getAdapter().getItemCount() - 1) ? 0 : UiUtils.getPixelsFromDp(getBaseContext(), 10);
+            public void getItemOffsets(@NotNull final Rect out_rect, @NotNull final View view, @NotNull final RecyclerView parent, @NotNull final RecyclerView.State state) {
+            super.getItemOffsets(out_rect, view, parent, state);
+            out_rect.right = (parent.getChildAdapterPosition(view) == parent.getAdapter().getItemCount() - 1) ? 0 : UI.getPixelsFromDp(getBaseContext(), 10);
             }
         });
-        ((FloatingActionButton) findViewById(R.id.sync_server_data)).setOnClickListener(this);
-        ((FloatingActionButton) findViewById(R.id.open_app_settings)).setOnClickListener(this);
-        ((FloatingActionButton) findViewById(R.id.copy_to_clipboard)).setOnClickListener(this);
-        mFabButtonShowOrHide = new FabButtonShowOrHide((RecyclerView) findViewById(R.id.accounts_list), false, new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) }, null);
-        ((EditText) findViewById(R.id.filter_text)).addTextChangedListener(this);
-        mRotateAnimation.setDuration(SYNC_BUTTON_ROTATION_DURATION);
-        mRotateAnimation.setInterpolator(new LinearInterpolator());
-        mRotateAnimation.setRepeatCount(Animation.INFINITE);
-        findViewById(android.R.id.content).getViewTreeObserver().addOnGlobalLayoutListener(this);
-        if (SharedPreferencesUtilities.getDefaultSharedPreferences(this).getBoolean(Constants.SYNC_ON_STARTUP_KEY, getResources().getBoolean(R.bool.sync_on_startup_default))) {
-            MainService.startService(this);
-        }
+        mEmptyView = findViewById(R.id.empty_view);
+        mSyncServerDataButton = (FloatingActionButton) findViewById(R.id.sync_server_data);
+        mSyncServerDataButton.setOnClickListener(this);
+        mOpenAppSettingsButton = (FloatingActionButton) findViewById(R.id.open_app_settings);
+        mOpenAppSettingsButton.setOnClickListener(this);
+        mCopyToClipboardButton = (FloatingActionButton) findViewById(R.id.copy_to_clipboard);
+        mCopyToClipboardButton.setOnClickListener(this);
+        mAddAccountDataButton = (FloatingActionButton) findViewById(R.id.add_account_data);
+        mAddAccountDataButton.setOnClickListener(this);
+        mFabButtonShowOrHide = new FabButtonShowOrHide(mAccountsListRecyclerView, false, new FloatingActionButton[] { mSyncServerDataButton, mAddAccountDataButton, mOpenAppSettingsButton }, null);
+        mRemainingOtpTimeProgressBar = (ProgressBar) findViewById(R.id.otp_time);
+        mFilterTextEditText = (EditText) findViewById(R.id.filter_text);
+        mFilterTextEditText.addTextChangedListener(this);
+        mServerIdentitySelector = findViewById(R.id.server_identity_selector);
+        mServerIdentitySelector.setOnClickListener(this);
+        preferences.edit().remove(Constants.FILTERING_BY_SERVER_IDENTITY_KEY).remove(Constants.FILTERING_BY_GROUP_KEY).apply();
+        MainService.startService(this, true);
         checkForAppUpdates();
     }
 
     @Override
     public void onDestroy() {
-        synchronized (mSynchronizationObject) {
-            ThreadUtils.interrupt(mDataLoader);
-            mDataLoader = null;
-            ThreadUtils.interrupt(mDataFilterer);
-            mDataFilterer = null;
-        }
+        Threads.interrupt(mDataLoaderAndFilterer);
         super.onDestroy();
+    }
+
+    // Show or hide functions
+    // On Show we try to unlock the device then set the buttons state then, on first show, load data
+    // On hide, we lock the app then, if activity is not being finish, we hide accounts (and header and list index)
+
+    @Override
+    protected void onResumeFirstTime() {
+        super.onResumeFirstTime();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mReceiver.enable(this);
+        if (MainService.getLastSyncTime(this) > mLastLoadTime) { loadData(); }
+        setListenForKeyboardPresence(true);
+        MainService.addListener(this);
         setSyncDataButtonAvailability();
-        loadData();
         unlock();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        mReceiver.disable(this);
+    protected void onPauseToHide() {
+        super.onPauseToHide();
+        mAccountsListAdapter.onPause();
+        mAccountsListHeader.setVisibility(View.GONE);
+        mAccountsListIndexContainer.setVisibility(View.GONE);
+    }
+
+    @Override
+    protected void onPause() {
+        setListenForKeyboardPresence(false);
+        MainService.removeListener(this);
         mUnlocked = false;
-        if (! isFinishedOrFinishing()) {
-            mAccountsListAdapter.onPause();
-            findViewById(R.id.accounts_list_header).setVisibility(View.GONE);
-            findViewById(R.id.accounts_list_index_container).setVisibility(View.GONE);
-        }
+        super.onPause();
+    }
+
+    // Cosmetic functions to show accounts list index only if portrait mode and keyboard not visible
+
+    private void setAccountsListIndexBounds() {
+        final ViewGroup.MarginLayoutParams button_params = (ViewGroup.MarginLayoutParams) mOpenAppSettingsButton.getLayoutParams();
+        int button_height = UI.getPixelsFromDp(this, 56) + button_params.topMargin + button_params.bottomMargin, number_of_visible_buttons = 3;
+        if (mCopyToClipboardButton.getVisibility() == View.VISIBLE) { number_of_visible_buttons ++; }
+        ViewGroup.MarginLayoutParams list_index_container_params = (ViewGroup.MarginLayoutParams) mAccountsListIndexContainer.getLayoutParams();
+        list_index_container_params.bottomMargin = number_of_visible_buttons * button_height + button_params.topMargin + button_params.bottomMargin;
+        mAccountsListIndexContainer.setLayoutParams(list_index_container_params);
     }
 
     private void setAccountsListIndexVisibility() {
-        final View accounts_list_index_container = findViewById(R.id.accounts_list_index_container);
-        final boolean accounts_list_index_container_will_be_visible = ((mLoadedAccountsData != null) && (mLoadedAccountsData.accounts != null) && (! mLoadedAccountsData.accounts.isEmpty()) && mLoadedAccountsData.alphaSorted && mUnlocked && (! mKeyboardVisible) && (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
-        accounts_list_index_container.setVisibility((accounts_list_index_container_will_be_visible && (mFabButtonShowOrHide.getDisplayState() != DisplayState.HIDDEN)) ? View.VISIBLE : View.GONE);
-        mFabButtonShowOrHide.setOtherViews(accounts_list_index_container_will_be_visible ? new View[] { findViewById(R.id.accounts_list_index_container) } : null); 
+        final boolean accounts_list_index_container_will_be_visible = ((! Lists.isEmptyOrNull(mFilteredAccounts)) && mAlphaSortedAccounts && mUnlocked && (! mKeyboardVisible) && UI.isInPortraitMode(this)), fab_buttons_is_showing_elements = (mFabButtonShowOrHide.getDisplayState() != FabButtonShowOrHide.DisplayState.HIDDEN);
+        if (fab_buttons_is_showing_elements && accounts_list_index_container_will_be_visible) { UI.animateShowOrHide(mAccountsListIndexContainer, true, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
+        setAccountsListIndexBounds();
+        mFabButtonShowOrHide.setOtherViews(accounts_list_index_container_will_be_visible ? new View[] { mAccountsListIndexContainer } : null, true);
     }
 
     @SuppressLint("NotifyDataSetChanged")
     public void onConfigurationChanged(@NotNull final Configuration new_config) {
+        final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(this);
+        final Resources resources = getResources();
         super.onConfigurationChanged(new_config);
-        final RecyclerView recycler_view = (RecyclerView) findViewById(R.id.accounts_list);
-        ((GridLayoutManager) recycler_view.getLayoutManager()).setSpanCount(new_config.orientation == Configuration.ORIENTATION_PORTRAIT ? 1 : 2);
-        recycler_view.getAdapter().notifyDataSetChanged();
+        ((GridLayoutManager) mAccountsListRecyclerView.getLayoutManager()).setSpanCount(UI.isInPortraitMode(this) ? preferences.getInt(Constants.ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY, resources.getInteger(R.integer.accounts_list_columns_portrait)) : preferences.getInt(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY, resources.getInteger(R.integer.accounts_list_columns_landscape)));
+        mAccountsListRecyclerView.getAdapter().notifyDataSetChanged();
         setAccountsListIndexVisibility();
-    }
-
-    private void onKeyboardVisibilityChanged(final boolean visible) {
-        synchronized (mSynchronizationObject) {
-            if (mKeyboardVisible != visible) {
-                mKeyboardVisible = visible;
-                setAccountsListIndexVisibility();
-            }
-        }
     }
 
     @Override
-    public void onGlobalLayout() {
-        final Rect rect = new Rect();
-        final View root_view = findViewById(android.R.id.content);
-        root_view.getWindowVisibleDisplayFrame(rect);
-        final int screen_height = root_view.getRootView().getHeight(), keypad_height = screen_height - rect.bottom;
-        onKeyboardVisibilityChanged(keypad_height > screen_height * 0.15);
+    protected void onKeyboardVisibikityChange(final boolean visible) {
+        setAccountsListIndexVisibility();
     }
 
-    private void onAuthenticationSucceeded() {
-        final boolean first_access = mFirstAccess;
-        mFirstAccess = false;
+    // Functions related to app unlock (PIN / Fingerprint)
+    // Unlock function is triggered each time activity becomes visible.
+    // If activity is locked and a lock is enabled, we show the unlock dialog.
+    // If authentication succeeded, we show accounts list (and headers and, if available, the list index)
+
+    public void onAuthenticationSuccess(@Nullable final Object object) {
         mUnlocked = true;
         mAccountsListAdapter.onResume();
-        findViewById(R.id.accounts_list_header).setVisibility(((mLoadedAccountsData == null) || (mLoadedAccountsData.accounts == null) || mLoadedAccountsData.accounts.isEmpty()) ? View.GONE : View.VISIBLE);
+        mAccountsListHeader.setVisibility((mAccounts != null) && (! Lists.isEmptyOrNull(mAccounts.get(-1L))) ? View.VISIBLE : View.GONE);
         setAccountsListIndexVisibility();
-        final SharedPreferences preferences = SharedPreferencesUtilities.getDefaultSharedPreferences(this);
-        if (first_access && ((SharedPreferencesUtilities.getEncryptedString(this, preferences, Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY, null) == null) || (SharedPreferencesUtilities.getEncryptedString(this, preferences, Constants.TWO_FACTOR_AUTH_TOKEN_KEY, null) == null))) {
-            findViewById(R.id.open_app_settings).callOnClick();
+        final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(this);
+        if (! preferences.getBoolean(HOW_INTERACT_WITH_ACCOUNTS_MESSAGE_ALREADY_DISPLAYED_KEY, false)) {
+            preferences.edit().putBoolean(HOW_INTERACT_WITH_ACCOUNTS_MESSAGE_ALREADY_DISPLAYED_KEY, true).apply();
+            UI.showMessageDialog(this, R.string.how_interact_with_accounts);
         }
     }
 
-    public void onBiometricAuthenticationSucceeded() {
-        onAuthenticationSucceeded();
-    }
-
-    public void onPinAuthenticationSucceeded() {
-        onAuthenticationSucceeded();
-    }
-
-    public void onAuthenticationError() {
+    public void onAuthenticationError(@Nullable final Object object) {
         finish();
     }
 
-    public void onBiometricAuthenticationError(final int error_code) {
-        if (error_code == BiometricPrompt.ERROR_LOCKOUT) {
-            SharedPreferencesUtilities.getDefaultSharedPreferences(this).edit().remove(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY).apply();
-        }
-        onAuthenticationError();
-    }
-
-    public void onPinAuthenticationError(final boolean cancelled) {
-        onAuthenticationError();
-    }
-
     private void unlock() {
-        if (mUnlocked) {
-            onAuthenticationSucceeded();
-        }
-        else {
-            final SharedPreferences preferences = SharedPreferencesUtilities.getDefaultSharedPreferences(this);
-            if (preferences.contains(Constants.PIN_CODE_KEY)) {
-                boolean authenticate_with_pin = true;
-                if (preferences.getBoolean(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY, false)) {
-                    final boolean can_use_biometrics = AuthenticWithBiometrics.canUseBiometrics(this);
-                    authenticate_with_pin = ((! can_use_biometrics) || (! AuthenticWithBiometrics.areBiometricsLinked()));
-                    if ((authenticate_with_pin) && (! can_use_biometrics)) {
-                        UiUtils.showToast(this, R.string.fingerprint_validation_disabled_due_to_biometric_enrollment);
-                        preferences.edit().remove(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY).apply();
-                    }
-                    else if (! authenticate_with_pin) {
-                        AuthenticWithBiometrics.authenticate(this, this);
-                    }
-                }
-                if (authenticate_with_pin) {
-                    AuthenticWithPin.authenticate(this, this, SharedPreferencesUtilities.getEncryptedString(this, preferences, Constants.PIN_CODE_KEY, null));
-                }
-            }
-            else {
-                onAuthenticationSucceeded();
-            }
-        }
+        if (mUnlocked) { onAuthenticationSuccess(null); }
+        else { mAuthenticator.authenticate(this, null); }
     }
 
-    private void startActivityForResult(@NotNull final Class<?> activity_class) {
-        Main.getInstance().startObservingIfAppBackgrounded();
-        mStartedActivityForResult = activity_class.getName();
-        mActivityResultLauncher.launch(new Intent(this, activity_class));
-    }
+    // User interaction
 
     @Override
     public void onClick(@NotNull final View view) {
-        final int id = view.getId();
-        if (id == R.id.sync_server_data) {
-            VibratorUtils.vibrate(this, SYNC_ACCOUNTS_VIBRATION_INTERVAL);
-            MainService.startService(this);
-        }
-        else if (id == R.id.open_app_settings) {
-            VibratorUtils.vibrate(this, OPEN_SETTINGS_VIBRATION_INTERVAL);
-            startActivityForResult(PreferencesActivity.class);
-        }
-        else if (id == R.id.copy_to_clipboard) {
-            final boolean has_vibrated = VibratorUtils.vibrate(this, COPY_TO_CLIPBOARD_VIBRATION_INTERVAL), app_has_been_minimized = mAccountsListAdapter.copyActiveAccountOtpCodeToClipboard(this);
-            if ((has_vibrated) && (app_has_been_minimized)) {
-                ThreadUtils.sleep(COPY_TO_CLIPBOARD_VIBRATION_INTERVAL);
+        final int view_id = view.getId();
+        final boolean has_vibrated = Vibrator.vibrate(this, view_id == R.id.copy_to_clipboard ? Constants.LONG_HAPTIC_FEEDBACK : Constants.NORMAL_HAPTIC_FEEDBACK);
+        if (view_id == R.id.server_identity_selector) { showSelectServerIdentityDialog(); }
+        else if (view_id == R.id.sync_server_data) { MainService.startService(this, mActiveServerIdentity); }
+        else if (view_id == R.id.add_account_data) { openAddAccountDataActivity(); }
+        else if (view_id == R.id.open_app_settings) { openAppSettingsActivity(); }
+        else if ((view_id == R.id.copy_to_clipboard) && mAccountsListAdapter.copyActiveAccountOtpCodeToClipboard(this) && has_vibrated) { Threads.sleep(Constants.LONG_HAPTIC_FEEDBACK); }
+    }
+
+    // Open settings after animate the button (animations availability is enabled or disabled at UI class)
+
+    private void openAppSettingsActivity() {
+        UI.startRotationAnimation(mOpenAppSettingsButton, Constants.BUTTON_CLICK_ANIMATION_BEFORE_START_ACTION_DEGREES, Constants.BUTTON_360_DEGREES_ROTATION_ANIMATION_DURATION, new UI.OnAnimationEndListener() {
+            @Override
+            public void onAnimationEnd(View view) {
+                startActivityForResult(PreferencesActivity.class);
             }
-        }
+        });
     }
 
+    // Open add account data activity after animate the button (animations availability is enabled or disabled at UI class)
+
+    private void openAddAccountDataActivity() {
+        UI.startRotationAnimation(mAddAccountDataButton, Constants.BUTTON_CLICK_ANIMATION_BEFORE_START_ACTION_DEGREES, Constants.BUTTON_360_DEGREES_ROTATION_ANIMATION_DURATION, new UI.OnAnimationEndListener() {
+            @Override
+            public void onAnimationEnd(View view) {
+                startActivityForResult(SelectHowAddAccountDataActivity.class);
+            }
+        });
+    }
+
+    // Saves account data, in a separate Thread, when account needs to be saved (HOTP account and counter increased)
+    // If sync immediately is enabled, the server synchronization process is also done by the thread
+
+    @Override
     public void onAccountSynchronizationNeeded(@NotNull final TwoFactorAccount account) {
-        SingleAccoutDataSynchronizer.getBackgroundTask(this, mAccountsListAdapter, account, null).start();
+        SaveAccountData.getBackgroundTask(this, account, null).start();
     }
 
+    @Override
+    public void onDataSaved(@NotNull final TwoFactorAccount account, final boolean success, final boolean synced) {
+        if ((! isFinishedOrFinishing()) && success) { mAccountsListAdapter.notifyItemChanged(account); }
+    }
+
+    // Events related to OTP codes
+
+    @Override
     public void onOtpCodeBecomesVisible(@NotNull final String otp_type) {
-        findViewById(R.id.otp_time).setVisibility((TwoFactorAccount.OTP_TYPE_TOTP_VALUE.equals(otp_type) || TwoFactorAccount.OTP_TYPE_STEAM_VALUE.equals(otp_type)) ? View.VISIBLE : View.INVISIBLE);
-        if (mFabButtonShowOrHide.getDisplayState() != FabButtonShowOrHide.DisplayState.HIDDEN) {
-            ((FloatingActionButton) findViewById(R.id.copy_to_clipboard)).show();
-        }
-        mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings), (FloatingActionButton) findViewById(R.id.copy_to_clipboard) });
+        mRemainingOtpTimeProgressBar.setVisibility(TwoFactorAccount.isHotp(otp_type) ? View.INVISIBLE : View.VISIBLE);
+        if (mFabButtonShowOrHide.getDisplayState() != FabButtonShowOrHide.DisplayState.HIDDEN) { UI.animateShowOrHide(mCopyToClipboardButton, true, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
+        mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { mSyncServerDataButton, mAddAccountDataButton, mOpenAppSettingsButton, mCopyToClipboardButton });
+        setAccountsListIndexBounds();
     }
 
+    @Override
     public void onTotpCodeShowAnimated(final long interval_until_current_otp_cycle_ends, final long cycle_time) {
-        final ProgressBar otp_time = (ProgressBar) findViewById(R.id.otp_time);
-        otp_time.setProgress(Math.max(0, (int) ((100 * interval_until_current_otp_cycle_ends) / cycle_time)));
-        otp_time.setProgressTintList(ColorStateList.valueOf(getResources().getColor(interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, getTheme())));
+        mRemainingOtpTimeProgressBar.setProgress(Math.max(0, (int) ((100 * interval_until_current_otp_cycle_ends) / cycle_time)));
+        mRemainingOtpTimeProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, getTheme())));
     }
 
+    @Override
     public void onOtpCodeHidden() {
-        findViewById(R.id.otp_time).setVisibility(View.INVISIBLE);
-        ((FloatingActionButton) findViewById(R.id.copy_to_clipboard)).hide();
-        mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { (FloatingActionButton) findViewById(R.id.sync_server_data), (FloatingActionButton) findViewById(R.id.open_app_settings) });
+        mRemainingOtpTimeProgressBar.setVisibility(View.INVISIBLE);
+        mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { mSyncServerDataButton, mAddAccountDataButton, mOpenAppSettingsButton });
+        UI.animateShowOrHide(mCopyToClipboardButton, false, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
+        setAccountsListIndexBounds();
     }
 
     @Override
-    public void beforeTextChanged(@NotNull final CharSequence string, final int start, final int count, final int after) {}
-
-    @Override
-    public void onTextChanged(@NotNull final CharSequence string, final int start, final int before, final int count) {}
-
-    @Override
-    public void afterTextChanged(@NotNull final Editable editable) {
-        filterData();
+    public void onOtpAccountClick(@NotNull final TwoFactorAccount account) {
+        final Bundle bundle = new Bundle();
+        bundle.putLong(EditAccountDataActivity.EXTRA_ACCOUNT_ID, account.getRowId());
+        startActivityForResult(EditAccountDataActivity.class, bundle);
     }
+
+    // Set "sync server data" and "add account data" buttons availability
 
     private void setSyncDataButtonAvailability() {
         if (! isFinishedOrFinishing()) {
-            synchronized (mSynchronizationObject) {
-                final boolean syncing_or_loading_data = ((mDataLoader != null) || (MainService.isRunning(this)));
-                ((FloatingActionButton) findViewById(R.id.sync_server_data)).setEnabled(MainService.canSyncServerData(this) && (! syncing_or_loading_data));
-                if ((syncing_or_loading_data) && (!mRotatingSyncingAccountsFab)) {
-                    ((FloatingActionButton) findViewById(R.id.sync_server_data)).startAnimation(mRotateAnimation);
-                    mRotatingSyncingAccountsFab = true;
-                }
-                else if ((! syncing_or_loading_data) && (mRotatingSyncingAccountsFab)) {
-                    ((FloatingActionButton) findViewById(R.id.sync_server_data)).clearAnimation();
-                    mRotatingSyncingAccountsFab = false;
-                }
-            }
+            final boolean syncing_or_loading_data = ((mDataLoaderAndFilterer != null) || MainService.isRunning(this)), can_sync_data = MainService.canSyncServerData(this);
+            mSyncServerDataButton.setEnabled((! syncing_or_loading_data) && can_sync_data);
+            mAddAccountDataButton.setEnabled(can_sync_data);
+            if (syncing_or_loading_data && (! mAnimatingSyncDataButton)) { UI.startInfiniteRotationAnimationLoop(mSyncServerDataButton, Constants.BUTTON_360_DEGREES_ROTATION_ANIMATION_DURATION); }
+            else if ((! syncing_or_loading_data) && (mAnimatingSyncDataButton)) { mSyncServerDataButton.clearAnimation(); }
+            mAnimatingSyncDataButton = syncing_or_loading_data;
         }
     }
 
-    public void onServiceStarted() {
-        setSyncDataButtonAvailability();
-    }
-
-    public void onServiceFinished(@Nullable final SyncResultType result_type) {
-        UiUtils.showToast(this, result_type == SyncResultType.UPDATED ? R.string.sync_completed : result_type == SyncResultType.NO_CHANGES ? R.string.sync_no_changes : R.string.sync_error);
-        setSyncDataButtonAvailability();
-        if (result_type == SyncResultType.UPDATED) {
-            loadData();
-        }
-    }
-
-    public void onDataSyncedFromServer(@Nullable final SyncResultType result_type) {}
-
-    private void loadData() {
-        synchronized (mSynchronizationObject) {
-            if (mDataLoader == null) {
-                mDataLoader = DataLoader.getBackgroundTask(this, mAccountsListAdapter, mGroupsListAdapter, this);
-                mDataLoader.start();
-            }
-        }
-    }
-
-    public void onDataLoaded(final boolean success) {
-        if (! isFinishedOrFinishing()) {
-            synchronized (mSynchronizationObject) {
-                mDataLoader = null;
-                if (success) {
-                    mAccountsListAdapter.setViews(findViewById(R.id.accounts_list), findViewById(R.id.empty_view));
-                    mActiveGroup = null;
-                    findViewById(R.id.accounts_list_header).setVisibility(((mLoadedAccountsData == null) || (mLoadedAccountsData.accounts == null) || mLoadedAccountsData.accounts.isEmpty() || (! mUnlocked)) ? View.GONE : View.VISIBLE);
-                    setAccountsListIndexVisibility();
-                    ((EditText) findViewById(R.id.filter_text)).setText(null);
-                }
-                setSyncDataButtonAvailability();
-                setAccountsListIndexVisibility();
-            }
-        }
-    }
-
-    @Override
-    public void onDataLoadError() {
-        onDataLoaded(false);
-    }
-
-    @Override
-    public void onDataLoadSuccess(@Nullable LoadedAccountsData data) {
-        synchronized (mSynchronizationObject) {
-            mLoadedAccountsData = data;
-            onDataLoaded(true);
-        }
-    }
-
-    private void filterData() {
-        synchronized (mSynchronizationObject) {
-            if (mLoadedAccountsData != null) {
-                ThreadUtils.interrupt(mDataFilterer);
-                mDataFilterer = DataFilterer.getBackgroundTask(this, mAccountsListAdapter, mGroupsListAdapter, mLoadedAccountsData.accounts, mActiveGroup, ((EditText) findViewById(R.id.filter_text)).getText().toString(), this);
-                mDataFilterer.start();
-            }
-        }
-    }
-
-    @Override
-    public void onDataFilterSuccess(final boolean any_filter_applied) {
-        synchronized (mSynchronizationObject) {
-            mAccountsListAdapter.setViews(findViewById(R.id.accounts_list), findViewById(any_filter_applied ? R.id.accounts_list : R.id.empty_view ));
-            mDataFilterer = null;
-        }
-    }
-
-    @Override
-    public void onDataFilterError() {}
-
-    public void onSelectedGroupChanges(@Nullable final String active_group, @Nullable final String previous_active_group) {
-        synchronized (mSynchronizationObject) {
-            if (! StringUtils.equals(mActiveGroup, active_group)) {
-                mActiveGroup = active_group;
-                filterData();
-            }
-        }
-    }
+    // Functions related to the search for updates process
+    // If a update is available we show a dialog with info and user decides if update is installed
+    // We do not notify the same update all the time but each time to time
 
     private void checkForAppUpdates() {
-        if (SharedPreferencesUtilities.getDefaultSharedPreferences(this).getBoolean(Constants.AUTO_UPDATE_APP_KEY, getResources().getBoolean(R.bool.auto_update_app_default))) {
-            CheckForAppUpdates.getBackgroundTask(this, this).start();
-        }
+        if (Preferences.getDefaultSharedPreferences(this).getBoolean(Constants.AUTO_UPDATE_APP_KEY, getResources().getBoolean(R.bool.auto_update_app))) { CheckForAppUpdates.getBackgroundTask(this, this).start(); }
     }
 
     public void onCheckForUpdatesFinished(@NotNull final File downloaded_app_file, @NotNull final AppVersionData downloaded_app_version)
     {
         if (! isFinishedOrFinishing()) {
-            final SharedPreferences preferences = SharedPreferencesUtilities.getDefaultSharedPreferences(this);
-            boolean update_will_be_notified = true;
-            if (downloaded_app_version.code == preferences.getInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, 0)) {
-                update_will_be_notified = (preferences.getLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, 0) + NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL < System.currentTimeMillis());
-            }            
-            if (update_will_be_notified) {
+            final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(this);
+            if ((downloaded_app_version.code != preferences.getInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, 0)) || (preferences.getLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, 0) + NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL < System.currentTimeMillis())) {
                 preferences.edit().putInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, downloaded_app_version.code).putLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, System.currentTimeMillis()).apply();
-                UiUtils.showConfirmDialog(this, getString(R.string.there_is_an_update_version, getString(R.string.app_build_version_number, getString(R.string.app_version_name_value), getResources().getInteger(R.integer.app_version_number_value)), getString(R.string.app_build_version_number, downloaded_app_version.name, downloaded_app_version.code)), R.string.install_now, new DialogInterface.OnClickListener() {
+                UI.showConfirmDialog(this, getString(R.string.there_is_an_update_version, getString(Main.getInstance().isPreRelease() ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, getString(R.string.app_version_name_value), getResources().getInteger(R.integer.app_version_number_value)), getString(downloaded_app_version.preRelease ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, downloaded_app_version.name, downloaded_app_version.code)), R.string.install_now, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        try {
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setDataAndType(FileProvider.getUriForFile(getBaseContext(), getPackageName() + ".provider", downloaded_app_file), "application/vnd.android.package-archive");
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            startActivity(intent);
-                        }
-                        catch (Exception e) {
-                            Log.e(Constants.LOG_TAG_NAME, "Exception while trying to install an app update", e);
-                        }
+                        startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(FileProvider.getUriForFile(getBaseContext(), getPackageName() + ".provider", downloaded_app_file), "application/vnd.android.package-archive").setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION));
                     }
                 });
             }
         }
     }
 
-    @Override
-    public void onActivityResult(@NotNull final ActivityResult result) {
-        if (result.getResultCode() == Activity.RESULT_OK) {
-            if ((PreferencesActivity.class.getName().equals(mStartedActivityForResult)) && (! isFinishedOrFinishing())) {
-                final Intent intent = result.getData();
-                if (intent != null) {
-                    final List<String> changed_settings = intent.getStringArrayListExtra(MainPreferencesFragment.EXTRA_CHANGED_SETTINGS);
-                    if (changed_settings != null) {
-                        if ((changed_settings.contains(Constants.TWO_FACTOR_AUTH_SERVER_LOCATION_KEY)) || (changed_settings.contains(Constants.TWO_FACTOR_AUTH_TOKEN_KEY))) {
-                            if (! Database.TwoFactorAccountOperations.exists()) {
-                                onDataLoadSuccess(null);
-                                if ((MainService.canSyncServerData(this)) && (! MainService.isRunning(this))) {
-                                    MainService.startService(this);
-                                }
-                            }
-                            else {
-                                loadData();
-                            }
-                        }
-                        else if (changed_settings.contains(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY)) {
-                            loadData();
-                        }
-                        mAccountsListAdapter.onOptionsChanged();
-                    }
-                }
-            }
-        }
-        mUnlocked = ! Main.getInstance().stopObservingIfAppBackgrounded();
+    // Events related to the synchronization process
+    // When synchronization process ends we launch load data process then change the buttons (related to the sync process) availability
+
+    public void onServiceStarted() {
+        setSyncDataButtonAvailability();
+    }
+
+    public void onServiceFinished(@Nullable final SyncResultType result_type) {
+        setSyncDataButtonAvailability();
+        loadData();
+    }
+
+    // Functions related to the data load and filter process
+    // This process is started first time app in launched and each time synchronization ends
+    // If load data ends with success, we clear filter options and list adapter options
+    // In any case, we set the buttons availability and list index accordly to current state
+
+    private void loadData() {
+        Threads.interrupt(mDataLoaderAndFilterer);
+        mDataLoaderAndFilterer = DataLoaderAndFilterer.getBackgroundTask(this, mActiveServerIdentity, mActiveGroup, mText, this, this);
+        setSyncDataButtonAvailability();
+        mDataLoaderAndFilterer.start();
     }
 
     @Override
-    protected void processOnBackPressed() {
-        boolean do_filter_data_instead_of_finish = false;
-        synchronized (mSynchronizationObject) {
-            if ((mActiveGroup != null) || (! ((EditText) findViewById(R.id.filter_text)).getText().toString().isEmpty())) {
-                ((EditText) findViewById(R.id.filter_text)).setText(null);
-                mActiveGroup = null;
-                do_filter_data_instead_of_finish = true;
+    public void onDataLoadError() {}
+
+    @Override
+    public void onDataLoadSuccess(@Nullable final List<TwoFactorServerIdentity> server_identities, @Nullable final Map<Long, List<TwoFactorGroup>> groups, @Nullable final Map<Long, List<TwoFactorAccount>> accounts, final boolean alpha_sorted_accounts) {
+        if (! isFinishedOrFinishing()) {
+            mLastLoadTime = MainService.getLastSyncTime(this);
+            mServerIdentities = server_identities;
+            mGroups = groups;
+            mAccounts = accounts;
+            mAlphaSortedAccounts = alpha_sorted_accounts;
+            mServerIdentitySelector.setVisibility(Lists.isSizeGreaterOrEqualsTo(mServerIdentities, 2) ? View.VISIBLE : View.GONE);
+            mAccountsListHeader.setVisibility(((mAccounts != null) && (! Lists.isEmptyOrNull(mAccounts.get(-1L)))) && mUnlocked ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    // Filter process follows the load data process, but also will be manually started
+    // Note that, on filter success, empty-view and not-empty-view are the same if any filter applied
+
+    private void filterData() {
+        Threads.interrupt(mDataLoaderAndFilterer);
+        if (mAccounts != null) { (mDataLoaderAndFilterer = DataLoaderAndFilterer.getBackgroundTask(this, mAccounts.get(-1L), mActiveServerIdentity, mActiveGroup, mText, this)).start(); }
+    }
+
+    @Override
+    public void onDataFiltered(final boolean any_filter_applied, @Nullable final List<TwoFactorAccount> accounts) {
+        if (! isFinishedOrFinishing()) {
+            mAccountsListAdapter.setItems(mFilteredAccounts = accounts);
+            mAccountsListAdapter.setViews(mAccountsListRecyclerView, any_filter_applied ? mAccountsListRecyclerView : mEmptyView);
+            final List<TwoFactorGroup> groups = (mActiveServerIdentity == null) ? (mGroups == null) ? null : mGroups.get(-1L) : mGroups.get(mActiveServerIdentity.getRowId());
+            mGroupsListAdapter.setItems(groups, mActiveGroup);
+            mGroupsListRecyclerView.setVisibility(Lists.isEmptyOrNull(groups) ? View.GONE : View.VISIBLE);
+            if (any_filter_applied) { mEmptyView.setVisibility(View.GONE); }
+            mDataLoaderAndFilterer = null;
+            setAccountsListIndexVisibility();
+            setSyncDataButtonAvailability();
+        }
+    }
+
+    private void showSelectServerIdentityDialog() {
+        final List<String> server_identities = new ArrayList<String>();
+        server_identities.add(getString(R.string.no_filter_by_server_identity));
+        for (final TwoFactorServerIdentity server_identity : mServerIdentities) { server_identities.add(server_identity.getTitle()); }
+        UI.showSelectItemFromListDialog(this, 0, R.string.select_a_server_identity_to_filter, server_identities, mActiveServerIdentity == null ? null : mActiveServerIdentity.getTitle(), R.string.accept, R.string.cancel, new OnSelectionDialogItemSelected() {
+            @Override
+            public void onItemSelected(final int position) {
+                final TwoFactorServerIdentity active_server_identity = ((position <= 0) || (position > mServerIdentities.size())) ? null : mServerIdentities.get(position - 1);
+                if (mActiveServerIdentity != active_server_identity) {
+                    mActiveServerIdentity = active_server_identity;
+                    Preferences.getDefaultSharedPreferences(getBaseContext()).edit().putBoolean(Constants.FILTERING_BY_SERVER_IDENTITY_KEY, mActiveServerIdentity != null).apply();
+                    onAppearanceOptionsChanged();
+                    filterData();
+                }
+            }
+        });
+    }
+
+    public void onSelectedGroupChanges(@Nullable final TwoFactorGroup active_group, @Nullable final TwoFactorGroup previous_active_group) {
+        final long active_group_id = (active_group == null) ? -1 : active_group.getRowId(), previous_active_group_id = (mActiveGroup == null) ? -1 : mActiveGroup.getRowId();
+        if (active_group_id != previous_active_group_id)  {
+            mActiveGroup = active_group;
+            Preferences.getDefaultSharedPreferences(this).edit().putBoolean(Constants.FILTERING_BY_GROUP_KEY, mActiveGroup != null).apply();
+            onAppearanceOptionsChanged();
+            filterData();
+        }
+    }
+
+    @Override
+    public void afterTextChanged(@NotNull final Editable editable) {
+        final String text = mFilterTextEditText.getText().toString();
+        if (! Strings.equals(mText, text, true)) {
+            mText = text;
+            filterData();
+        }
+    }
+
+    // Entry point for the related activities launch
+
+    @Override
+    protected void startActivityForResult(@NotNull final Class<?> activity_class, @Nullable final Bundle bundle) {
+        Main.getInstance().startObservingIfAppBackgrounded();
+        mStartedActivityForResult = activity_class.getName();
+        super.startActivityForResult(activity_class, bundle);
+    }
+
+    // Entry point for the related activities end
+    // When the settings activity ends, if changed settings includes server-identities, we try to start synchronization process or, if not possible, we reload accounts data
+    // If the activity that ends isn't the settings activity, we reload accounts data
+    // Note that, if app has not paused while related activity execution, we maintains the app unlocked
+
+    private void onAppearanceOptionsChanged() {
+        final AppearanceOptions options = new AppearanceOptions(this);
+        mAccountsListAdapter.onOptionsChanged(options);
+        mGroupsListAdapter.onOptionsChanged(options);
+    }
+
+    @Override
+    public void onActivityResult(@NotNull final ActivityResult result) {
+        if ((result.getResultCode() == Activity.RESULT_OK) && (! isFinishedOrFinishing())) {
+            if (PreferencesActivity.class.getName().equals(mStartedActivityForResult)) {
+                final Intent intent = result.getData();
+                if (intent != null) {
+                    if (intent.getBooleanExtra(MainPreferencesFragment.SERVER_IDENTITIES_CHANGED, false)) {
+                        if (! MainService.isRunning(this)) {
+                            if (MainService.canSyncServerData(this)) { MainService.startService(this); }
+                            else { loadData(); }
+                        }
+                    }
+                    else if (intent.getBooleanExtra(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY, false)) {
+                        loadData();
+                    }
+                    onAppearanceOptionsChanged();
+                }
+            }
+            else if (EditAccountDataActivity.class.getName().equals(mStartedActivityForResult) || SelectHowAddAccountDataActivity.class.getName().equals(mStartedActivityForResult)) {
+                loadData();
             }
         }
-        if (do_filter_data_instead_of_finish) {
+        mUnlocked = ! Main.getInstance().stopObservingIfAppBackgrounded();
+        onConfigurationChanged(getResources().getConfiguration());
+    }
+
+    // If back button pressed and we are filtering by any kind of data, we reset the filter
+    // In other case, we ends the activity
+
+    @Override
+    protected void processOnBackPressed() {
+        if ((mActiveServerIdentity != null) || (mActiveGroup != null) || (! mFilterTextEditText.getText().toString().isEmpty())) {
+            mFilterTextEditText.setText(null);
+            mActiveServerIdentity = null;
+            mActiveGroup = null;
+            Preferences.getDefaultSharedPreferences(this).edit().remove(Constants.FILTERING_BY_SERVER_IDENTITY_KEY).remove(Constants.FILTERING_BY_GROUP_KEY).apply();
+            onAppearanceOptionsChanged();
             filterData();
         }
         else {

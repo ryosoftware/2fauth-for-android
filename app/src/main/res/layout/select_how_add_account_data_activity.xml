@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".SelectHowAddAccountDataActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/how_do_you_want_to_add_account_data" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/use_qr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="10dp"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="10dp"
+                android:paddingStart="20dp"
+                android:paddingBottom="10dp"
+                android:paddingEnd="20dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:minHeight="60dp"
+                android:background="@drawable/border_frame_clickable"
+                android:text="@string/add_account_data_from_a_qr_code" />
+
+            <TextView
+                android:id="@+id/use_form"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="10dp"
+                android:paddingStart="20dp"
+                android:paddingBottom="10dp"
+                android:paddingEnd="20dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:minHeight="60dp"
+                android:background="@drawable/border_frame_clickable"
+                android:text="@string/add_account_data_from_a_form" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:justificationMode="inter_word"
+            android:text="@string/camera_permission_is_optional" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:justificationMode="inter_word"
+            android:text="@string/no_external_qr_libraries_be_used" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:justificationMode="inter_word"
+            android:text="@string/you_can_edit_qr_data_when_decoded" />
+
+        <LinearLayout
+            android:id="@+id/server_identity_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:justificationMode="inter_word"
+                android:text="@string/select_server_identity_header" />
+
+            <Spinner
+                android:id="@+id/server_identity_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/qr_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/qr"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:scaleType="centerInside" />
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:indeterminate="true" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</ScrollView>
+

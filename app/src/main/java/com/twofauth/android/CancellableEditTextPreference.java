@@ -2,7 +2,6 @@ package com.twofauth.android;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/icon"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_upload"
+                android:scaleType="centerInside" />
+
+            <TextView
+                android:id="@+id/icon_source"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingTop="10dp"
+                android:paddingStart="20dp"
+                android:paddingBottom="10dp"
+                android:paddingEnd="20dp"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:maxLines="1"
+                android:background="@drawable/border_frame_clickable"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/server_identity_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/server_identity" />
+
+            <Spinner
+                android:id="@+id/server_identity_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/service" />
+
+            <EditText
+                android:id="@+id/service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/account" />
+
+            <EditText
+                android:id="@+id/account"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/groups_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/group" />
+
+            <Spinner
+                android:id="@+id/group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/show_advanced_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:paddingTop="10dp"
+            android:paddingStart="20dp"
+            android:paddingBottom="10dp"
+            android:paddingEnd="20dp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:maxLines="1"
+            android:background="@drawable/border_frame_clickable"
+            android:text="@string/show_advanced_data" />
+
+        <LinearLayout
+            android:id="@+id/advanced_data_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/otp_type" />
+
+                <LinearLayout
+                    android:id="@+id/otp_types_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/otp_type"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="totp"
+                        android:text="@string/otp_type_totp" />
+
+                    <TextView
+                        android:id="@id/otp_type"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="hotp"
+                        android:text="@string/otp_type_hotp" />
+
+                    <TextView
+                        android:id="@id/otp_type"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="steamtotp"
+                        android:text="@string/otp_type_steam" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/secret" />
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageButton
+                        android:id="@+id/copy_secret"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_alignParentEnd="true"
+                        android:paddingTop="10dp"
+                        android:paddingStart="10dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="10dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:src="@drawable/ic_copy"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="6"
+                        android:text="@string/number_6" />
+
+                    <EditText
+                        android:id="@+id/secret"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@id/copy_secret"
+                        android:layout_alignWithParentIfMissing="true"
+                        android:lines="1" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/digits_block_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/digits" />
+
+                <LinearLayout
+                    android:id="@+id/digits_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/digit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="6"
+                        android:text="@string/number_6" />
+
+                    <TextView
+                        android:id="@id/digit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="7"
+                        android:text="@string/number_7" />
+
+                    <TextView
+                        android:id="@id/digit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="8"
+                        android:text="@string/number_8" />
+
+                    <TextView
+                        android:id="@id/digit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="9"
+                        android:text="@string/number_9" />
+
+                    <TextView
+                        android:id="@id/digit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="10"
+                        android:text="@string/number_10" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/algorithms_block_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/algorithm" />
+
+                <LinearLayout
+                    android:id="@+id/algorithms_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/algorithm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="sha1"
+                        android:text="@string/algorithm_sha1" />
+
+                    <TextView
+                        android:id="@id/algorithm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="sha256"
+                        android:text="@string/algorithm_sha256" />
+
+                    <TextView
+                        android:id="@id/algorithm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="sha512"
+                        android:text="@string/algorithm_sha512" />
+
+                    <TextView
+                        android:id="@id/algorithm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:paddingTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:background="@drawable/border_frame_clickable"
+                        android:tag="md5"
+                        android:text="@string/algorithm_md5" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/period_block_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/period" />
+
+                <EditText
+                    android:id="@+id/period"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:digits="0123456789"
+                    android:lines="1" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/counter_block_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/counter" />
+
+                <EditText
+                    android:id="@+id/counter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:digits="0123456789"
+                    android:lines="1" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
+
+

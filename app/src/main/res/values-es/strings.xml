@@ -1,73 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
 
     <string name="app_name">2FAuth</string>
 
     <string name="app_version">Número de versión</string>
     <string name="app_build_version_number">%1$s (compilación núm. %2$d)</string>
-    <string name="app_version_is_debug_release">%1$s\n\nVersión de desarrollo</string>
+    <string name="app_build_version_number_prerelease">%1$s (compilación número %2$d, versión preliminar)</string>
+    <string name="app_version_is_debug_release">%1$s\n\nEstá usando una versión de desarrollo</string>
+
+    <string name="how_interact_with_accounts">(Este mensaje sólo se mostrará una vez)\n\nHemos modificado la forma de interactuar con las cuentas:\n\nCuando el código 2FA de una cuenta no se está mostrando, un clic hará que se muestre mientras que un click largo le llevará a la pantalla de edición de la cuenta.\n\nPor el contrario, cuendo el código 2FA de la cuenta se está mostrando, un clic en el área de la cuenta lo ocultará mientras que un clic largo lo copiará en el portapapeles y, según sus opciones de configuración, minimizará la aplicación</string>
 
     <string name="settings">Configuración</string>
-    <string name="action_settings">@string/settings</string>
 
     <string name="sync_service_notifications_channel">Notificaciones del servicio de sincronización</string>
 
-    <string name="trying_to_load_2fa_codes">Tratando de leer los códigos 2FA</string>
-    <string name="trying_to_refresh_2fa_codes">Tratando de refrescar la lista de códigos 2FA</string>
+    <string name="syncing_2fa_codes">Sincronizando los códigos 2FA del usuario</string>
 
     <string name="no_2fa_codes">No hay cuentas 2FA</string>
+
+    <string name="server_identities">Identidades en servidores</string>
+    <string name="server_identities_summary">Haga clic para administrar sus identidades</string>
+    <string name="no_server_identities">No se han definido identidades</string>
+    <string name="select_a_server_identity_to_filter">Seleccione la identidad cuyas cuentas quiere ver</string>
+    <string name="no_filter_by_server_identity">No filrar por identidad</string>
+
+    <string name="add_new_server_identity">Añadir una nueva identidad</string>
+
+    <string name="server_identity_will_be_removed">Se eliminará la identidad.\n\nEsta acción no tiene efectos sobre los datos almacenados en su servidor.\n\n¿Está seguro de que desea continuar?</string>
+    <string name="server_identity_and_accounts_will_be_removed">Se eliminarán la identidad y las cuentas relacionadas de la app.\n\nEsta acción no tiene efectos sobre los datos almacenados en su servidor.\n\n¿Está seguro de que desea continuar?</string>
+    <string name="server_identity_and_accounts_and_not_synced_accounts_will_be_removed">Se eliminarán la identidad y las cuentas relacionadas, incluyendo los datos no sincronizados, de la app.\n\nEsta acción no tiene efectos sobre los datos almacenados en su servidor.\n\n¿Está seguro de que desea continuar?</string>
+
+    <string name="server_identity_data_saved">Los datos de la identidad se han guardado</string>
+
+    <string name="accounts_will_be_removed">Se eliminarán las cuentas relacionadas de la app.\n\nEsta acción no tiene efectos sobre los datos almacenados en su servidor.\n\n¿Está seguro de que desea continuar?</string>
+    <string name="accounts_and_not_synced_accounts_will_be_removed">Se eliminarán llas cuentas relacionadas, incluyendo los datos no sincronizados, de la app.\n\nEsta acción no tiene efectos sobre los datos almacenados en su servidor.\n\n¿Está seguro de que desea continuar?</string>
+
+    <string name="cancel_identity_edition_message">Los datos de la identidad han cambiado.\n\n¿Qué desea hacer?</string>
+    <string name="cancel_identity_creation_message">@string/cancel_account_edition_message</string>
+
+    <string name="label">Etiqueta</string>
+    <string name="label_dialog_title">@string/label</string>
+    <string name="label_dialog_message">Indique un nombre para la identidad que le permita identificarla en la lista de identidades (en su defecto se usará el nombre establecido para la cuenta en el servidor, si está disponible)</string>
+    <string name="label_not_set">No se ha indicado etiqueta</string>
 
     <string name="server_location">URL del servidor</string>
     <string name="server_location_dialog_title">@string/server_location</string>
     <string name="server_location_dialog_message">Por favor, introduzca la dirección del servidor (incluyendo la parte correspondiente al protocolo http/https y el puerto, en caso de que éste no sea el estándar).\n\nEjemplo: https://demo.2fauth.app</string>
     <string name="server_location_is_not_set">Server location is not set</string>
-    <string name="server_http_is_insecure_warning">La ubicación del servidor que ha especificado no es segura.\n\nLe recomendamos encarecidamente que lo traslade a una ubicación segura (quizás tenga que instalar traefik, nginx-proxy o similar) excepto para realizar pruebas y si conoce los riesgos.</string>
-
-    <string name="server_location_has_changed_and_token_defined_and_downloaded_data_exists">Al cambiar la ubicación del servidor se eliminó también, por su seguridad, el token de acceso.\n\nAdicionalmente, le recomendamos que elimine de la app los datos de las cuentas que se hubieran descargado anteriormente.\n\n¿Desea eliminar los datos ahora?</string>
-    <string name="server_location_has_changed_and_token_not_defined_but_downloaded_data_exists">Al cambiar la ubicación del servidor le recomendamos que elimine de la app los datos de las cuentas que se hubieran descargado anteriormente.\n\n¿Desea eliminar los datos ahora?</string>
-    <string name="server_location_has_changed_and_token_defined_and_no_downloaded_data_exists">Al cambiar la ubicación del servidor se eliminó también, por su seguridad, el token de acceso</string>
-    <string name="server_location_has_changed_and_token_not_defined_and_no_downloaded_data_exists">La ubicación del servidor se ha actualizado</string>
-
-    <string name="open_server_location">Abrir en navegador</string>
-    <string name="open_server_location_summary">Abre el sitio del servidor en una ventana del navegador web</string>
+    <string name="server_http_is_insecure_warning">La ubicación del servidor que ha especificado no es segura.\n\nLe recomendamos encarecidamente que lo traslade a una ubicación segura (quizás tenga que instalar traefik, nginx-proxy o similar) excepto para realizar pruebas y si conoce los riesgos</string>
 
     <string name="token_value">Token de acceso</string>
     <string name="token_value_is_set_summary">Haga clic para actualizar el valor del token de acceso</string>
     <string name="token_value_is_not_set_summary">Haga clic para introducir el valor del token de acceso</string>
     <string name="token_value_dialog_title">@string/token_value</string>
-    <string name="token_value_dialog_message">Por favor, ingrese el valor del token.\n\nPara obtener un token, abra la URL del servidor en un navegador web, inicie sesión con su cuenta de usuario y acceda a los ajustes y luego a "Configuración de OAuth"; finalmente haga clic en "generar un token", copie el valor y péguelo aquí.</string>
+    <string name="token_value_dialog_message">Por favor, ingrese el valor del token.\n\nPara obtener un token, abra la URL del servidor en un navegador web, inicie sesión con su cuenta de usuario y acceda a los ajustes y luego a "Configuración de OAuth"; finalmente haga clic en "generar un token", copie el valor y péguelo aquí</string>
     <string name="token_unchanged">(sin cambios)</string>
-
-    <string name="token_has_changed_and_downloaded_data_exists">El token de acceso al servidor se ha actualizado.\n\nAdicionalmente, le recomendamos que elimine de la app los datos de las cuentas que se hubieran descargado anteriormente.\n\n¿Desea eliminar los datos ahora?</string>
-    <string name="token_has_changed_and_no_downloaded_data_exists">El token de acceso al servidor se ha actualizado</string>
-
-    <string name="not_synced_changes_will_be_lost">Hay cambios no sincronizados que se perderán si continúa con esta operación sin realizar antes una sincronización de datos.\n\n¿Está seguro de que desea continuar?</string>
-
-    <plurals name="number_of_accounts">
-        <item quantity="one">Se lista una única cuenta</item>
-        <item quantity="other">Se listan %1$d cuentas</item>
-        <item quantity="many">Se listan %1$d cuentas</item>
-    </plurals>
 
     <string name="date_time">%1$s a las %2$s</string>
 
-    <string name="last_server_sync_data_time">Los datos se han sincronizado el %1$s</string>
-
-    <string name="sync_details">Detalles de sincronización</string>
-    <string name="sync_is_in_progress">Hay una sincronización de datos en marcha</string>
     <string name="sync_no_changes">No se han detectado cambios</string>
     <string name="sync_error">Se ha producido un error en la sincronización</string>
     <string name="sync_completed">La sincronización se ha completado</string>
-    <string name="click_to_sync_data">Haga clic para iniciar la sincronización</string>
-    <string name="last_sync_error">La última sincronización fue el %2$s, pero no se completó debido al siguiente error: %1$s.\n\n%3$s</string>
+    <string name="last_sync_error">La última sincronización fue el %2$s, pero no se completó debido al siguiente error: %1$s</string>
+    <string name="account_never_synced">La cuetna nunca se ha sincronizado</string>
 
     <plurals name="sync_details">
-        <item quantity="one">La última sincronización fue el %2$s y se leyeron los datos de una cuenta.\n\n%3$s</item>
-        <item quantity="other">La última sincronización fue el %2$s y se leyeron los datos de %1$d cuentas.\n\n%3$s</item>
-        <item quantity="many">La última sincronización fue el %2$s y se leyeron los datos de %21$d cuentas.\n\n%3$s</item>
+        <item quantity="one">La última sincronización fue el %2$s y se leyeron los datos de una cuenta</item>
+        <item quantity="other">La última sincronización fue el %2$s y se leyeron los datos de %1$d cuentas</item>
+        <item quantity="many">La última sincronización fue el %2$s y se leyeron los datos de %21$d cuentas</item>
     </plurals>
 
     <string name="sync_on_startup">Sincronizar al iniciar</string>
     <string name="sync_on_startup_summary">Intenta sincronizar los datos del servidor cada vez que se inicia la app</string>
+
+    <string name="sync_immediately">Sincronizar inmediatamente</string>
+    <string name="sync_immediately_summary">Intenta sincronizar inmediatamente los datos en el servidor cuando se añadan, actualicen o eliminen en la app.\n\nEn cualquier caso, los elementos no sincronizados se actualizan en la sincronización global</string>
 
     <string name="appearance">Apariencia y usabilidad</string>
 
@@ -84,18 +92,33 @@
     <string name="reset_accounts_last_use_data">Resetear datos de uso</string>
     <string name="reset_accounts_last_use_data_summary">Elimina los datos de uso de las cuentas y la ordenación se reinicia</string>
     <string name="data_usage_has_been_deleted">Se han eliminado los datos de uso</string>
+    <string name="data_usage_has_not_been_deleted">UHa habido un error al borrar los datos de uso</string>
+
+    <string name="accounts_list_columns_portrait">Columnas en modo vertical</string>
+    <string name="accounts_list_columns_landscape">Columnas en modo apaisado</string>
 
     <string name="ungroup_otp_codes">Desagrupar código 2FA</string>
     <string name="ungroup_otp_codes_summary">Desagrupa los códigos para facilitar la lectura</string>
 
+    <string name="display_account_server_identity">Mostrar la etiqueta de la identidad</string>
+    <string name="display_account_server_identity_summary">Si está usando más de una identidad, se mostrará la etiqueta de la identidad a la que pertenece la cuenta</string>
+
     <string name="display_account_group">Mostrar el grupo</string>
-    <string name="display_account_group_summary">Se mostrará el grupo al que pertenece cada cuenta, si es el caso.</string>
+    <string name="display_account_group_summary">Se mostrará el grupo al que pertenece cada cuenta, si es el caso</string>
 
     <string name="minimize_app_after_copy_to_clipboard">Minimizar al copiar</string>
     <string name="minimize_app_after_copy_to_clipboard_summary">Minimiza la app cuando un código OTP es copiado al portapapeles</string>
 
     <string name="haptic_feedback">Respuesta háptica</string>
     <string name="haptic_feedback_summary">Hacer que el vibrador del teléfono vibre levemente como respuesta a algunas acciones, tales como pulsar un botón, mostrar u ocultar un código OTP o copiarlo en el portapapeles</string>
+
+    <string name="allow_animations">Permitir animaciones</string>
+    <string name="allow_animations_summary">Muestra animaciones para ciertos botones, lo que agrega un retraso mínimo en la ejecución de algunas acciones a cambio de un mayor impacto visual</string>
+
+    <string name="theme">Tema</string>
+    <string name="light_theme">Tema claro</string>
+    <string name="dark_theme">Tema oscuro</string>
+    <string name="follow_system_theme">Seguir el tema del sistema</string>
 
     <string name="security">Seguridad</string>
 
@@ -110,23 +133,31 @@
     <string name="show_next_otp_code_summary">Para códigos basados en tiempo (TOTP), al mostrar el código se mostrará también el siguiente.\n\nTenga en cuenta que la acción de "copiar al portapapeles" actuará solamente sobre el código actual</string>
 
     <string name="pin_access">PIN de acceso</string>
-    <string name="pin_access_summary">Configurar un código para acceder a la app</string>
+    <string name="pin_access_summary">Configurar un código para acceder a la app o realizar algunas acciones de especial relevancia</string>
     <string name="pin_access_dialog_title">@string/pin_access</string>
     <string name="pin_access_enter_current_pin">Por favor, introduzca el código de acceso</string>
-    <string name="pin_access_enter_new_pin">Por favor, introduzca el código con el que acceder a la app.El PIN debe tener entre 4 y 8 dígitos.\n\nNo podrá acceder a la app si lo olvida.</string>
-    <string name="pin_access_enter_new_pin_again">Por favor, introduzca el código de nuevo.\n\nRecuerde que no podrá acceder a la app si lo olvida.</string>
+    <string name="pin_access_enter_new_pin">Por favor, introduzca el código con el que acceder a la app.El PIN debe tener entre 4 y 8 dígitos.\n\nNo podrá acceder a la app si lo olvida</string>
+    <string name="pin_access_enter_new_pin_again">Por favor, introduzca el código de nuevo.\n\nRecuerde que no podrá acceder a la app si lo olvida</string>
     <string name="pin_is_not_valid">El código introducido no es válido</string>
     <string name="pin_and_its_repeat_does_not_match">El código y su repetición no coinciden</string>
     <string name="pin_has_been_set">Se ha configurado un código de acceso</string>
     <string name="pin_has_been_removed">El código de acceso se ha eliminado</string>
 
     <string name="use_fingerprint_instead_of_pin_code">Acceso con huella</string>
-    <string name="use_fingerprint_instead_of_pin_code_summary">Requerir la huella digital del usuario para acceder al aplicativo</string>
+    <string name="use_fingerprint_instead_of_pin_code_summary">Usar la huella digital en lugar del PIN</string>
     <string name="use_your_fingerprint_to_unlock_the_app">Verificación biométrica</string>
     <string name="fingerprint_is_not_valid">No se ha podido validar su identidad</string>
     <string name="fingerprint_validation_disabled_due_to_biometric_enrollment">Validación por huella deshabilitada debido a un registro de nuevas huellas</string>
 
     <string name="keystore_access_error">Se ha producido un error accediendo al almacén de claves</string>
+
+    <string name="allow_copy_server_access_tokens">Permitir copiar tokens de acceso</string>
+    <string name="allow_copy_server_access_tokens_summary">Incluir un botón en la pantalla de edición de identidad para copiar el token de acceso al portapapeles (no es nada recomendable si no se activa un método de acceso seguro)</string>
+
+    <string name="privacy">Privacidad</string>
+
+    <string name="download_icons_from_external_sources">Descargar iconos de fuentes externas</string>
+    <string name="download_icons_from_external_sources_summary">Intentaremos descargar los iconos que no se encontraron en su servidor, o que tenían un formato incompatible, desde repositorios de código abierto utilizando el nombre del servicio, lo que puede filtrar algunos datos privados, como los servicios 2FA que utiliza o su dirección IP</string>
 
     <string name="others">Otros</string>
 
@@ -137,20 +168,90 @@
     <string name="github_repo_summary">Abra el repositorio GitHub de la aplicación para obtener información sobre las últimas versiones, reportar errores o contribuir al desarrollo</string>
 
     <string name="auto_update_app">Actualizaciones automáticas</string>
-    <string name="auto_update_app_summary">Cuando inicie la app se conectará con el repositorio para comprobar si existen actualizaciones, procediendo a su descarga y a su instalación, si es el caso.</string>
+    <string name="auto_update_app_summary">Cuando inicie la app se conectará con el repositorio para comprobar si existen actualizaciones, procediendo a su descarga y a su instalación, si es el caso</string>
     <string name="there_is_an_update_version">Está usando la versión %1$s de la aplicación, pero la versión %2$s ya está disponible.\n\n¿Desea actualizar ahora?</string>
+
+    <string name="auto_update_app_include_prereleases">Incluir versiones preliminares</string>
+    <string name="auto_update_app_include_prereleases_summary">Las versiones preliminares incluyen nuevas funcionalidades, que pueden ser inestables; las funcionalidades anteriores también pueden resultar afectadas.\nPor favor, no olvide reportar cualquier error de funcionamiento que encuentre</string>
 
     <string name="auto_update_app_only_in_wifi">Actualizar sólo en redes WiFi</string>
     <string name="auto_update_app_only_in_wifi_summary">Sólo comprueba, y descarga, las nuevas versiones de la app si hay una conexión WiFi activa</string>
 
-
     <string name="search">Escribe algo para filtrar&#8230;</string>
 
+    <string name="how_do_you_want_to_add_account_data">¿Cómo desea añadir los datos de la cuenta?</string>
+    <string name="add_account_data_from_a_qr_code">Desde un código QR</string>
+    <string name="add_account_data_from_a_form">Usar un formulario</string>
+    <string name="camera_permission_is_optional">Puede seleccionar el código QR desde la galería o usar la cámara del dispositivo, pero en ese caso deberá otorgar el permiso de acceso a la cámara si se le solicita</string>
+    <string name="no_external_qr_libraries_be_used">Para proteger su privacidad, no usaremos ninguna librería externa para obtener los datos del QR sino que lo enviaremos a su servidor para que éste los decodifique, con el inconveniente de que sólo podrá hacerlo si está conectado a la red de éste</string>
+    <string name="you_can_edit_qr_data_when_decoded">Cuando el código QR haya sido decodificado por su servidor, le redireccionaremos al formulario de edición para que valide o edite los datos</string>
+    <string name="select_server_identity_header">Seleccione a continuación la identidad que se usará para decodificar el código QR:</string>
+    <string name="select_a_image">Seleccione una imagen</string>
+    <string name="cannot_load_selected_image">No se ha podido cargar la imagen</string>
+    <string name="cannot_decode_selected_image">No se ha podido decodificar la imagen</string>
+
+    <string name="server_identity">Identidad</string>
+    <string name="service">Servicio</string>
+    <string name="cloned_service">%1$s (copia)</string>
+    <string name="account">Cuenta</string>
+    <string name="group">Grupo</string>
+    <string name="no_group">Ninguno</string>
+    <string name="show_advanced_data">Mostrar datos avanzados</string>
+    <string name="otp_type">Tipo de autenticación</string>
+    <string name="otp_type_totp">TOTP</string>
+    <string name="otp_type_hotp">HOTP</string>
+    <string name="otp_type_steam">STEAM</string>
+    <string name="secret">Secreto</string>
+    <string name="digits">Dígitos</string>
+    <string name="algorithm">Algoritmo</string>
+    <string name="algorithm_sha1">SHA1</string>
+    <string name="algorithm_sha256">SHA256</string>
+    <string name="algorithm_sha512">SHA512</string>
+    <string name="algorithm_md5">MD5</string>
+    <string name="period">Periodo</string>
+    <string name="counter">Contador</string>
+
+    <string name="server_loaded_data">Datos cargados del servidor</string>
+    <string name="name">Nombre</string>
+    <string name="email">E-mail</string>
+    <string name="is_admin">Administrador del servicio</string>
+
+    <string name="icon_source_bubka">Icono descargado de su servidor 2FA</string>
+    <string name="icon_source_dashboard_icons">Icono descargado de "Dashboard Icons"</string>
+
+    <string name="cannot_load_account_data">No se han podido cargar los datos de la cuenta</string>
+    <string name="cancel_account_edition_message">Los datos de la cuenta han cambiado.\n\n¿Qué desea hacer?</string>
+    <string name="cancel_account_creation_message">@string/cancel_account_edition_message</string>
+    <string name="server_identity_changed_message">Ha cambiado la identidad a la que se asocia la cuenta, lo que provocará que la cuenta se elimine de la identidad anterior y se añada a la nueva.\n\nSi la sincronización no se puede hacer de forma inmediata, es posible que, temporalmente, aparezcan una cuenta extra (marcada como eliminada) en la lista de cuentas.\n\n¿Está seguro de que desea continuar?</string>
+    <string name="delete_account_data_message">Esta operación no se puede deshacer.\n\n¿Seguro que desea eliminar los datos de la cuenta?</string>
+    <string name="undelete_account_data_message">Se recuperarán los datos de la cuenta en el estado que estaban cuando la eliminó.\n\nSi cuando la eliminó había datos sin sincronizar, los cambios se perderán cuando realice una sincronización de datos con el servidor</string>
+    <string name="error_while_loading_account_data">No se han podido leer los datos de la cuenta</string>
+    <string name="account_data_has_been_saved_and_synced">Los datos de la cuenta se han guardado y sincronizado</string>
+    <string name="account_data_has_been_saved_but_not_synced">Los datos de la cuenta se han guardado pero no sincronizado</string>
+    <string name="error_while_saving_account_data">No se han podido guardar los datos de la cuenta</string>
+    <string name="account_data_has_been_deleted_and_synced">Los datos de la cuenta se han eliminado local y remotamente</string>
+    <string name="account_data_has_been_deleted_but_not_synced">Los datos de la cuenta se han eliminado localmente</string>
+    <string name="error_while_deleting_account_data">No se ha podido eliminar la cuenta</string>
+    <string name="account_data_has_been_undeleted">Los datos de la cuenta se han recuperado</string>
+    <string name="error_while_undeleting_account_data">No se ha podido recuperar la cuenta</string>
+    <string name="you_need_to_be_connected_to_server_to_download_qr_code_message">Los códigos QR se descargan del servidor \"sobre la marcha\" utilizando los datos almacenados en éste, por lo que necesitamos conectarnos para poder descargarlo.\n\n¿Desea descargar el código QR ahora?</string>
+    <string name="you_need_to_be_connected_to_server_to_download_qr_code_but_account_updated_message">Los códigos QR se descargan del servidor \"sobre la marcha\" utilizando los datos almacenados en éste, por lo que necesitamos conectarnos para poder descargarlo.\n\nComo ha actualizado algunos de los datos de la cuenta, los datos incluídos en el código QR podrían no ser los que está viendo en la pantalla.\n\n¿Qué desea hacer?</string>
+    <string name="error_retrieving_qr_code">No se ha podido cargar el código QR</string>
+
+    <string name="server_identity_and_group_label">%2$s @ %1$s</string>
+    <string name="server_identity_label">\@ %1$s</string>
+    <string name="group_label">%2$s</string>
+
+    <string name="loading_data">Cargando datos&#8230;</string>
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
-    <string name="yes">Sí</string>
     <string name="ok">OK</string>
+    <string name="yes">Sí</string>
+    <string name="no">No</string>
     <string name="install_now">Instalar ahora</string>
+    <string name="exit">Salir</string>
+    <string name="continue_editing">Continuar editando</string>
+    <string name="get_qr_now">Obtener QR</string>
 
     <string name="information">Información</string>
     <string name="warning">Atención</string>
@@ -165,6 +266,8 @@
     <string name="number_7">7</string>
     <string name="number_8">8</string>
     <string name="number_9">9</string>
+    <string name="number_10">10</string>
     <string name="key_delete">\u232B</string>
 
+    <string name="cannot_process_request_due_to_an_internal_error">No se puede procesar la petición debido a un error interno</string>
 </resources>

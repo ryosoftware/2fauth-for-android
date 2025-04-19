@@ -22,16 +22,10 @@ public class HtmlActivity extends BaseActivity {
         super.onCreate(saved_instance_state);
         setContentView(R.layout.html_activity);
         final Intent intent = getIntent();
-        if (intent == null) {
-            throw new RuntimeException("Intent isn't defined!");
-        }
+        if (intent == null) { throw new RuntimeException("Intent isn't defined!"); }
         final String file_pathname = intent.getStringExtra(EXTRA_FILE_PATHNAME);
         if (file_pathname == null) throw new RuntimeException("File pathname hasn't been received!");
         initializeWebView(file_pathname);
-    }
-
-    private Activity getActivity() {
-        return this;
     }
 
     private void initializeWebView(@NotNull final String url) {
@@ -41,9 +35,7 @@ public class HtmlActivity extends BaseActivity {
             @Override
             public boolean shouldOverrideUrlLoading(@NotNull final WebView view, @NotNull final WebResourceRequest request) {
                 final Uri uri = request.getUrl();
-                if (! INTERNAL_FILE_SCHEMA.equals(uri.getScheme())) {
-                    openInWebBrowser(getActivity(), uri);
-                }
+                if (! INTERNAL_FILE_SCHEMA.equals(uri.getScheme())) { openInWebBrowser(getActivity(), uri); }
                 return false;
             }
         });
@@ -52,12 +44,8 @@ public class HtmlActivity extends BaseActivity {
 
     @Override
     protected void processOnBackPressed() {
-        if (((WebView) findViewById(R.id.web_view)).canGoBack()) {
-            ((WebView) findViewById(R.id.web_view)).goBack();
-        }
-        else {
-            finish();
-        }
+        if (((WebView) findViewById(R.id.web_view)).canGoBack()) { ((WebView) findViewById(R.id.web_view)).goBack(); }
+        else { finish(); }
     }
 
     public static void openInWebBrowser(@NotNull final Activity activity, @NotNull final Uri uri) {
@@ -65,7 +53,7 @@ public class HtmlActivity extends BaseActivity {
             activity.startActivity(new Intent(Intent.ACTION_VIEW).setData(uri).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
         catch (Exception e) {
-            Log.e(Constants.LOG_TAG_NAME, String.format("Exception trying to open Uri: %s", uri), e);
+            Log.e(Main.LOG_TAG_NAME, String.format("Exception trying to open Uri: %s", uri), e);
         }
     }
 }

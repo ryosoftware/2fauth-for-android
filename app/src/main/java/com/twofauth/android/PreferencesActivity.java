@@ -4,8 +4,12 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
+
+import org.jetbrains.annotations.NotNull;
 
 public class PreferencesActivity extends BaseActivity {
     @Override
@@ -15,8 +19,16 @@ public class PreferencesActivity extends BaseActivity {
         setContentView(R.layout.preferences_activity);
         setTitle(R.string.settings);
         if (saved_instance_state == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.preferences_content, new MainPreferencesFragment()).commit();
+            setFragment(new MainPreferencesFragment());
         }
+    }
+
+    public void setFragment(@NotNull final Fragment fragment) {
+        final FragmentTransaction fragment_transaction = getSupportFragmentManager().beginTransaction().replace(R.id.contents, fragment);
+        if (! (fragment instanceof MainPreferencesFragment)) {
+            fragment_transaction.addToBackStack(null);
+        }
+        fragment_transaction.commit();
     }
 
     @Override

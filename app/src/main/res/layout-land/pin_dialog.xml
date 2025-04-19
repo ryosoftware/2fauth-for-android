@@ -47,67 +47,67 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_1"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_1" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_2"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_2" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_3"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_3" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_4"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_4" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_5"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_5" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_6"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_6" />
 
             </LinearLayout>
@@ -121,56 +121,56 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_7"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_7" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_8"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_8" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_9"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_9" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_0"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="26sp"
+                    android:textSize="18sp"
                     android:text="@string/number_0" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_delete"
-                    android:layout_width="66dp"
-                    android:layout_height="66dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="33dp"
+                    app:cornerRadius="25dp"
                     style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="20sp"
+                    android:textSize="11sp"
                     android:text="@string/key_delete" />
 
             </LinearLayout>
