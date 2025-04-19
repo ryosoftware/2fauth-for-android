@@ -238,9 +238,7 @@
                         android:gravity="center"
                         android:maxLines="1"
                         android:src="@drawable/ic_copy"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="6"
-                        android:text="@string/number_6" />
+                        android:background="@drawable/border_frame_clickable" />
 
                     <EditText
                         android:id="@+id/secret"
