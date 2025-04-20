@@ -108,6 +108,11 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         }
     }
 
+    @Override
+    public void onServerIdentitiesLoadError() {
+        if (isAdded()) { UI.showToast(getContext(), R.string.cannot_process_request_due_to_an_internal_error); }
+    }
+
     private void setSecurityPreferencesSummariesAndAvailability() {
         if (isAdded()) {
             final Context context = getContext();

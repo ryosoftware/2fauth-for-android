@@ -147,11 +147,6 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
         }
     }
 
-    @Override
-    public void onServerIdentitiesLoadError() {
-        if (isAdded()) { UI.showToast(getContext(), R.string.cannot_process_request_due_to_an_internal_error); }
-    }
-
     // Entry points for the synchronization process events
 
     @Override
