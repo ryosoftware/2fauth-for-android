@@ -11,15 +11,22 @@ import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -42,6 +49,10 @@ public class UI {
 
     public interface OnAnimationEndListener {
         public abstract void onAnimationEnd(View view);
+    }
+
+    public interface OnTextEnteredListener {
+        public abstract void onTextEntered(String text);
     }
 
     public static boolean isDarkModeActive(@NotNull final Context context) {
@@ -144,7 +155,7 @@ public class UI {
             alert_dialog_builder.setView(view);
             alert_dialog_builder.setPositiveButton(accept_button_text_id == 0 ? R.string.accept : accept_button_text_id, new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
+                public void onClick(@NotNull final DialogInterface dialog, final int which) {
                     on_element_selected_listener.onItemSelected(spinner.getSelectedItemPosition());
                 }
             });
@@ -178,6 +189,62 @@ public class UI {
 
     public static void showSelectItemFromListDialog(@NotNull final Activity activity, final int title, int message_id, @NotNull final List<String> elements, final int accept_button_text_id, final int cancel_button_text_id, @NotNull final OnSelectionDialogItemSelected on_element_selected_listener) {
         showSelectItemFromListDialog(activity, title == 0 ? null : activity.getString(title), message_id == 0 ? null : activity.getString(message_id), elements, accept_button_text_id, cancel_button_text_id, on_element_selected_listener, null);
+    }
+
+    public static void showEditTextDialog(@NotNull final Activity activity, @Nullable final String title, @Nullable final String message, @Nullable final String value, @Nullable final String hint, @Nullable final String regexp, final int accept_button_text_id, final int cancel_button_text_id, @NotNull final OnTextEnteredListener on_text_entered_listener) {
+        try {
+            final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
+            alert_dialog_builder.setTitle(title);
+            alert_dialog_builder.setMessage(message);
+            final FrameLayout container = new FrameLayout(activity);
+            final EditText input_text = new EditText(activity);
+            final ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMargins(getPixelsFromDp(activity, 20), 0, getPixelsFromDp(activity, 20), 0);
+            input_text.setLayoutParams(params);
+            input_text.setInputType(InputType.TYPE_CLASS_TEXT);
+            input_text.setText(value);
+            input_text.setHint(hint);
+            container.addView(input_text);
+            alert_dialog_builder.setView(container);
+            alert_dialog_builder.setPositiveButton(accept_button_text_id == 0 ? R.string.accept : accept_button_text_id, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(@NotNull final DialogInterface dialog, final int which) {
+                    on_text_entered_listener.onTextEntered(input_text.getText().toString().trim());
+                }
+            });
+            alert_dialog_builder.setNegativeButton(cancel_button_text_id == 0 ? R.string.cancel : cancel_button_text_id, null);
+            final AlertDialog alert_dialog = alert_dialog_builder.create();
+            if (regexp != null) {
+                alert_dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                       private boolean isValid(@NotNull final String value) {
+                           return value.matches(regexp);
+                       }
+                       @Override
+                       public void onShow(@NotNull final DialogInterface dialog) {
+                           final Button accept_button = alert_dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                           accept_button.setEnabled(isValid(input_text.getText().toString().trim()));
+                           input_text.addTextChangedListener(new TextWatcher() {
+                               @Override
+                               public void beforeTextChanged(@NotNull final CharSequence string, final int start, final int count, final int after) {}
+
+                               @Override
+                               public void onTextChanged(@NotNull final CharSequence string, final int start, final int before, final int count) {}
+
+                               @Override
+                               public void afterTextChanged(@NotNull final Editable edit) { accept_button.setEnabled(isValid(edit.toString().trim())); }
+                           });
+                       }
+                });
+            }
+            alert_dialog.show();
+        }
+        catch (Exception e) {
+            Log.e(Main.LOG_TAG_NAME, "Exception while trying to show a EditText dialog", e);
+        }
+    }
+
+    public static void showEditTextDialog(@NotNull final Activity activity, final int title, final int message, final String value, final int hint, @Nullable final String regexp, final int accept_button_text_id, final int cancel_button_text_id, @NotNull final OnTextEnteredListener on_text_entered_listener) {
+        showEditTextDialog(activity, title == 0 ? null : activity.getString(title), message == 0 ? null : activity.getString(message), value, hint == 0 ? null : activity.getString(hint), regexp, accept_button_text_id, cancel_button_text_id, on_text_entered_listener);
     }
 
     public static void showToast(@NotNull final Context context, final int message_id) {

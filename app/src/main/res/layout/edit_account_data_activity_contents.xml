@@ -112,11 +112,31 @@
                 android:layout_height="wrap_content"
                 android:text="@string/group" />
 
-            <Spinner
-                android:id="@+id/group"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp" />
+                android:orientation="horizontal">
+
+                <Spinner
+                    android:id="@+id/group"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginTop="10dp" />
+
+                <ImageButton
+                    android:id="@+id/add_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:padding="5dp"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:src="@drawable/ic_add"
+                    android:background="@drawable/border_frame_clickable" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -124,7 +144,7 @@
             android:id="@+id/show_advanced_data"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="15dp"
             android:paddingTop="10dp"
             android:paddingStart="20dp"
             android:paddingBottom="10dp"
@@ -231,10 +251,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:layout_alignParentEnd="true"
-                        android:paddingTop="10dp"
-                        android:paddingStart="10dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="10dp"
+                        android:padding="10dp"
                         android:gravity="center"
                         android:maxLines="1"
                         android:src="@drawable/ic_copy"
