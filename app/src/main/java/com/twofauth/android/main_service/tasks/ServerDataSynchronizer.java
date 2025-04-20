@@ -125,12 +125,15 @@ public class ServerDataSynchronizer
             return null;
         }
 
-        private void removeSyncedAccounts(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorAccount> local_loaded_accounts) throws Exception {
-            if (local_loaded_accounts != null) {
-                for (int i = local_loaded_accounts.size() - 1; i >= 0; i --) {
-                    if (local_loaded_accounts.get(i).isSynced()) {
-                        local_loaded_accounts.get(i).delete(database, mService);
-                        local_loaded_accounts.remove(i);
+        private void setAccountGroup(@Nullable final List<JSONObject> account_objects, @Nullable final List<TwoFactorGroup> groups) throws Exception {
+            if ((account_objects != null) && (groups != null)) {
+                final Map<Integer, TwoFactorGroup> groups_map = new HashMap<Integer, TwoFactorGroup>();
+                for (final TwoFactorGroup group : groups) {
+                    groups_map.put(group.getRemoteId(), group);
+                }
+                for (final JSONObject account_object : account_objects) {
+                    if (account_object.has(Constants.ACCOUNT_DATA_GROUP_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_GROUP_KEY))) {
+                        account_object.put(Constants.ACCOUNT_DATA_GROUP_KEY, groups_map.get(account_object.getInt(Constants.ACCOUNT_DATA_GROUP_KEY)));
                     }
                 }
             }
@@ -224,7 +227,8 @@ public class ServerDataSynchronizer
                                     synchronizeAccountsData(database, not_synced_accounts, false);
                                     // Gets server data (we raise an exception if we can't access data)
                                     final List<JSONObject> server_loaded_accounts_raw = API.getAccounts(server_identity, true);
-                                    final List<TwoFactorGroup> server_loaded_groups = API.getGroups(server_identity, server_loaded_accounts_raw, true);
+                                    final List<TwoFactorGroup> server_loaded_groups = API.getGroups(server_identity, true);
+                                    setAccountGroup(server_loaded_accounts_raw, server_loaded_groups);
                                     // Icons are less relevant than other data (we do not raise an exception on network error)
                                     API.getIcons(server_identity, mService, server_loaded_accounts_raw, false);
                                     // Now we parse accounts data then start database transition

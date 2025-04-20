@@ -99,29 +99,22 @@ public class API {
         return null;
     }
 
-    public static @Nullable List<TwoFactorGroup> getGroups(@NotNull final TwoFactorServerIdentity server_identity, @Nullable final Collection<JSONObject> accounts_objects, final boolean raise_exception_on_network_error) throws Exception {
+    public static @Nullable List<TwoFactorGroup> getGroups(@NotNull final TwoFactorServerIdentity server_identity, final boolean raise_exception_on_network_error) throws Exception {
         final HttpURLConnection connection = HTTP.get(new URL(GROUPS_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             final List<JSONObject> groups_objects = JSON.toListOfJSONObjects(HTTP.getContentString(connection));
             if (groups_objects != null) {
-                final Map<Integer, TwoFactorGroup> groups = new HashMap<Integer, TwoFactorGroup>();
+                final List<TwoFactorGroup> groups = new ArrayList<TwoFactorGroup>();
                 for (final JSONObject group_object : groups_objects) {
                     if (group_object.has(Constants.GROUP_DATA_ID_KEY) && (! group_object.isNull(Constants.GROUP_DATA_ID_KEY)) && (group_object.getInt(Constants.GROUP_DATA_ID_KEY) != 0)) {
                         final TwoFactorGroup group = new TwoFactorGroup();
                         group.setServerIdentity(server_identity);
                         group.setRemoteId(group_object.getInt(Constants.GROUP_DATA_ID_KEY));
                         group.setName(group_object.getString(Constants.GROUP_DATA_NAME_KEY));
-                        groups.put(group.getRemoteId(), group);
+                        groups.add(group);
                     }
                 }
-                if (accounts_objects != null) {
-                    for (final JSONObject account_object : accounts_objects) {
-                        if (account_object.has(Constants.ACCOUNT_DATA_GROUP_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_GROUP_KEY))) {
-                            account_object.put(Constants.ACCOUNT_DATA_GROUP_KEY, groups.get(account_object.getInt(Constants.ACCOUNT_DATA_GROUP_KEY)));
-                        }
-                    }
-                }
-                return new ArrayList<TwoFactorGroup>(groups.values());
+                return groups;
             }
         }
         else if (raise_exception_on_network_error) {
