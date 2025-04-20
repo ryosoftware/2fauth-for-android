@@ -78,6 +78,8 @@ public class Constants {
     public static final String GROUP_DATA_ID_KEY = "id";
     public static final String GROUP_DATA_NAME_KEY = "name";
 
+    public static final String GROUP_NAME_VALID_REGEXP = "^[\\p{L}0-9 ]+$";
+
     // Relevant fields from a 2FA account icon
 
     public static final String ICON_DATA_ID_KEY = "filename";

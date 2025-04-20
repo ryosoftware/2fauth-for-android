@@ -68,19 +68,14 @@ public class TwoFactorAccountsHelper extends TableHelper<TwoFactorAccount> {
     }
 
     public @Nullable List<TwoFactorAccount> get(@Nullable final TwoFactorServerIdentity server_identity, final boolean only_not_synced_accounts, final SortMode sort_mode) throws Exception {
-        try {
-            final SQLiteDatabase database = Main.getInstance().getDatabaseHelper().open(false);
-            if (database != null) {
-                try {
-                    return get(database, server_identity, only_not_synced_accounts, sort_mode);
-                }
-                finally {
-                    Main.getInstance().getDatabaseHelper().close(database);
-                }
+        final SQLiteDatabase database = Main.getInstance().getDatabaseHelper().open(false);
+        if (database != null) {
+            try {
+                return get(database, server_identity, only_not_synced_accounts, sort_mode);
             }
-        }
-        catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to get accounts", e);
+            finally {
+                Main.getInstance().getDatabaseHelper().close(database);
+            }
         }
         return null;
     }
@@ -139,5 +134,4 @@ public class TwoFactorAccountsHelper extends TableHelper<TwoFactorAccount> {
         folder.mkdirs();
         return folder;
     }
-
 }

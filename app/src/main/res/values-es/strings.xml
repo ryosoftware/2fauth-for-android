@@ -242,6 +242,9 @@
     <string name="server_identity_label">\@ %1$s</string>
     <string name="group_label">%2$s</string>
 
+    <string name="add_group_dialog_title">Añadir un grupo</string>
+    <string name="add_group_dialog_message">Introduzca el nombre del grupo.\n\n(El grupo no se creará hasta que se sincronicen los datos de la cuenta)</string>
+
     <string name="loading_data">Cargando datos&#8230;</string>
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>

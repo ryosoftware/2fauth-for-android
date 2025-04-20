@@ -23,6 +23,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResult;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -50,6 +51,7 @@ import com.twofauth.android.utils.Vibrator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -134,6 +136,15 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             }
             return -1;
         }
+
+        public static int indexOf(@Nullable final List<TwoFactorGroup> groups, @NotNull final String name) {
+            if (groups != null) {
+                for (int i = groups.size() - 1; i >= 0; i --) {
+                    if (Strings.equals(groups.get(i).getName(), name, true)) { return i; }
+                }
+            }
+            return -1;
+        }
     }
 
     private TwoFactorAccount mInitialAccountData = null;
@@ -151,6 +162,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private EditText mServiceEditText;
     private EditText mAccountEditText;
     private Spinner mGroupSpinner;
+    private View mAddGroupButton;
     private ViewGroup mOtpTypeContainer;
     private EditText mSecretEditText;
     private View mCopySecretButton;
@@ -195,6 +207,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mAccountEditText.addTextChangedListener(this);
         mGroupSpinner = (Spinner) findViewById(R.id.group);
         mGroupSpinner.setOnItemSelectedListener(this);
+        mAddGroupButton = findViewById(R.id.add_group);
+        mAddGroupButton.setOnClickListener(this);
         mOtpTypeContainer = (ViewGroup) findViewById(R.id.otp_types_container);
         ViewUtils.setChildrenViewsOnClickListener(mOtpTypeContainer, this);
         mSecretEditText = (EditText) findViewById(R.id.secret);
@@ -277,10 +291,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     }
 
     private void enableEdition() {
-        mEditing = true;
         UI.animateIconChange(mEditOrSaveAccountDataButton, R.drawable.ic_actionbar_accept, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, true);
         UI.hideSubmenuAndRelatedOptions(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, mSubmenuButtons);
-        renableViews();
+        setViewsAvailability(mEditing = true);
     }
 
     private void copySecretToClipboard() {
@@ -322,8 +335,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         if (current_server_identity != initial_server_identity) { return true; }
         if (! Strings.equals(mCurrentAccountData.getService(), mInitialAccountData.getService())) { return true; }
         if (! Strings.equals(mCurrentAccountData.getAccount(), mInitialAccountData.getAccount())) { return true; }
-        final int current_group = mCurrentAccountData.hasGroup() ? mCurrentAccountData.getGroup().getRemoteId() : 0, initial_group = mInitialAccountData.hasGroup() ? mInitialAccountData.getGroup().getRemoteId() : 0;
-        if (current_group != initial_group) { return true; }
+        final String current_group_name = mCurrentAccountData.hasGroup() ? mCurrentAccountData.getGroup().getName() : null, initial_group_name = mInitialAccountData.hasGroup() ? mInitialAccountData.getGroup().getName() : null;
+        if (! Strings.equals(current_group_name, initial_group_name)) { return true; }
         if (mCurrentAccountData.hasIcon() && mCurrentAccountData.getIcon().isDirty()) { return true; }
         if (! Strings.equals(mCurrentAccountData.getSecret(), mInitialAccountData.getSecret())) { return true; }
         if (! Strings.equals(mCurrentAccountData.getOtpType(), mInitialAccountData.getOtpType())) { return true; }
@@ -372,6 +385,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             mCurrentAccountData.setAlgorithm(ViewUtils.setSelected(this, view));
             setButtonsAvailability();
         }
+        else if (view_id == R.id.add_group) {
+            addGroup();
+        }
         else if (view_id == R.id.copy_secret) {
             mAuthenticator.authenticate(this, AuthenticatedActions.COPY_SECRET_CODE_TO_CLIPBOARD);
         }
@@ -400,7 +416,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             final int view_id = edittext.getId();
             if (view_id == R.id.service) { mCurrentAccountData.setService(editable.toString()); }
             else if (view_id == R.id.account) { mCurrentAccountData.setAccount(editable.toString()); }
-            else if (view_id == R.id.secret) { mCurrentAccountData.setSecret(editable.toString()); }
+            else if (view_id == R.id.secret) { mCurrentAccountData.setSecret(editable.toString()); mCopySecretButton.setEnabled(! Strings.isEmptyOrNull(mCurrentAccountData.getSecret())); }
             else if (view_id == R.id.period) { mCurrentAccountData.setPeriod(Integer.parseInt(editable.toString())); }
             else if (view_id == R.id.counter) { mCurrentAccountData.setCounter(Integer.parseInt(editable.toString())); }
             setButtonsAvailability();
@@ -419,8 +435,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             }
         }
         else if (view_id == R.id.group) {
-            final int selected_server_identity_index = mServerIdentitySpinner.getSelectedItemPosition();
-            final TwoFactorGroup group = (position <= 0) || (selected_server_identity_index < 0) ? null : mGroups.get(mServerIdentities.get(selected_server_identity_index).getRowId()).get(position - 1);
+            final List<TwoFactorGroup> groups = getGroupsBySelectedServerIdentity();
+            final TwoFactorGroup group = ((position <= 0) || (groups == null)) ? null : groups.get(position - 1);
             final long current_group_id = mCurrentAccountData.hasGroup() ? mCurrentAccountData.getGroup().getRowId() : -1, new_group_id = (group == null) ? -1 : group.getRowId();
             if (current_group_id != new_group_id) { mCurrentAccountData.setGroup(group); }
         }
@@ -456,8 +472,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     // Set initial form values and state
 
     private void setSelectableGroups() {
-        final int selected_server_identity_index = mServerIdentitySpinner.getSelectedItemPosition();
-        final List<TwoFactorGroup> groups = ((mGroups == null) || (selected_server_identity_index < 0)) ? null : mGroups.get(mServerIdentities.get(selected_server_identity_index).getRowId());
+        final List<TwoFactorGroup> groups = getGroupsBySelectedServerIdentity();
         final List<String> groups_names = new ArrayList<String>();
         Lists.setItems(groups_names, new String[] { getString(R.string.no_group) }, TwoFactorGroupsUtils.getNames(groups));
         final ArrayAdapter<String> groups_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, groups_names);
@@ -490,7 +505,6 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mAdvancedDataLayout.setVisibility(adding_new_account ? View.VISIBLE : View.GONE);
         final String otp_type = mCurrentAccountData.getOtpType();
         ViewUtils.setSelected(this, mOtpTypeContainer, otp_type);
-        mCopySecretButton.setVisibility(adding_new_account ? View.GONE : View.VISIBLE);
         mSecretEditText.setInputType(adding_new_account ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD : InputType.TYPE_TEXT_VARIATION_PASSWORD);
         mSecretEditText.setTransformationMethod(adding_new_account ? null : new PasswordTransformationMethod());
         mSecretEditText.setText(mCurrentAccountData.getSecret());
@@ -515,7 +529,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
                 return;
             }
             mServerIdentities = server_identities;
-            mGroups = groups;
+            mGroups = (groups == null) ? new HashMap<Long, List<TwoFactorGroup>>() : groups;
             mInitialAccountData = account;
             mInitialAccountData.setOtpType(account.inDatabase() ? account.getOtpType() : null);
             if (! mInitialAccountData.hasServerIdentity()) { mInitialAccountData.setServerIdentity(mServerIdentities.get(0)); }
@@ -524,66 +538,75 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             mEditing = ! mCurrentAccountData.inDatabase();
             mEditOrSaveAccountDataButton.setImageResource(mEditing ? R.drawable.ic_actionbar_accept : R.drawable.ic_actionbar_edit);
             mToggleSubmenuVisibilityButton.setVisibility(mEditing ? View.GONE : View.VISIBLE);
+            if (mEditing) { for (final FloatingActionButton button : mSubmenuButtons) { button.setVisibility(View.GONE); } }
             setEditableAccountData();
-            if (mEditing) { renableViews(); for (final FloatingActionButton button : mSubmenuButtons) { button.setVisibility(View.GONE); } }
-            else { disableViews(); }
+            setViewsAvailability(mEditing);
             setButtonsAvailability();
         }
     }
 
-    // Disables (and reenables) the form inputs when data is trying to be updated or already updated
+    // Disables (or reenables) the form inputs when data is trying to be updated or already updated
 
-    private void disableViews() {
-        mEditOrSaveAccountDataButton.setEnabled(false);
-        mToggleSubmenuVisibilityButton.setEnabled(false);
-        mDeleteOrUndeleteAccountDataButton.setEnabled(false);
-        mServerIdentitySpinner.setEnabled(false);
-        mServiceEditText.setEnabled(false);
-        mAccountEditText.setEnabled(false);
-        mGroupSpinner.setEnabled(false);
-        mIconImageView.setEnabled(false);
-        ViewUtils.setEnabled(mOtpTypeContainer, false);
-        mSecretEditText.setEnabled(false);
-        ViewUtils.setEnabled(mDigitsContainer, false);
-        ViewUtils.setEnabled(mAlgorithmContainer, false);
-        mPeriodEditText.setEnabled(false);
-        mCounterEditText.setEnabled(false);
+    private void setViewsAvailability(final boolean enable) {
+        mEditOrSaveAccountDataButton.setEnabled(enable && mEditing);
+        mToggleSubmenuVisibilityButton.setEnabled(enable && mEditing);
+        mDeleteOrUndeleteAccountDataButton.setEnabled(enable && mEditing);
+        mServerIdentitySpinner.setEnabled(enable && mEditing);
+        mServiceEditText.setEnabled(enable && mEditing);
+        mAccountEditText.setEnabled(enable && mEditing);
+        mGroupSpinner.setEnabled(enable && mEditing);
+        mAddGroupButton.setEnabled(enable && mEditing);
+        mIconImageView.setEnabled(enable && mEditing);
+        ViewUtils.setEnabled(mOtpTypeContainer, enable && mEditing);
+        mSecretEditText.setInputType(enable && mEditing ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD : InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        mSecretEditText.setTransformationMethod(enable && mEditing ? null : new PasswordTransformationMethod());
+        mSecretEditText.setEnabled(enable && mEditing);
+        mCopySecretButton.setEnabled((mWorking.getVisibility() != View.VISIBLE) && (! Strings.isEmptyOrNull(mCurrentAccountData.getSecret())));
+        ViewUtils.setEnabled(mDigitsContainer, enable && mEditing);
+        ViewUtils.setEnabled(mAlgorithmContainer, enable && mEditing);
+        mPeriodEditText.setEnabled(enable && mEditing);
+        mCounterEditText.setEnabled(enable && mEditing);
     }
 
     private void onSyncingDataStarted() {
         mWorking.setVisibility(View.VISIBLE);
         mContents.setAlpha(Constants.BLUR_ALPHA);
-        disableViews();
-    }
-
-    private void setSecretEditable() {
-        mSecretEditText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-        mSecretEditText.setTransformationMethod(null);
-        mSecretEditText.setEnabled(mEditing);
-        mCopySecretButton.setVisibility(View.GONE);
-    }
-
-    private void renableViews() {
-        mEditOrSaveAccountDataButton.setEnabled(true);
-        mToggleSubmenuVisibilityButton.setEnabled(true);
-        mDeleteOrUndeleteAccountDataButton.setEnabled(true);
-        mServerIdentitySpinner.setEnabled(true);
-        mServiceEditText.setEnabled(true);
-        mAccountEditText.setEnabled(true);
-        mGroupSpinner.setEnabled(true);
-        mIconImageView.setEnabled(true);
-        ViewUtils.setEnabled(mOtpTypeContainer, true);
-        setSecretEditable();
-        ViewUtils.setEnabled(mDigitsContainer, true);
-        ViewUtils.setEnabled(mAlgorithmContainer, true);
-        mPeriodEditText.setEnabled(true);
-        mCounterEditText.setEnabled(true);
+        setViewsAvailability(false);
     }
 
     private void onSyncingDataFinished() {
         mWorking.setVisibility(View.GONE);
         mContents.setAlpha(1.0f);
-        renableViews();
+        setViewsAvailability(true);
+    }
+
+    // Adds a group to the list of groups
+
+    private List<TwoFactorGroup> getGroupsBySelectedServerIdentity() {
+        final int selected_server_identity_index = mServerIdentitySpinner.getSelectedItemPosition();
+        final long selected_identity_row_id = (selected_server_identity_index >= 0) ? mServerIdentities.get(selected_server_identity_index).getRowId() : -1;
+        return (selected_server_identity_index < 0) ? null : mGroups.get(selected_identity_row_id);
+    }
+
+    private void addGroup() {
+        final int selected_server_identity_index = mServerIdentitySpinner.getSelectedItemPosition();
+        if (selected_server_identity_index >= 0) {
+            UI.showEditTextDialog(this, R.string.add_group_dialog_title, R.string.add_group_dialog_message, "", 0, Constants.GROUP_NAME_VALID_REGEXP, R.string.accept, R.string.cancel, new UI.OnTextEnteredListener() {
+                @Override
+                public void onTextEntered(@NotNull final String name) {
+                    final TwoFactorServerIdentity current_server_identity = mServerIdentities.get(selected_server_identity_index);
+                    if (TwoFactorGroupsUtils.indexOf(mGroups.get(current_server_identity.getRowId()), name) < 0) {
+                        final TwoFactorGroup group = new TwoFactorGroup();
+                        group.setServerIdentity(current_server_identity);
+                        group.setName(name);
+                        mGroups.computeIfAbsent(current_server_identity.getRowId(), k -> new ArrayList<TwoFactorGroup>()).add(group);
+                        mCurrentAccountData.setGroup(group);
+                        mCurrentAccountData.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
+                        setSelectableGroups();
+                    }
+                }
+            });
+        }
     }
 
     // Clones current account data

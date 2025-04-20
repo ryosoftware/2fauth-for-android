@@ -425,7 +425,7 @@ public class TwoFactorAccount extends TableRow {
     }
 
     public boolean hasGroup() {
-        return ((mGroup != null) && (mGroup.getRemoteId() != 0));
+        return mGroup != null;
     }
 
     public @Nullable TwoFactorGroup getGroup() { return mGroup; }
