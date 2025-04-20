@@ -222,6 +222,7 @@ public class ServerDataSynchronizer
                                     API.getIcons(server_identity, mService, server_loaded_accounts_raw, false);
                                     // Now we parse accounts data then start database transition
                                     final List<TwoFactorAccount> server_loaded_accounts = parseAccounts(server_identity, server_loaded_accounts_raw, true);
+                                    final int server_loaded_accounts_count = Lists.size(server_loaded_accounts), server_loaded_groups_count = Lists.size(server_loaded_groups);
                                     if (Main.getInstance().getDatabaseHelper().beginTransaction(database)) {
                                         boolean commit_transaction = false;
                                         try {
@@ -239,7 +240,7 @@ public class ServerDataSynchronizer
                                             // Remove not referenced groups and icons
                                             removeNotReferencedData(database);
                                             // Sync is finished, we annotate then commit the transaction
-                                            (new TwoFactorServerIdentityWithSyncData(server_identity)).onSyncSuccess(mService, server_loaded_accounts, server_loaded_groups);
+                                            (new TwoFactorServerIdentityWithSyncData(server_identity)).onSyncSuccess(mService, server_loaded_accounts_count, server_loaded_groups_count);
                                             commit_transaction = true;
                                             accounts_has_been_synced ++;
                                             result_type = SyncResultType.UPDATED;

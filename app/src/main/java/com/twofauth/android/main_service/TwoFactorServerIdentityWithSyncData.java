@@ -39,11 +39,11 @@ public class TwoFactorServerIdentityWithSyncData {
         return key + String.valueOf(storedData.getRowId());
     }
 
-    public void onSyncSuccess(@NotNull final Context context, @Nullable final List<TwoFactorAccount> accounts, @Nullable final List<TwoFactorGroup> groups) {
+    public void onSyncSuccess(@NotNull final Context context, final int accounts, final int groups) {
         if (storedData.inDatabase()) {
             final SharedPreferences.Editor editor = Preferences.getDefaultSharedPreferences(context).edit();
             editor.putLong(getPreferencesKey(LAST_SYNC_TIME_KEY_PREFIX), System.currentTimeMillis());
-            editor.putInt(getPreferencesKey(LAST_SYNCED_ACCOUNTS_KEY_PREFIX), accounts == null ? 0 : accounts.size());
+            editor.putInt(getPreferencesKey(LAST_SYNCED_ACCOUNTS_KEY_PREFIX), accounts);
             editor.remove(getPreferencesKey(LAST_SYNC_ERROR_TIME_KEY_PREFIX));
             editor.remove(getPreferencesKey(LAST_SYNC_ERROR_KEY_PREFIX));
             editor.apply();

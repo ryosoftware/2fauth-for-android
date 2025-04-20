@@ -58,4 +58,8 @@ public class Lists {
         }
         return -1;
     }
+
+    public static <E> int size(@Nullable final Collection<E> list) {
+        return (list == null) ? 0 : list.size();
+    }
 }
