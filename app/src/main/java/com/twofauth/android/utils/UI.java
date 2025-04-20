@@ -145,14 +145,18 @@ public class UI {
             final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
             alert_dialog_builder.setTitle(title);
             alert_dialog_builder.setMessage(message);
-            final View view = LayoutInflater.from(activity).inflate(R.layout.alert_dialog_spinner, null);
-            final Spinner spinner = view.findViewById(R.id.spinner);
+            final FrameLayout container = new FrameLayout(activity);
+            final Spinner spinner = new Spinner(activity, Spinner.MODE_DROPDOWN);
+            final ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMargins(getPixelsFromDp(activity, 20), getPixelsFromDp(activity, 20), getPixelsFromDp(activity, 20), 0);
+            spinner.setLayoutParams(params);
             final ArrayAdapter<String> spinner_adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_item, elements);
             spinner_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(spinner_adapter);
             final int selected_element_index = selected_element == null ? -1 : elements.indexOf(selected_element);
             if (selected_element_index >= 0) { spinner.setSelection(selected_element_index); }
-            alert_dialog_builder.setView(view);
+            container.addView(spinner);
+            alert_dialog_builder.setView(container);
             alert_dialog_builder.setPositiveButton(accept_button_text_id == 0 ? R.string.accept : accept_button_text_id, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(@NotNull final DialogInterface dialog, final int which) {
