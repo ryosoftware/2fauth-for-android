@@ -123,12 +123,13 @@ public class UI {
 
     public static void showBase64ImageDialog(@NotNull final Activity activity, @NotNull final String image, @Nullable final DialogInterface.OnClickListener on_accept_button_click) {
         try {
-            final LayoutInflater inflater = LayoutInflater.from(activity);
-            final View view = inflater.inflate(R.layout.alert_dialog_image, null);
-            final WebView webview = (WebView) view.findViewById(R.id.webview);
+            final WebView webview = new WebView(activity);
+            final ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMargins(0, 0, 0, 0);
+            webview.setLayoutParams(params);
             webview.loadData(String.format("<html><body><center><img width='300' height='300' src='%s'/></center></body></html>", image), "text/html", "UTF-8");
             final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
-            alert_dialog_builder.setView(view);
+            alert_dialog_builder.setView(webview);
             alert_dialog_builder.create().show();
         }
         catch (Exception e) {
