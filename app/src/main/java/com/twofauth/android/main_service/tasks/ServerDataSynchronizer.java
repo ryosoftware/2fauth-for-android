@@ -13,7 +13,6 @@ import com.twofauth.android.MainService.SyncResultType;
 import com.twofauth.android.R;
 import com.twofauth.android.main_service.TwoFactorServerIdentityWithSyncData;
 import com.twofauth.android.utils.Lists;
-import com.twofauth.android.utils.Preferences;
 import com.twofauth.android.utils.Strings;
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
@@ -85,12 +84,18 @@ public class ServerDataSynchronizer
             mIdentityToSynchronize = identity_to_synchronize;
         }
 
+        private void synchronizeGroupsData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorGroup> local_loaded_groups, final boolean raise_exception_on_network_error) throws Exception {
+            if (local_loaded_groups != null) {
+                for (final TwoFactorGroup group : local_loaded_groups) {
+                    API.syncGroup(database, mService, group, raise_exception_on_network_error);
+                }
+            }
+        }
+
         private void synchronizeAccountsData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorAccount> local_loaded_accounts, final boolean raise_exception_on_network_error) throws Exception {
             if (local_loaded_accounts != null) {
                 for (final TwoFactorAccount account : local_loaded_accounts) {
-                    if (! account.isSynced()) {
-                        API.syncAccount(database, mService, account, raise_exception_on_network_error);
-                    }
+                    API.syncAccount(database, mService, account, raise_exception_on_network_error);
                 }
             }
         }
@@ -211,9 +216,11 @@ public class ServerDataSynchronizer
                                     accounts_will_be_synced ++;
                                     // Refresh server identity data
                                     API.refreshIdentityData(server_identity, true);
-                                    // Synchronize out of sync accounts (deleted, updated or added accounts) with server before start download
+                                    // Synchronize out of sync accounts and groups (deleted, updated or added accounts) with server before start download
                                     // We do not raise error if we can't sync accounts at this stage
+                                    List<TwoFactorGroup> not_synced_groups = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database, server_identity, true);
                                     List<TwoFactorAccount> not_synced_accounts = Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().get(database, server_identity, true, null);
+                                    synchronizeGroupsData(database, not_synced_groups, false);
                                     synchronizeAccountsData(database, not_synced_accounts, false);
                                     // Gets server data (we raise an exception if we can't access data)
                                     final List<JSONObject> server_loaded_accounts_raw = API.getAccounts(server_identity, true);
