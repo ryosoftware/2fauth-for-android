@@ -216,6 +216,13 @@
     <string name="email">E-mail</string>
     <string name="is_admin">Administrador del servicio</string>
 
+    <string name="groups">Grupos</string>
+    <string name="groups_summary">Mantenimiento de grupos</string>
+    <string name="no_defined_groups">No hay grupos</string>
+    <string name="pending_of_sync">Pendiente de sincronización en el servidor</string>
+    <string name="pending_of_deletion">Pendiente de borrado en el servidor</string>
+    <string name="deleted_group">%1$s [borrado]</string>
+
     <string name="icon_source_bubka">Icono descargado de su servidor 2FA</string>
     <string name="icon_source_dashboard_icons">Icono descargado de "Dashboard Icons"</string>
 
@@ -244,6 +251,9 @@
 
     <string name="add_group_dialog_title">Añadir un grupo</string>
     <string name="add_group_dialog_message">Introduzca el nombre del grupo.\n\n(El grupo no se creará hasta que se sincronicen los datos de la cuenta)</string>
+
+    <string name="group_name_dialog_title">@string/name</string>
+    <string name="group_name_dialog_message">Introduzca el nombre del grupo</string>
 
     <string name="loading_data">Cargando datos&#8230;</string>
     <string name="accept">Aceptar</string>

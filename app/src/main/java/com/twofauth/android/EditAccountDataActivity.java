@@ -119,10 +119,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     }
 
     private static class TwoFactorGroupsUtils {
-        public static @Nullable List<String> getNames(@Nullable final List<TwoFactorGroup> groups) {
+        public static @Nullable List<String> getNames(@NotNull final Context context, @Nullable final List<TwoFactorGroup> groups) {
             if (! Lists.isEmptyOrNull(groups)) {
                 List<String> names = new ArrayList<String>();
-                for (final TwoFactorGroup group : groups) { names.add(group.getName()); }
+                for (final TwoFactorGroup group : groups) { names.add(group.isDeleted() ? context.getString(R.string.deleted_group, group.getName()) : group.getName()); }
                 return names;
             }
             return null;
@@ -436,9 +436,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         }
         else if (view_id == R.id.group) {
             final List<TwoFactorGroup> groups = getGroupsBySelectedServerIdentity();
-            final TwoFactorGroup group = ((position <= 0) || (groups == null)) ? null : groups.get(position - 1);
-            final long current_group_id = mCurrentAccountData.hasGroup() ? mCurrentAccountData.getGroup().getRowId() : -1, new_group_id = (group == null) ? -1 : group.getRowId();
-            if (current_group_id != new_group_id) { mCurrentAccountData.setGroup(group); }
+            mCurrentAccountData.setGroup(((position <= 0) || (groups == null)) ? null : groups.get(position - 1));
         }
         setButtonsAvailability();
     }
@@ -474,7 +472,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private void setSelectableGroups() {
         final List<TwoFactorGroup> groups = getGroupsBySelectedServerIdentity();
         final List<String> groups_names = new ArrayList<String>();
-        Lists.setItems(groups_names, new String[] { getString(R.string.no_group) }, TwoFactorGroupsUtils.getNames(groups));
+        Lists.setItems(groups_names, new String[] { getString(R.string.no_group) }, TwoFactorGroupsUtils.getNames(this, groups));
         final ArrayAdapter<String> groups_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, groups_names);
         groups_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mGroupSpinner.setAdapter(groups_adapter);
