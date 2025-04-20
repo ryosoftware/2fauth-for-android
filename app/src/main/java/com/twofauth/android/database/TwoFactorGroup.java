@@ -64,7 +64,7 @@ public class TwoFactorGroup extends TableRow {
         try {
             final JSONObject object = new JSONObject();
             object.put(SERVER_IDENTITY, hasServerIdentity() ? getServerIdentity().getRowId() : -1);
-            object.put(Constants.GROUP_DATA_ID_KEY, getRemoteId());
+            if (getRemoteId() > 0) { object.put(Constants.GROUP_DATA_ID_KEY, getRemoteId()); }
             object.put(Constants.GROUP_DATA_NAME_KEY, getName());
             return object;
         }
