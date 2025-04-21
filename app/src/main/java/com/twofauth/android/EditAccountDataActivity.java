@@ -295,6 +295,11 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         setViewsAvailability(mEditing = true);
     }
 
+    private void disableEdition() {
+        UI.animateIconChange(mEditOrSaveAccountDataButton, R.drawable.ic_actionbar_edit, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
+        UI.animateShowOrHide(mToggleSubmenuVisibilityButton, true, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
+        mEditing = false;
+    }
     private void copySecretToClipboard() {
         if (! isFinishedOrFinishing()) {
             Clipboard.copy(this, mCurrentAccountData.getSecret(), true, null);
@@ -352,11 +357,11 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
 
     private void setButtonsAvailability() {
         final boolean buttons_available = (mDataLoader == null);
-        mEditOrSaveAccountDataButton.setEnabled(buttons_available && ((! mEditing) || (isValid() && (isChanged() || (! mInitialAccountData.inDatabase())))));
+        mEditOrSaveAccountDataButton.setEnabled(buttons_available && (! mCurrentAccountData.isDeleted()) && ((! mEditing) || (isValid() && (isChanged() || (! mCurrentAccountData.inDatabase())))));
         mToggleSubmenuVisibilityButton.setEnabled(buttons_available);
-        mDeleteOrUndeleteAccountDataButton.setEnabled(buttons_available && mInitialAccountData.inDatabase());
-        mCloneAccountDataButton.setEnabled(buttons_available && mInitialAccountData.inDatabase());
-        mShowQRCodeButton.setEnabled(buttons_available && mInitialAccountData.inDatabase() && (! isChanged()));
+        mDeleteOrUndeleteAccountDataButton.setEnabled(buttons_available);
+        mCloneAccountDataButton.setEnabled(buttons_available && mCurrentAccountData.inDatabase());
+        mShowQRCodeButton.setEnabled(buttons_available && (mCurrentAccountData.getRemoteId() != 0) && (! isChanged()));
     }
 
     // User interaction
@@ -644,6 +649,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             if (success) { setResult(Activity.RESULT_OK); }
             mInitialAccountData = new TwoFactorAccount(mCurrentAccountData);
             onSyncingDataFinished();
+            disableEdition();
             setButtonsAvailability();
         }
     }
@@ -673,8 +679,20 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     public void onDataDeleted(final boolean success, final boolean synced) {
         if (! isFinishedOrFinishing()) {
             UI.showToast(this, success ? synced ? R.string.account_data_has_been_deleted_and_synced : R.string.account_data_has_been_deleted_but_not_synced : R.string.error_while_deleting_account_data);
-            if (success) { setResult(Activity.RESULT_OK); finish(); }
-            else { onSyncingDataFinished(); }
+            if (success) {
+                if (synced) {
+                    setResult(Activity.RESULT_OK);
+                    finish();
+                }
+                else {
+                    UI.animateIconChange(mDeleteOrUndeleteAccountDataButton, R.drawable.ic_actionbar_undelete, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
+                    onSyncingDataFinished();
+                    setButtonsAvailability();
+                }
+            }
+            else {
+                onSyncingDataFinished();
+            }
         }
     }
 
@@ -682,19 +700,22 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     public void onDataUndeleted(final boolean success) {
         if (! isFinishedOrFinishing()) {
             UI.showToast(this, success ? R.string.account_data_has_been_undeleted : R.string.error_while_undeleting_account_data);
-            if (success) { setResult(Activity.RESULT_OK); mDeleteOrUndeleteAccountDataButton.setImageResource(R.drawable.ic_actionbar_delete); }
-            mInitialAccountData = new TwoFactorAccount(mCurrentAccountData);
+            if (success) {
+                setResult(Activity.RESULT_OK);
+                UI.animateIconChange(mDeleteOrUndeleteAccountDataButton, R.drawable.ic_actionbar_delete, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
+            }
             onSyncingDataFinished();
+            setButtonsAvailability();
         }
     }
 
     private void onDeleteOrUndeleteDataConfirmed() {
         onSyncingDataStarted();
-        ToggleAccountDataDeletionState.getBackgroundTask(getActivity(), mInitialAccountData, EditAccountDataActivity.this).start();
+        ToggleAccountDataDeletionState.getBackgroundTask(getActivity(), mCurrentAccountData, EditAccountDataActivity.this).start();
     }
 
     private void deleteOrUnDeleteData() {
-        if (! mInitialAccountData.isDeleted()) {
+        if (! mCurrentAccountData.isDeleted()) {
             UI.showConfirmDialog(this, R.string.delete_account_data_message, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
