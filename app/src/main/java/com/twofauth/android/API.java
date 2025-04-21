@@ -111,6 +111,7 @@ public class API {
                         group.setServerIdentity(server_identity);
                         group.setRemoteId(group_object.getInt(Constants.GROUP_DATA_ID_KEY));
                         group.setName(group_object.getString(Constants.GROUP_DATA_NAME_KEY));
+                        group.setStatus(TwoFactorGroup.STATUS_DEFAULT);
                         groups.add(group);
                     }
                 }

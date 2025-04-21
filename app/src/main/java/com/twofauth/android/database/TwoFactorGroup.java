@@ -116,7 +116,10 @@ public class TwoFactorGroup extends TableRow {
     }
 
     public void setRemoteId(final int server_id) {
-        if (mRemoteId != server_id) { setDirty(REMOTE_ID, mRemoteId = server_id); }
+        if (mRemoteId != server_id) {
+            setDirty(REMOTE_ID, mRemoteId = server_id);
+            setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
+        }
     }
 
     public boolean hasName() { return ! Strings.isEmptyOrNull(getName()); }
@@ -126,7 +129,10 @@ public class TwoFactorGroup extends TableRow {
     }
 
     public void setName(@Nullable final String name) {
-        if (! Strings.equals(mName, name)) { setDirty(NAME, mName = name); }
+        if (! Strings.equals(mName, name)) {
+            setDirty(NAME, mName = name);
+            setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
+        }
     }
 
     public boolean isDeleted() {

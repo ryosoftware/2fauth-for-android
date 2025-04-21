@@ -10,19 +10,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public class LoadServerIdentityAndGroupsData {
-    public interface OnServerIdentityAndGroupsDataLoadedListener {
-        public abstract void onServerIdentityAndGroupsDataLoaded(boolean success);
+public class LoadServerIdentityAndGroupsDataFromServer {
+    public interface OnServerIdentityAndGroupsDataLoadedFromServerListener {
+        public abstract void onServerIdentityAndGroupsDataLoadedFromServer(boolean success);
     }
 
-    private static class LoadServerIdentityAndGroupsImplementation implements Main.OnBackgroundTaskExecutionListener {
-        private final OnServerIdentityAndGroupsDataLoadedListener mListener;
+    private static class LoadServerIdentityAndGroupsDataImplementation implements Main.OnBackgroundTaskExecutionListener {
+        private final OnServerIdentityAndGroupsDataLoadedFromServerListener mListener;
 
         private final TwoFactorServerIdentity mServerIdentity;
 
         private boolean mSuccess = false;
 
-        LoadServerIdentityAndGroupsImplementation(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final OnServerIdentityAndGroupsDataLoadedListener listener) {
+        LoadServerIdentityAndGroupsDataImplementation(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final OnServerIdentityAndGroupsDataLoadedFromServerListener listener) {
             mServerIdentity = server_identity;
             mListener = listener;
         }
@@ -42,11 +42,11 @@ public class LoadServerIdentityAndGroupsData {
 
         @Override
         public void onBackgroundTaskFinished(@Nullable final Object data) {
-            mListener.onServerIdentityAndGroupsDataLoaded(mSuccess);
+            mListener.onServerIdentityAndGroupsDataLoadedFromServer(mSuccess);
         }
     }
 
-    public static @NotNull Thread getBackgroundTask(@NotNull final TwoFactorServerIdentity server_identity, @NotNull OnServerIdentityAndGroupsDataLoadedListener listener) {
-        return Main.getInstance().getBackgroundTask(new LoadServerIdentityAndGroupsImplementation(server_identity, listener));
+    public static @NotNull Thread getBackgroundTask(@NotNull final TwoFactorServerIdentity server_identity, @NotNull OnServerIdentityAndGroupsDataLoadedFromServerListener listener) {
+        return Main.getInstance().getBackgroundTask(new LoadServerIdentityAndGroupsDataImplementation(server_identity, listener));
     }
 }

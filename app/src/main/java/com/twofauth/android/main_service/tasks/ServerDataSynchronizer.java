@@ -175,9 +175,12 @@ public class ServerDataSynchronizer
                     removed_account.delete(database, mService);
                 }
             }
+        }
+
+        private void saveServerLoadedGroups(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorGroup> server_loaded_groups) throws Exception {
             if (server_loaded_groups != null) {
                 for (final TwoFactorGroup group : server_loaded_groups) {
-                    group.save(database, mService);
+                    if (! group.inDatabase()) { group.save(database, mService); }
                 }
             }
         }
@@ -250,6 +253,8 @@ public class ServerDataSynchronizer
                                             combineData(database, server_loaded_accounts, local_loaded_accounts, server_loaded_groups);
                                             // Remove not referenced groups and icons
                                             removeNotReferencedData(database);
+                                            // Save groups that are not referenced by any group
+                                            saveServerLoadedGroups(database, server_loaded_groups);
                                             // Sync is finished, we annotate then commit the transaction
                                             (new TwoFactorServerIdentityWithSyncData(server_identity)).onSyncSuccess(mService, server_loaded_accounts_count, server_loaded_groups_count);
                                             commit_transaction = true;

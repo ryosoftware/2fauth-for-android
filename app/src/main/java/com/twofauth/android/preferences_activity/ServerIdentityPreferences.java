@@ -29,12 +29,13 @@ import com.twofauth.android.Constants;
 import com.twofauth.android.HtmlActivity;
 import com.twofauth.android.MainService;
 import com.twofauth.android.MainService.OnMainServiceStatusChangedListener;
+import com.twofauth.android.PreferencesActivity;
 import com.twofauth.android.R;
 import com.twofauth.android.database.TwoFactorServerIdentity;
 import com.twofauth.android.api_tasks.DeleteServerIdentityData;
 import com.twofauth.android.api_tasks.DeleteServerIdentityData.OnServerIdentityDeletedListener;
-import com.twofauth.android.api_tasks.LoadServerIdentity;
-import com.twofauth.android.api_tasks.LoadServerIdentity.OnServerIdentityLoadedListener;
+import com.twofauth.android.preferences_activity.tasks.LoadServerIdentityAndGroupsDataFromServer;
+import com.twofauth.android.preferences_activity.tasks.LoadServerIdentityAndGroupsDataFromServer.OnServerIdentityAndGroupsDataLoadedFromServerListener;
 import com.twofauth.android.preferences_activity.tasks.LoadServerIdentitiesData.TwoFactorServerIdentityWithSyncDataAndAccountNumbers;
 import com.twofauth.android.api_tasks.SaveServerIdentityData;
 import com.twofauth.android.api_tasks.SaveServerIdentityData.OnServerIdentitySavedListener;
@@ -48,7 +49,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class ServerIdentityPreferences extends PreferenceFragmentCompat implements OnServerIdentityDeletedListener, OnServerIdentitySavedListener, OnServerIdentityLoadedListener, OnMainServiceStatusChangedListener, OnAuthenticatorFinishListener, OnPreferenceClickListener, OnPreferenceChangeListener, OnClickListener {
+public class ServerIdentityPreferences extends PreferenceFragmentCompat implements OnServerIdentityDeletedListener, OnServerIdentitySavedListener, OnServerIdentityAndGroupsDataLoadedFromServerListener, OnMainServiceStatusChangedListener, OnAuthenticatorFinishListener, OnPreferenceClickListener, OnPreferenceChangeListener, OnClickListener {
     public static final String EDIT_IDENTITY = "edit-server-identity";
     public static final String EDIT_IDENTITY_RESULT = "result";
     public static enum EditIdentityResultType { RELEVANT_UPDATE, NOT_RELEVANT_UPDATE, DELETED };
@@ -63,7 +64,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
     private static final String EMAIL_KEY = "email";
     private static final String IS_ADMIN_KEY = "is-admin";
 
-    private static enum AuthenticatedActions { DELETE_SERVER_IDENTITY, ENABLE_SERVER_IDENTITY_EDITION, COPY_TOKEN_TO_CLIPBOARD };
+    private static enum AuthenticatedActions { DELETE_SERVER_IDENTITY, ENABLE_SERVER_IDENTITY_EDITION, MANAGE_GROUPS, COPY_TOKEN_TO_CLIPBOARD };
 
     private boolean mAnimatingSyncDataButton = false;
 
@@ -76,6 +77,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
     private FloatingActionButton mEditOrSaveIdentityDataButton;
     private FloatingActionButton mToggleSubmenuVisibilityButton;
     private FloatingActionButton mDeleteIdentityDataButton;
+    private FloatingActionButton mManageGroupsButton;
     private FloatingActionButton mSyncServerDataButton;
     private FloatingActionButton mCopyTokenToClipboardButton;
     private FloatingActionButton mOpenServerLocationButton;
@@ -185,6 +187,9 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         mDeleteIdentityDataButton = (FloatingActionButton) view.findViewById(R.id.delete_server_identity_data);
         mDeleteIdentityDataButton.setVisibility(View.GONE);
         mDeleteIdentityDataButton.setOnClickListener(this);
+        mManageGroupsButton = (FloatingActionButton) view.findViewById(R.id.manage_groups);
+        mManageGroupsButton.setVisibility(View.GONE);
+        mManageGroupsButton.setOnClickListener(this);
         mSyncServerDataButton = (FloatingActionButton) view.findViewById(R.id.sync_server_data);
         mSyncServerDataButton.setVisibility(View.GONE);
         mSyncServerDataButton.setOnClickListener(this);
@@ -288,10 +293,11 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
 
     private void setButtonsAvailability() {
         final Context context = getContext();
-        final boolean is_syncing_data = MainService.isRunning(context), can_save_data = mCurrentServerIdentity.storedData.hasServer() && mCurrentServerIdentity.storedData.hasToken(), can_sync_data = MainService.canSyncServerData(context) && can_save_data && (! isServerOrTokenChanged()), is_syncing_this_identity = MainService.isSyncingIdentity(context, mCurrentServerIdentity.storedData);
+        final boolean is_syncing_data = MainService.isRunning(context), can_save_data = mCurrentServerIdentity.storedData.hasServer() && mCurrentServerIdentity.storedData.hasToken(), can_sync_data = can_save_data && (! isServerOrTokenChanged()), is_syncing_this_identity = MainService.isSyncingIdentity(context, mCurrentServerIdentity.storedData);
         mWorkingView.setVisibility(mRunningTasks ? View.VISIBLE : View.GONE);
         mEditOrSaveIdentityDataButton.setEnabled((! mRunningTasks) && (! is_syncing_this_identity) && ((! mEditing) || (can_save_data && isChanged() && (! isIdentityInUse()))));
         mDeleteIdentityDataButton.setEnabled((! mRunningTasks) && (! is_syncing_this_identity) && mCurrentServerIdentity.storedData.inDatabase() && (! isChanged()));
+        mManageGroupsButton.setEnabled((! mRunningTasks) && mCurrentServerIdentity.storedData.inDatabase());
         mSyncServerDataButton.setEnabled(can_sync_data && (! is_syncing_data) && mDeleteIdentityDataButton.isEnabled());
         if ((is_syncing_this_identity) && (! mAnimatingSyncDataButton)) { UI.startInfiniteRotationAnimationLoop(mSyncServerDataButton, Constants.BUTTON_360_DEGREES_ROTATION_ANIMATION_DURATION); }
         else if ((! is_syncing_this_identity) && (mAnimatingSyncDataButton)) { mSyncServerDataButton.clearAnimation(); }
@@ -357,6 +363,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
             if (success) {
                 setFragmentResult(isServerOrTokenChanged() ? EditIdentityResultType.RELEVANT_UPDATE : EditIdentityResultType.NOT_RELEVANT_UPDATE);
                 mInitialServerIdentity.setFrom(mCurrentServerIdentity.storedData);
+                disableEdition();
                 setButtonsAvailability();
             }
         }
@@ -395,10 +402,10 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
     // We do not set the running task flag to true due to this is a non block task (maybe the server is not accessible at this moment)
 
     private void refreshServerIdentity() {
-        LoadServerIdentity.getBackgroundTask(mCurrentServerIdentity.storedData, this).start();
+        LoadServerIdentityAndGroupsDataFromServer.getBackgroundTask(mCurrentServerIdentity.storedData, this).start();
     }
 
-    public void onServerIdentityLoaded(final boolean success) {
+    public void onServerIdentityAndGroupsDataLoadedFromServer(final boolean success) {
         if (isAdded()) {
             findPreference(SERVER_LOADED_DATA_KEY).setVisible(success || mCurrentServerIdentity.storedData.hasName());
             findPreference(NAME_KEY).setSummary(mCurrentServerIdentity.storedData.getName());
@@ -420,7 +427,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
             else { saveServerIdentityData(); }
         }
         else if (view_id == R.id.toggle_submenu) {
-            UI.animateSubmenuOpenOrClose(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.ALLOW_COPY_SERVER_ACCESS_TOKEN_KEY, context.getResources().getBoolean(R.bool.allow_copy_server_access_tokens)) ? new FloatingActionButton[] { mDeleteIdentityDataButton, mSyncServerDataButton, mCopyTokenToClipboardButton, mOpenServerLocationButton } : new FloatingActionButton[] { mDeleteIdentityDataButton, mSyncServerDataButton, mOpenServerLocationButton });
+            UI.animateSubmenuOpenOrClose(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.ALLOW_COPY_SERVER_ACCESS_TOKEN_KEY, context.getResources().getBoolean(R.bool.allow_copy_server_access_tokens)) ? new FloatingActionButton[] { mDeleteIdentityDataButton, mManageGroupsButton, mSyncServerDataButton, mCopyTokenToClipboardButton, mOpenServerLocationButton } : new FloatingActionButton[] { mDeleteIdentityDataButton, mManageGroupsButton, mSyncServerDataButton, mOpenServerLocationButton });
         }
         else if (view_id == R.id.delete_server_identity_data) {
             deleteServerIdentityData();
@@ -430,6 +437,9 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         }
         else if (view_id == R.id.copy_token_to_clipboard) {
             mAuthenticator.authenticate(this, AuthenticatedActions.COPY_TOKEN_TO_CLIPBOARD);
+        }
+        else if (view_id == R.id.manage_groups) {
+            mAuthenticator.authenticate(this, AuthenticatedActions.MANAGE_GROUPS);
         }
         else if (view_id == R.id.open_server_location) {
             HtmlActivity.openInWebBrowser(getActivity(), Uri.parse(mCurrentServerIdentity.storedData.getServer()));
@@ -504,13 +514,28 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         final AuthenticatedActions action = (AuthenticatedActions) object;
         if (action == AuthenticatedActions.DELETE_SERVER_IDENTITY) { deleteServerIdentityDataConfirmed(); }
         else if (action == AuthenticatedActions.ENABLE_SERVER_IDENTITY_EDITION) { enableEdition(); }
+        else if (action == AuthenticatedActions.MANAGE_GROUPS) { manageGroups(); }
         else if (action == AuthenticatedActions.COPY_TOKEN_TO_CLIPBOARD) { copyTokenToClipboard(); }
     }
 
+    private void manageGroups() {
+        ((PreferencesActivity) getActivity()).setFragment(new ManageGroupsPreferences(mCurrentServerIdentity.storedData));
+    }
+
     private void enableEdition() {
-        UI.animateIconChange(mEditOrSaveIdentityDataButton, R.drawable.ic_actionbar_accept, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, true);
-        UI.hideSubmenuAndRelatedOptions(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, new FloatingActionButton[] { mDeleteIdentityDataButton, mSyncServerDataButton, mCopyTokenToClipboardButton, mOpenServerLocationButton });
-        mEditing = true;
+        if (isAdded()) {
+            UI.animateIconChange(mEditOrSaveIdentityDataButton, R.drawable.ic_actionbar_accept, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, true);
+            UI.hideSubmenuAndRelatedOptions(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, new FloatingActionButton[] { mDeleteIdentityDataButton, mManageGroupsButton, mSyncServerDataButton, mCopyTokenToClipboardButton, mOpenServerLocationButton });
+            mEditing = true;
+        }
+    }
+
+    private void disableEdition() {
+        if (isAdded()) {
+            UI.animateIconChange(mEditOrSaveIdentityDataButton, R.drawable.ic_actionbar_edit, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
+            UI.animateShowOrHide(mToggleSubmenuVisibilityButton, true, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
+            mEditing = false;
+        }
     }
 
     private void copyTokenToClipboard() {

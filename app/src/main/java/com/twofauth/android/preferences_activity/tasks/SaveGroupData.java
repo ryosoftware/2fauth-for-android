@@ -1,11 +1,11 @@
-package com.twofauth.android.api_tasks;
+package com.twofauth.android.preferences_activity.tasks;
 
 import android.content.Context;
 import android.util.Log;
 
 import com.twofauth.android.API;
 import com.twofauth.android.Main;
-import com.twofauth.android.database.TwoFactorAccount;
+import com.twofauth.android.preferences_activity.tasks.LoadGroupsData.TwoFactorGroupWithReferencesInformation;
 import com.twofauth.android.database.TwoFactorGroup;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class SaveGroupData {
     public interface OnDataSavedListener {
-        public abstract void onDataSaved(TwoFactorGroup group, boolean success, boolean synced);
+        public abstract void onDataSaved(TwoFactorGroupWithReferencesInformation group, boolean success, boolean synced);
     }
 
     private static class SaveGroupDataImplementation implements Main.OnBackgroundTaskExecutionListener {
@@ -25,6 +25,7 @@ public class SaveGroupData {
 
         private final OnDataSavedListener mListener;
 
+        private TwoFactorGroupWithReferencesInformation mGroupWithReferencesInformation;
         private boolean mSuccess = false;
         private boolean mSynced = false;
 
@@ -42,7 +43,9 @@ public class SaveGroupData {
                     try {
                         if (Main.getInstance().getDatabaseHelper().beginTransaction(database)) {
                             try {
-                                mGroup.save(database, mContext);
+                                if (mGroup.isDeleted() && (mGroup.getRemoteId() == 0)) { mGroup.delete(database, mContext); }
+                                else { mGroup.save(database, mContext); }
+                                mGroupWithReferencesInformation = new TwoFactorGroupWithReferencesInformation(database, mGroup);
                                 mSuccess = true;
                                 if (mGroup.getServerIdentity().isSyncingImmediately()) { mSynced = API.syncGroup(database, mContext, mGroup, true); }
                             }
@@ -64,7 +67,7 @@ public class SaveGroupData {
 
         @Override
         public void onBackgroundTaskFinished(@Nullable final Object data) {
-            if (mListener != null) { mListener.onDataSaved(mGroup, mSuccess, mSynced); }
+            if (mListener != null) { mListener.onDataSaved(mGroupWithReferencesInformation, mSuccess, mSynced); }
         }
     }
 

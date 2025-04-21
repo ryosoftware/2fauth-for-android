@@ -1,4 +1,4 @@
-package com.twofauth.android;
+package com.twofauth.android.preferences_activity;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -10,6 +10,7 @@ import androidx.preference.Preference;
 
 public class CancellableEditTextPreference extends EditTextPreference implements Preference.OnPreferenceClickListener {
     private OnPreferenceClickListener mOnClickListener = null;
+
     public CancellableEditTextPreference(@NonNull final Context context, @Nullable final AttributeSet attrs, final int def_style_attr, final int def_style_res) {
         super(context, attrs, def_style_attr, def_style_res);
         super.setOnPreferenceClickListener(this);

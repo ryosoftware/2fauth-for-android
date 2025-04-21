@@ -21,52 +21,63 @@ import com.twofauth.android.MainService;
 import com.twofauth.android.MainService.OnMainServiceStatusChangedListener;
 import com.twofauth.android.PreferencesActivity;
 import com.twofauth.android.R;
-import com.twofauth.android.main_service.TwoFactorServerIdentityWithSyncData;
-import com.twofauth.android.preferences_activity.tasks.LoadServerIdentitiesData;
-import com.twofauth.android.preferences_activity.ServerIdentityPreferences.EditIdentityResultType;
-import com.twofauth.android.preferences_activity.tasks.LoadServerIdentitiesData.OnServerIdentitiesLoadedListener;
-import com.twofauth.android.preferences_activity.tasks.LoadServerIdentitiesData.TwoFactorServerIdentityWithSyncDataAndAccountNumbers;
+import com.twofauth.android.database.TwoFactorGroup;
+import com.twofauth.android.database.TwoFactorServerIdentity;
+import com.twofauth.android.preferences_activity.tasks.LoadGroupsData;
+import com.twofauth.android.preferences_activity.tasks.LoadGroupsData.TwoFactorGroupWithReferencesInformation;
+import com.twofauth.android.preferences_activity.tasks.LoadGroupsData.OnGroupsLoadedListener;
+import com.twofauth.android.preferences_activity.tasks.SaveGroupData;
+import com.twofauth.android.preferences_activity.tasks.SaveGroupData.OnDataSavedListener;
+import com.twofauth.android.preferences_activity.ManageGroupPreferences.EditGroupResultType;
 import com.twofauth.android.utils.Lists;
-import com.twofauth.android.utils.Preferences;
 import com.twofauth.android.utils.Strings;
 import com.twofauth.android.utils.UI;
 import com.twofauth.android.utils.Vibrator;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implements OnServerIdentitiesLoadedListener, OnMainServiceStatusChangedListener, OnPreferenceClickListener, OnClickListener, FragmentResultListener {
-    public static final String EDIT_IDENTITIES = "edit-server-identities";
-    public static final String EDIT_IDENTITIES_RESULT = "result";
-
-    private static class TwoFactorServerIdentitiesWithSyncDataAndAccountNumbersComparator implements Comparator<TwoFactorServerIdentityWithSyncDataAndAccountNumbers> {
+public class ManageGroupsPreferences extends PreferenceFragmentCompat implements OnGroupsLoadedListener, OnDataSavedListener, OnMainServiceStatusChangedListener, OnPreferenceClickListener, OnClickListener, FragmentResultListener {
+    private static class TwoFactorGroupsWithReferencesInformationComparator implements Comparator<TwoFactorGroupWithReferencesInformation> {
         @Override
-        public int compare(@NotNull final TwoFactorServerIdentityWithSyncDataAndAccountNumbers server_identity_1, @NotNull final TwoFactorServerIdentityWithSyncDataAndAccountNumbers server_identity_2) {
-            return Strings.compare(server_identity_1.storedData.getTitle(), server_identity_2.storedData.getTitle(), true);
+        public int compare(@NotNull final TwoFactorGroupWithReferencesInformation group_1, @NotNull final TwoFactorGroupWithReferencesInformation group_2) {
+            return Strings.compare(group_1.storedData.getName(), group_2.storedData.getName(), true);
         }
     }
 
-    private final Bundle mResultBundle = new Bundle();
+    public static class TwoFactorGroupsUtils {
+        public static int indexOf(@Nullable final List<TwoFactorGroupWithReferencesInformation> groups, @NotNull final String name) {
+            if (groups != null) {
+                for (int i = groups.size() - 1; i >= 0; i --) {
+                    if (Strings.equals(groups.get(i).storedData.getName(), name, true)) { return i; }
+                }
+            }
+            return -1;
+        }
+    }
 
+    private boolean mRunningTasks = false;
     private boolean mAnimatingSyncDataButton = false;
 
-    private final TwoFactorServerIdentitiesWithSyncDataAndAccountNumbersComparator mComparator = new TwoFactorServerIdentitiesWithSyncDataAndAccountNumbersComparator();
+    private final TwoFactorServerIdentity mServerIdentity;
+    private final List<LoadGroupsData.TwoFactorGroupWithReferencesInformation> mGroups = new ArrayList<LoadGroupsData.TwoFactorGroupWithReferencesInformation>();
 
-    private final List<TwoFactorServerIdentityWithSyncDataAndAccountNumbers> mServerIdentities;
-
-    private TwoFactorServerIdentityWithSyncDataAndAccountNumbers mActiveServerIdentity;
+    private TwoFactorGroupWithReferencesInformation mActiveGroup;
 
     private FloatingActionButton mSyncDataButton;
-    private FloatingActionButton mAddIdentityDataButton;
+    private FloatingActionButton mAddGroupDataButton;
 
-    private View mEmptyView;
+    private final TwoFactorGroupsWithReferencesInformationComparator mComparator = new TwoFactorGroupsWithReferencesInformationComparator();
 
-    public ServerIdentitiesPreferences(@NotNull final List<TwoFactorServerIdentityWithSyncDataAndAccountNumbers> server_identities) {
+    private View mEmptyView = null;
+
+    public ManageGroupsPreferences(@NotNull final TwoFactorServerIdentity server_identity) {
         super();
-        mServerIdentities = server_identities;
-        mResultBundle.putBoolean(EDIT_IDENTITIES_RESULT, true);
+        mServerIdentity = server_identity;
+        LoadGroupsData.getBackgroundTask(mServerIdentity, this).start();
     }
 
     @Override
@@ -84,7 +95,7 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
 
     @Override
     public @NotNull View onCreateView(@NotNull LayoutInflater inflater, @NotNull ViewGroup container, @Nullable Bundle saved_instance_state) {
-        final View view = inflater.inflate(R.layout.server_identities_preferences_fragment, container, false);
+        final View view = inflater.inflate(R.layout.manage_groups_preferences_fragment, container, false);
         final FrameLayout preferences_container = view.findViewById(R.id.contents);
         preferences_container.addView(super.onCreateView(inflater, preferences_container, saved_instance_state));
         return view;
@@ -94,32 +105,37 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
     public void onViewCreated(@NotNull final View view, @Nullable final Bundle saved_instance_state) {
         super.onViewCreated(view, saved_instance_state);
         mEmptyView = view.findViewById(R.id.empty_view);
-        mEmptyView.setVisibility(mServerIdentities.isEmpty() ? View.VISIBLE : View.GONE);
+        mEmptyView.setVisibility(mGroups.isEmpty() ? View.VISIBLE : View.GONE);
         mSyncDataButton = (FloatingActionButton) view.findViewById(R.id.sync_server_data);
         mSyncDataButton.setOnClickListener(this);
-        mAddIdentityDataButton = (FloatingActionButton) view.findViewById(R.id.add_identity_data);
-        mAddIdentityDataButton.setOnClickListener(this);
-        getParentFragmentManager().setFragmentResultListener(ServerIdentityPreferences.EDIT_IDENTITY, this, this);
+        mAddGroupDataButton = (FloatingActionButton) view.findViewById(R.id.add_group_data);
+        mAddGroupDataButton.setOnClickListener(this);
+        getParentFragmentManager().setFragmentResultListener(ManageGroupPreferences.EDIT_GROUP, this, this);
         setSyncDataButtonsAvailability();
         setDivider(null);
     }
 
     @Override
     public void onCreatePreferences(@Nullable final Bundle saved_instance_state, @Nullable final String root_key) {
-        setPreferencesFromResource(R.xml.server_identities_preferences, root_key);
+        setPreferencesFromResource(R.xml.manage_groups_preferences, root_key);
+        onGroupsChanged();
+    }
+
+    private void onGroupsChanged() {
         initializePreferences();
+        if (mEmptyView != null) { mEmptyView.setVisibility(mGroups.isEmpty() ? View.VISIBLE : View.GONE); }
     }
 
     private void initializePreferences() {
         final Context context = getPreferenceManager().getContext();
         final PreferenceScreen root_preference = getPreferenceScreen();
         root_preference.removeAll();
-        mServerIdentities.sort(mComparator);
-        for (int i = 0; i < mServerIdentities.size(); i ++) {
-            final TwoFactorServerIdentityWithSyncData server_identity = mServerIdentities.get(i);
+        mGroups.sort(mComparator);
+        for (int i = 0; i < mGroups.size(); i ++) {
+            final TwoFactorGroupWithReferencesInformation group = mGroups.get(i);
             final Preference preference = new Preference(context);
-            preference.setTitle(server_identity.storedData.getTitle());
-            preference.setSummary(getServerIdentitySyncDetails(context, server_identity));
+            preference.setTitle(group.storedData.getName());
+            preference.setSummary(group.storedData.isDeleted() ? getString(R.string.pending_of_deletion) : group.storedData.isSynced() ? null : getString(R.string.pending_of_sync));
             preference.setKey(String.valueOf(i));
             preference.setOnPreferenceClickListener(this);
             root_preference.addPreference(preference);
@@ -129,22 +145,24 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
     private void setSyncDataButtonsAvailability() {
         if (isAdded()) {
             final Context context = getContext();
-            final boolean sync_process_running = MainService.isRunning(context), can_start_sync_process = ((! sync_process_running) && MainService.canSyncServerData(context));
-            mSyncDataButton.setEnabled(can_start_sync_process);
+            final boolean sync_process_running = MainService.isRunning(context) || mRunningTasks;
+            mSyncDataButton.setEnabled(! sync_process_running);
+            mAddGroupDataButton.setEnabled(! mRunningTasks);
             if ((sync_process_running) && (! mAnimatingSyncDataButton)) { UI.startInfiniteRotationAnimationLoop(mSyncDataButton, Constants.BUTTON_360_DEGREES_ROTATION_ANIMATION_DURATION); }
             else if ((! sync_process_running) && (mAnimatingSyncDataButton)) { mSyncDataButton.clearAnimation(); }
             mAnimatingSyncDataButton = sync_process_running;
         }
     }
 
-    // Entry point for the server identities task finish
+    // Entry point for the load groups task finished
 
-    @Override
-    public void onServerIdentitiesLoaded(@Nullable final List<TwoFactorServerIdentityWithSyncDataAndAccountNumbers> server_identities) {
-        if (isAdded()) {
-            Lists.setItems(mServerIdentities, server_identities);
-            onServerIdentitiesChanged(false);
-        }
+    public void onGroupsLoaded(@Nullable final List<TwoFactorGroupWithReferencesInformation> groups) {
+        Lists.setItems(mGroups, groups);
+        if (isAdded()) { onGroupsChanged(); }
+    }
+
+    public void onGroupsLoadError() {
+        if (isAdded()) { UI.showToast(getContext(), R.string.cannot_process_request_due_to_an_internal_error); }
     }
 
     // Entry points for the synchronization process events
@@ -157,18 +175,9 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
     @Override
     public void onServiceFinished(MainService.SyncResultType result_type) {
         if (isAdded()) {
-            if (result_type == MainService.SyncResultType.UPDATED) { LoadServerIdentitiesData.getBackgroundTask(this).start(); }
+            if (result_type == MainService.SyncResultType.UPDATED) { LoadGroupsData.getBackgroundTask(mServerIdentity, this).start(); }
             setSyncDataButtonsAvailability();
         }
-    }
-
-    // Gets the server identity synchronization status
-    // We include information about last synchronization error time and error message or, if no error, last success synchronization time, if available
-
-    private @NotNull String getServerIdentitySyncDetails(@NotNull final Context context, @NotNull final TwoFactorServerIdentityWithSyncData server_identity) {
-        if (server_identity.hasSyncErrors(context)) { return getString(R.string.last_sync_error, server_identity.getLastSyncError(context), Strings.getDateTimeString(context, server_identity.getLastSyncErrorTime(context))); }
-        else if (server_identity.hasBeenSynced(context)) { return getResources().getQuantityString(R.plurals.sync_details, server_identity.getLastSyncedAccounts(context), server_identity.getLastSyncedAccounts(context), Strings.getDateTimeString(context, server_identity.getLastSyncTime(context))); }
-        return getString(R.string.account_never_synced);
     }
 
     @Override
@@ -176,55 +185,71 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
         final Context context = view.getContext();
         final int view_id = view.getId();
         Vibrator.vibrate(context, Constants.NORMAL_HAPTIC_FEEDBACK);
-        if (view_id == R.id.add_identity_data) { addServerIdentity(); }
+        if (view_id == R.id.add_group_data) { addGroup(); }
         else if (view_id == R.id.sync_server_data) { MainService.startService(context); }
     }
 
     @Override
     public boolean onPreferenceClick(@NotNull final Preference preference) {
-        editServerIdentity(mServerIdentities.get(Integer.parseInt(preference.getKey())));
+        if (! mRunningTasks) {
+            editGroup(mGroups.get(Integer.parseInt(preference.getKey())));
+        }
         return true;
     }
 
-    // Procedures related to the identity manager
-    // If a identity is changed, we propagate this information to the caller, if is a relevant change
+    // Entry point to the edit group process
 
-    private void onServerIdentitiesChanged(final boolean propagate_result) {
-        if (propagate_result) { getParentFragmentManager().setFragmentResult(EDIT_IDENTITIES, mResultBundle); }
-        Preferences.getDefaultSharedPreferences(getContext()).edit().putInt(Constants.SERVER_IDENTITIES_COUNT_KEY, mServerIdentities.size()).apply();
-        initializePreferences();
-        mEmptyView.setVisibility(mServerIdentities.isEmpty() ? View.VISIBLE : View.GONE);
+    private void editGroup(@NotNull final TwoFactorGroupWithReferencesInformation group) {
+        ((PreferencesActivity) getActivity()).setFragment(new ManageGroupPreferences(mActiveGroup = group, mGroups));
     }
 
     @Override
     public void onFragmentResult(@NotNull final String request_key, @NotNull final Bundle result) {
-        if (isAdded() && ServerIdentityPreferences.EDIT_IDENTITY.equals(request_key)) {
-            final EditIdentityResultType result_type = (EditIdentityResultType) result.getSerializable(ServerIdentityPreferences.EDIT_IDENTITY_RESULT);
-            if (result_type == EditIdentityResultType.DELETED) {
-                mServerIdentities.remove(mActiveServerIdentity);
-                onServerIdentitiesChanged(true);
-            }
-            else if ((result_type == EditIdentityResultType.RELEVANT_UPDATE) || (result_type == EditIdentityResultType.NOT_RELEVANT_UPDATE)) {
-                final boolean is_new_identity = ! mServerIdentities.contains(mActiveServerIdentity);
-                if (is_new_identity) { mServerIdentities.add(mActiveServerIdentity); }
-                onServerIdentitiesChanged(is_new_identity || (result_type == EditIdentityResultType.RELEVANT_UPDATE));
+        if (isAdded() && ManageGroupPreferences.EDIT_GROUP.equals(request_key)) {
+            final EditGroupResultType result_type = (EditGroupResultType) result.getSerializable(ManageGroupPreferences.EDIT_GROUP_RESULT);
+            if (result_type != null) {
+                if (result_type == EditGroupResultType.DELETED.DELETED) { mGroups.remove(mActiveGroup); }
+                onGroupsChanged();
             }
         }
     }
 
-    private void editServerIdentity(@Nullable final TwoFactorServerIdentityWithSyncDataAndAccountNumbers server_identity) {
-        mActiveServerIdentity = (server_identity == null) ? new TwoFactorServerIdentityWithSyncDataAndAccountNumbers() : server_identity;
-        ((PreferencesActivity) getActivity()).setFragment(new ServerIdentityPreferences(mActiveServerIdentity, mServerIdentities));
-    }
+    // Entry point to the add group process
 
-    // Open identity manager fragment after animate the add button (animations availability is enabled or disabled at UI class)
-
-    private void addServerIdentity() {
-        UI.startRotationAnimation(mAddIdentityDataButton, Constants.BUTTON_CLICK_ANIMATION_BEFORE_START_ACTION_DEGREES, Constants.BUTTON_360_DEGREES_ROTATION_ANIMATION_DURATION, new UI.OnAnimationEndListener() {
+    private void addGroup() {
+        UI.startRotationAnimation(mAddGroupDataButton, Constants.BUTTON_CLICK_ANIMATION_BEFORE_START_ACTION_DEGREES, Constants.BUTTON_360_DEGREES_ROTATION_ANIMATION_DURATION, new UI.OnAnimationEndListener() {
             @Override
             public void onAnimationEnd(View view) {
-                editServerIdentity(null);
+                if (isAdded()) {
+                    UI.showEditTextDialog(getActivity(), R.string.add_group_dialog_title, R.string.add_group_dialog_message, null, 0, Constants.GROUP_NAME_VALID_REGEXP, R.string.accept, R.string.cancel, new UI.OnTextEnteredListener() {
+                        @Override
+                        public void onTextEntered(@NotNull final String name) {
+                            addGroup(name);
+                        }
+                    });
+                }
             }
         });
+    }
+
+    private void addGroup(@NotNull final String name) {
+        if (isAdded() && (TwoFactorGroupsUtils.indexOf(mGroups, name) < 0)) {
+            final TwoFactorGroup group = new TwoFactorGroup();
+            group.setServerIdentity(mServerIdentity);
+            group.setName(name);
+            mRunningTasks = true;
+            setSyncDataButtonsAvailability();
+            SaveGroupData.getBackgroundTask(getContext(), group, ManageGroupsPreferences.this).start();
+        }
+    }
+
+    @Override
+    public void onDataSaved(TwoFactorGroupWithReferencesInformation group, boolean success, boolean synced) {
+        if (isAdded()) {
+            mRunningTasks = false;
+            if (! success) UI.showToast(getContext(), R.string.cannot_process_request_due_to_an_internal_error);
+            else { mGroups.add(group); onGroupsChanged(); }
+            setSyncDataButtonsAvailability();
+        }
     }
 }

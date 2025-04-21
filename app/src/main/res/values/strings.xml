@@ -249,10 +249,9 @@
     <string name="group_label">%2$s</string>
 
     <string name="add_group_dialog_title">Add a group</string>
-    <string name="add_group_dialog_message">Enter the name of the group.\n\n(Group will be created when account data was synced)</string>
-
-    <string name="group_name_dialog_title">@string/name</string>
-    <string name="group_name_dialog_message">Enter the name of the group</string>
+    <string name="add_group_dialog_message">Enter the name of the group</string>
+    <string name="edit_group_name_dialog_title">Edit a group</string>
+    <string name="edit_group_name_dialog_message">@string/add_group_dialog_message</string>
 
     <string name="loading_data">Loading data&#8230;</string>
     <string name="accept">Accept</string>

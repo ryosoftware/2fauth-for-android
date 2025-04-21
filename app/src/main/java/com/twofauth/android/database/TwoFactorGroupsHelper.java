@@ -59,6 +59,10 @@ public class TwoFactorGroupsHelper extends TableHelper<TwoFactorGroup> {
         return super.get(database, new QueryOptions(server_identity, only_not_synced_accounts));
     }
 
+    public @Nullable List<TwoFactorGroup> get(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity) throws Exception {
+        return super.get(database, new QueryOptions(server_identity, false));
+    }
+
     public @Nullable List<TwoFactorGroup> get(@Nullable final TwoFactorServerIdentity server_identity, final boolean only_not_synced_accounts) throws Exception {
         final SQLiteDatabase database = Main.getInstance().getDatabaseHelper().open(false);
         if (database != null) {
@@ -70,6 +74,10 @@ public class TwoFactorGroupsHelper extends TableHelper<TwoFactorGroup> {
             }
         }
         return null;
+    }
+
+    public @Nullable List<TwoFactorGroup> get(@Nullable final TwoFactorServerIdentity server_identity) throws Exception {
+        return get(server_identity, false);
     }
 
     public @Nullable List<TwoFactorGroup> get(final boolean only_not_synced_accounts) throws Exception {

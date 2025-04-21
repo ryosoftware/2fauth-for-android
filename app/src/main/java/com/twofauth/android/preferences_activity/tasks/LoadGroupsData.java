@@ -1,12 +1,11 @@
 package com.twofauth.android.preferences_activity.tasks;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.database.TwoFactorServerIdentity;
-import com.twofauth.android.main_service.TwoFactorServerIdentityWithSyncData;
+import com.twofauth.android.utils.Lists;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
 
@@ -14,58 +13,35 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class LoadServerIdentitiesData {
-    public interface OnServerIdentitiesLoadedListener {
-        public abstract void onServerIdentitiesLoaded(List<TwoFactorServerIdentityWithSyncDataAndAccountNumbers> server_identities);
+public class LoadGroupsData {
+    public interface OnGroupsLoadedListener {
+        public abstract void onGroupsLoaded(List<TwoFactorGroupWithReferencesInformation> groups);
+        public abstract void onGroupsLoadError();
     }
 
-    public static class TwoFactorServerIdentityWithSyncDataAndAccountNumbers extends TwoFactorServerIdentityWithSyncData {
-        private int mAccounts;
-        private int mNotSyncedAccounts;
+    public static class TwoFactorGroupWithReferencesInformation {
+        public final TwoFactorGroup storedData;
 
-        TwoFactorServerIdentityWithSyncDataAndAccountNumbers(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorServerIdentity server_identity) throws Exception {
-            super(server_identity);
-            mAccounts = Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().count(database, server_identity, false);
-            mNotSyncedAccounts = Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().count(database, server_identity, true);
-        }
+        public final boolean isReferenced;
 
-        public TwoFactorServerIdentityWithSyncDataAndAccountNumbers() {
-            super();
-            mAccounts = mNotSyncedAccounts = 0;
-        }
-
-        public void onDataDeleted(@NotNull final Context context) {
-            super.onDataDeleted(context);
-            mAccounts = mNotSyncedAccounts = 0;
-        }
-
-        public boolean hasAccounts() {
-            return mAccounts > 0;
-        }
-
-        public int countAccounts() {
-            return mAccounts;
-        }
-
-        public boolean hasNotSyncedAccounts() {
-            return mNotSyncedAccounts > 0;
-        }
-
-        public int countNotSyncedAccounts() {
-            return mNotSyncedAccounts;
+        TwoFactorGroupWithReferencesInformation(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorGroup group) {
+            storedData = group;
+            isReferenced = ((group.getRowId() >= 0) && group.isReferenced(database));
         }
     }
 
-    private static class LoadServerIdentitiesDataImplementation implements Main.OnBackgroundTaskExecutionListener {
-        private final OnServerIdentitiesLoadedListener mListener;
+    private static class LoadGroupsDataImplementation implements Main.OnBackgroundTaskExecutionListener {
+        private final TwoFactorServerIdentity mServerIdentity;
 
-        private final List<TwoFactorServerIdentityWithSyncDataAndAccountNumbers> mServerIdentities = new ArrayList<TwoFactorServerIdentityWithSyncDataAndAccountNumbers>();
+        private final OnGroupsLoadedListener mListener;
 
-        LoadServerIdentitiesDataImplementation(@NotNull final OnServerIdentitiesLoadedListener listener) {
+        private List<TwoFactorGroupWithReferencesInformation> mGroups = null;
+        private boolean mSuccess = false;
+
+        LoadGroupsDataImplementation(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final OnGroupsLoadedListener listener) {
+            mServerIdentity = server_identity;
             mListener = listener;
         }
 
@@ -75,9 +51,14 @@ public class LoadServerIdentitiesData {
                 final SQLiteDatabase database = Main.getInstance().getDatabaseHelper().open(false);
                 if (database != null) {
                     try {
-                        for (final TwoFactorServerIdentity server_identity : Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(database)) {
-                            mServerIdentities.add(new TwoFactorServerIdentityWithSyncDataAndAccountNumbers(database, server_identity));
+                        final List<TwoFactorGroup> groups = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database, mServerIdentity);
+                        if (!Lists.isEmptyOrNull(groups)) {
+                            mGroups = new ArrayList<TwoFactorGroupWithReferencesInformation>();
+                            for (final TwoFactorGroup group : groups) {
+                                mGroups.add(new TwoFactorGroupWithReferencesInformation(database, group));
+                            }
                         }
+                        mSuccess = true;
                     }
                     finally {
                         Main.getInstance().getDatabaseHelper().close(database);
@@ -85,18 +66,19 @@ public class LoadServerIdentitiesData {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load server identities data", e);
+                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load groups data", e);
             }
             return null;
         }
 
         @Override
         public void onBackgroundTaskFinished(@Nullable final Object data) {
-            mListener.onServerIdentitiesLoaded(mServerIdentities);
+            if (mSuccess) { mListener.onGroupsLoaded(mGroups); }
+            else { mListener.onGroupsLoadError(); }
         }
     }
 
-    public static @NotNull Thread getBackgroundTask(@NotNull OnServerIdentitiesLoadedListener listener) {
-        return Main.getInstance().getBackgroundTask(new LoadServerIdentitiesDataImplementation(listener));
+    public static @NotNull Thread getBackgroundTask(@NotNull final TwoFactorServerIdentity server_identity, @NotNull OnGroupsLoadedListener listener) {
+        return Main.getInstance().getBackgroundTask(new LoadGroupsDataImplementation(server_identity, listener));
     }
 }
