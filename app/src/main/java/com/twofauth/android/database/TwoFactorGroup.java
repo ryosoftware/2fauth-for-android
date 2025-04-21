@@ -82,19 +82,6 @@ public class TwoFactorGroup extends SynceableTableRow {
         return false;
     }
 
-    public boolean isReferenced() {
-        final SQLiteDatabase database = Main.getInstance().getDatabaseHelper().open(false);
-        if (database != null) {
-            try {
-                return isReferenced(database);
-            }
-            finally {
-                Main.getInstance().getDatabaseHelper().close(database);
-            }
-        }
-        return false;
-    }
-
     public boolean hasName() { return ! Strings.isEmptyOrNull(getName()); }
 
     public @Nullable String getName() {
