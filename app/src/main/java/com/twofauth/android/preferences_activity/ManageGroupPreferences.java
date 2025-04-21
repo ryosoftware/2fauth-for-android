@@ -98,7 +98,7 @@ public class ManageGroupPreferences extends PreferenceFragmentCompat implements 
     private void setButtonsAvailability() {
         final Context context = getContext();
         mWorkingView.setVisibility(mRunningTasks == null ? View.GONE : View.VISIBLE);
-        mEditGroupName.setEnabled(mRunningTasks == null);
+        mEditGroupName.setEnabled((mRunningTasks == null) && (! mGroup.storedData.isDeleted()));
         mDeleteOrUndeleteGroup.setEnabled((mRunningTasks == null) && (mGroup.storedData.isDeleted() || (! mGroup.isReferenced)));
     }
 
