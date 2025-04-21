@@ -685,16 +685,6 @@ public class TwoFactorAccount extends SynceableTableRow {
 
     protected void onDataDeleted(@NotNull final SQLiteDatabase database, @NotNull final Context context) {
         try {
-            if (mGroup != null) {
-                try {
-                    mGroup.delete(database, context);
-                }
-                catch (SQLiteConstraintException ignored) {
-                }
-                catch (Exception e) {
-                    Log.e(Main.LOG_TAG_NAME, "Exception while trying to delete a group", e);
-                }
-            }
             if (mIcon != null) {
                 try {
                     mIcon.delete(database, context);
