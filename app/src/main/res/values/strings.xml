@@ -222,8 +222,8 @@
     <string name="pending_of_deletion">Pending of deletion at server side</string>
     <string name="deleted_group">%1$s [deleted]</string>
 
-    <string name="icon_source_bubka">Icon downloaded from your 2FA server</string>
-    <string name="icon_source_dashboard_icons">Icon downloaded from "Dashboard icons"</string>
+    <string name="icon_source_bubka">From your 2FA server</string>
+    <string name="icon_source_dashboard_icons">From \"Dashboard icons\"</string>
 
     <string name="cannot_load_account_data">Cannot load account data</string>
     <string name="cancel_account_edition_message">Account data has been changed.\n\nWhat do you want to do?</string>

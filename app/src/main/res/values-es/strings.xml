@@ -223,8 +223,8 @@
     <string name="pending_of_deletion">Pendiente de borrado en el servidor</string>
     <string name="deleted_group">%1$s [borrado]</string>
 
-    <string name="icon_source_bubka">Icono descargado de su servidor 2FA</string>
-    <string name="icon_source_dashboard_icons">Icono descargado de "Dashboard Icons"</string>
+    <string name="icon_source_bubka">En su servidor 2FA</string>
+    <string name="icon_source_dashboard_icons">En \"Dashboard Icons\"</string>
 
     <string name="cannot_load_account_data">No se han podido cargar los datos de la cuenta</string>
     <string name="cancel_account_edition_message">Los datos de la cuenta han cambiado.\n\n¿Qué desea hacer?</string>
