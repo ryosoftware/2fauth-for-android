@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.twofauth.android.API;
 import com.twofauth.android.utils.Bitmaps;
 import com.twofauth.android.Main;
 import com.twofauth.android.utils.Strings;
@@ -195,12 +196,28 @@ public class TwoFactorIcon extends TableRow {
         super.onDataSaved(context);
     }
 
-    @Override
-    protected void onDataDeleted(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {
+    private void deleteFiles(@NotNull final Context context) {
         for (final BitmapTheme theme : new BitmapTheme[] { null, BitmapTheme.DARK, BitmapTheme.LIGHT }) {
             final File file = getBitmapFile(context, theme);
             if (file != null) { file.delete(); }
         }
+    }
+
+    @Override
+    public synchronized void delete(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {
+        if (API.ICON_SOURCE_DEFAULT.equals(getSource()) && (! Strings.isEmptyOrNull(getSourceId()))) {
+            deleteFiles(context);
+            setSource(null);
+            save(database, context);
+        }
+        else if ((getSource() != null) || Strings.isEmptyOrNull(getSourceId())) {
+            super.delete(database, context);
+        }
+    }
+
+    @Override
+    protected void onDataDeleted(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {
+        deleteFiles(context);
         super.onDataDeleted(database, context);
     }
 }
