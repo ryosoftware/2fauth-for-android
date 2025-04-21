@@ -104,7 +104,7 @@ public class TwoFactorIcon extends TableRow {
         setBitmap(Bitmaps.get(file), theme);
     }
 
-    public void setBitmaps(@Nullable Bitmap not_themed_bitmap, @Nullable final Bitmap dark_themed_bitmap, @Nullable final Bitmap light_themed_bitmap) throws Exception {
+    public void setBitmaps(@Nullable Bitmap not_themed_bitmap, @Nullable final Bitmap dark_themed_bitmap, @Nullable final Bitmap light_themed_bitmap) {
         setBitmap(not_themed_bitmap, null);
         setBitmap(dark_themed_bitmap, BitmapTheme.DARK);
         setBitmap(light_themed_bitmap, BitmapTheme.LIGHT);
