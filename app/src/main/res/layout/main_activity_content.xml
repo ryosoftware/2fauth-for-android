@@ -96,8 +96,6 @@
             android:layout_alignParentEnd="true"
             android:layout_below="@id/accounts_list_header"
             android:layout_marginEnd="@dimen/fab_margin"
-            android:layout_marginTop="@dimen/fab_margin"
-            android:layout_marginBottom="345dp"
             android:layout_alignWithParentIfMissing="true"
             android:elevation="6dp"
             android:stateListAnimator="@null"
