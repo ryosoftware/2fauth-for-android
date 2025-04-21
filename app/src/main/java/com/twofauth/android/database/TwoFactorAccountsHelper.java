@@ -18,8 +18,6 @@ import java.util.List;
 public class TwoFactorAccountsHelper extends TableHelper<TwoFactorAccount> {
     public static final String TABLE_NAME = "two_factor_accounts";
 
-    private static final String QR_CODES_FOLDER = "qr_codes";
-
     public enum SortMode { SORT_BY_LAST_USE, SORT_BY_SERVICE };
 
     private static class QueryOptions {
@@ -110,28 +108,5 @@ public class TwoFactorAccountsHelper extends TableHelper<TwoFactorAccount> {
 
     public boolean exists(@Nullable final TwoFactorServerIdentity server_identity, final boolean only_not_synced_accounts) throws Exception {
         return exists(new QueryOptions(server_identity, only_not_synced_accounts, null));
-    }
-
-    private void deleteFiles(@NotNull final Context context) {
-        final File base_folder = getBaseFolder(context);
-        if (base_folder.exists()) {
-            File[] files = base_folder.listFiles();
-            if (files != null) {
-                for (final File file : files) {
-                    file.delete();
-                }
-            }
-        }
-    }
-
-    protected void delete(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {
-        super.delete(database);
-        deleteFiles(context);
-    }
-
-    protected static @NotNull File getBaseFolder(@NotNull final Context context) {
-        final File folder = new File(context.getFilesDir(), QR_CODES_FOLDER);
-        folder.mkdirs();
-        return folder;
     }
 }

@@ -129,8 +129,8 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
     private void setSyncDataButtonsAvailability() {
         if (isAdded()) {
             final Context context = getContext();
-            final boolean sync_process_running = MainService.isRunning(context), can_start_sync_process = ((! sync_process_running) && MainService.canSyncServerData(context));
-            mSyncDataButton.setEnabled(can_start_sync_process);
+            final boolean sync_process_running = MainService.isRunning(context);
+            mSyncDataButton.setEnabled((! sync_process_running) && (! mServerIdentities.isEmpty()));
             if ((sync_process_running) && (! mAnimatingSyncDataButton)) { UI.startInfiniteRotationAnimationLoop(mSyncDataButton, Constants.BUTTON_360_DEGREES_ROTATION_ANIMATION_DURATION); }
             else if ((! sync_process_running) && (mAnimatingSyncDataButton)) { mSyncDataButton.clearAnimation(); }
             mAnimatingSyncDataButton = sync_process_running;
@@ -145,6 +145,11 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
             Lists.setItems(mServerIdentities, server_identities);
             onServerIdentitiesChanged(false);
         }
+    }
+
+    @Override
+    public void onServerIdentitiesLoadError() {
+        if (isAdded()) { UI.showToast(getContext(), R.string.cannot_process_request_due_to_an_internal_error); }
     }
 
     // Entry points for the synchronization process events

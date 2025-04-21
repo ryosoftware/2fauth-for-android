@@ -21,6 +21,7 @@ import java.util.Map;
 public class LoadServerIdentitiesData {
     public interface OnServerIdentitiesLoadedListener {
         public abstract void onServerIdentitiesLoaded(List<TwoFactorServerIdentityWithSyncDataAndAccountNumbers> server_identities);
+        public abstract void onServerIdentitiesLoadError();
     }
 
     public static class TwoFactorServerIdentityWithSyncDataAndAccountNumbers extends TwoFactorServerIdentityWithSyncData {
@@ -65,6 +66,8 @@ public class LoadServerIdentitiesData {
 
         private final List<TwoFactorServerIdentityWithSyncDataAndAccountNumbers> mServerIdentities = new ArrayList<TwoFactorServerIdentityWithSyncDataAndAccountNumbers>();
 
+        private boolean mSuccess = false;
+
         LoadServerIdentitiesDataImplementation(@NotNull final OnServerIdentitiesLoadedListener listener) {
             mListener = listener;
         }
@@ -78,6 +81,7 @@ public class LoadServerIdentitiesData {
                         for (final TwoFactorServerIdentity server_identity : Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(database)) {
                             mServerIdentities.add(new TwoFactorServerIdentityWithSyncDataAndAccountNumbers(database, server_identity));
                         }
+                        mSuccess = true;
                     }
                     finally {
                         Main.getInstance().getDatabaseHelper().close(database);
@@ -92,7 +96,8 @@ public class LoadServerIdentitiesData {
 
         @Override
         public void onBackgroundTaskFinished(@Nullable final Object data) {
-            mListener.onServerIdentitiesLoaded(mServerIdentities);
+            if (mSuccess) { mListener.onServerIdentitiesLoaded(mServerIdentities); }
+            else { mListener.onServerIdentitiesLoadError(); }
         }
     }
 

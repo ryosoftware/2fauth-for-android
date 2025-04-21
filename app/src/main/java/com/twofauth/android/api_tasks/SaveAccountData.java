@@ -68,7 +68,7 @@ public class SaveAccountData {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to store/synchronize an element", e);
+                Log.e(Main.LOG_TAG_NAME, "Exception while trying to store/synchronize an account", e);
             }
             return null;
         }

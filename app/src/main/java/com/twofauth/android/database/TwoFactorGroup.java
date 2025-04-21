@@ -64,7 +64,7 @@ public class TwoFactorGroup extends TableRow {
         try {
             final JSONObject object = new JSONObject();
             object.put(SERVER_IDENTITY, hasServerIdentity() ? getServerIdentity().getRowId() : -1);
-            object.put(Constants.GROUP_DATA_ID_KEY, getRemoteId());
+            if (getRemoteId() > 0) { object.put(Constants.GROUP_DATA_ID_KEY, getRemoteId()); }
             object.put(Constants.GROUP_DATA_NAME_KEY, getName());
             return object;
         }
@@ -116,7 +116,10 @@ public class TwoFactorGroup extends TableRow {
     }
 
     public void setRemoteId(final int server_id) {
-        if (mRemoteId != server_id) { setDirty(REMOTE_ID, mRemoteId = server_id); }
+        if ((! isDeleted()) && (mRemoteId != server_id)) {
+            setDirty(REMOTE_ID, mRemoteId = server_id);
+            setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
+        }
     }
 
     public boolean hasName() { return ! Strings.isEmptyOrNull(getName()); }
@@ -126,7 +129,10 @@ public class TwoFactorGroup extends TableRow {
     }
 
     public void setName(@Nullable final String name) {
-        if (! Strings.equals(mName, name)) { setDirty(NAME, mName = name); }
+        if ((! isDeleted()) && (! Strings.equals(mName, name))) {
+            setDirty(NAME, mName = name);
+            setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
+        }
     }
 
     public boolean isDeleted() {

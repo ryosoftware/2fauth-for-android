@@ -37,49 +37,14 @@
         android:orientation="vertical">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/open_server_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_open" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/copy_token_to_clipboard"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_copy" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/manage_groups"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_group" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/sync_server_data"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_sync" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/delete_server_identity_data"
+            android:id="@+id/delete_or_undelete_group_data"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
             app:srcCompat="@drawable/ic_actionbar_delete" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/toggle_submenu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_submenu" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/edit_or_save_server_identity_data"
+            android:id="@+id/edit_group_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/ic_actionbar_edit" />

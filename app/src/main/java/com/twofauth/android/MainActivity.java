@@ -76,6 +76,9 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends BaseActivityWithTextController implements OnMainServiceStatusChangedListener, OnOtpCodeVisibleStateChangedListener, OnAccountNeedsToBeSynchronizedListener, OnOtpAccountClickListener, OnSelectedGroupChangesListener, OnDataLoadedListener, OnDataFilteredListener, OnCheckForUpdatesListener, OnDataSavedListener, OnAuthenticatorFinishListener, ActivityResultCallback<ActivityResult>, OnClickListener {
+    private static final String LAST_CHECK_FOR_UPDATES_TIME_KEY = "last-check-for-updates-time";
+    private static final long CHECK_FOR_UPDATES_INTERVAL = 12 * DateUtils.HOUR_IN_MILLIS;
+
     private static final String LAST_NOTIFIED_APP_UPDATED_VERSION_KEY = "last-notified-app-updated-version";
     private static final String LAST_NOTIFIED_APP_UPDATED_TIME_KEY = "last-notified-app-updated-time";
     private static final long NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
@@ -170,7 +173,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         mServerIdentitySelector.setOnClickListener(this);
         preferences.edit().remove(Constants.FILTERING_BY_SERVER_IDENTITY_KEY).remove(Constants.FILTERING_BY_GROUP_KEY).apply();
         MainService.startService(this, true);
-        checkForAppUpdates();
+        if (preferences.getLong(LAST_CHECK_FOR_UPDATES_TIME_KEY, 0) + CHECK_FOR_UPDATES_INTERVAL < System.currentTimeMillis()) { checkForAppUpdates(); }
     }
 
     @Override
@@ -377,8 +380,11 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     {
         if (! isFinishedOrFinishing()) {
             final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(this);
+            final SharedPreferences.Editor editor = preferences.edit();
+            final long now = System.currentTimeMillis();
+            editor.putLong(LAST_CHECK_FOR_UPDATES_TIME_KEY, now);
             if ((downloaded_app_version.code != preferences.getInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, 0)) || (preferences.getLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, 0) + NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL < System.currentTimeMillis())) {
-                preferences.edit().putInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, downloaded_app_version.code).putLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, System.currentTimeMillis()).apply();
+                editor.putInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, downloaded_app_version.code).putLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, now);
                 UI.showConfirmDialog(this, getString(R.string.there_is_an_update_version, getString(Main.getInstance().isPreRelease() ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, getString(R.string.app_version_name_value), getResources().getInteger(R.integer.app_version_number_value)), getString(downloaded_app_version.preRelease ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, downloaded_app_version.name, downloaded_app_version.code)), R.string.install_now, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -386,6 +392,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
                     }
                 });
             }
+            editor.apply();
         }
     }
 
