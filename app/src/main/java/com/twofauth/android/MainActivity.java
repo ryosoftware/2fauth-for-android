@@ -375,34 +375,6 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         }
     }
 
-    // Functions related to the search for updates process
-    // If a update is available we show a dialog with info and user decides if update is installed
-    // We do not notify the same update all the time but each time to time
-
-    private void checkForAppUpdates() {
-        if (Preferences.getDefaultSharedPreferences(this).getBoolean(Constants.AUTO_UPDATE_APP_KEY, getResources().getBoolean(R.bool.auto_update_app))) { CheckForAppUpdates.getBackgroundTask(this, this).start(); }
-    }
-
-    public void onCheckForUpdatesFinished(@NotNull final File downloaded_app_file, @NotNull final AppVersionData downloaded_app_version)
-    {
-        if (! isFinishedOrFinishing()) {
-            final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(this);
-            final SharedPreferences.Editor editor = preferences.edit();
-            final long now = System.currentTimeMillis();
-            editor.putLong(LAST_CHECK_FOR_UPDATES_TIME_KEY, now);
-            if ((downloaded_app_version.code != preferences.getInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, 0)) || (preferences.getLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, 0) + NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL < System.currentTimeMillis())) {
-                editor.putInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, downloaded_app_version.code).putLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, now);
-                UI.showConfirmDialog(this, getString(R.string.there_is_an_update_version, getString(Main.getInstance().isPreRelease() ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, getString(R.string.app_version_name_value), getResources().getInteger(R.integer.app_version_number_value)), getString(downloaded_app_version.preRelease ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, downloaded_app_version.name, downloaded_app_version.code)), R.string.install_now, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(FileProvider.getUriForFile(getBaseContext(), getPackageName() + ".provider", downloaded_app_file), "application/vnd.android.package-archive").setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION));
-                    }
-                });
-            }
-            editor.apply();
-        }
-    }
-
     // Events related to the synchronization process
     // When synchronization process ends we launch load data process then change the buttons (related to the sync process) availability
 
@@ -569,5 +541,36 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         else {
             finish();
         }
+    }
+
+    // Functions related to the search for updates process
+    // If a update is available we show a dialog with info and user decides if update is installed
+    // We do not notify the same update all the time but each time to time
+
+    private void checkForAppUpdates() {
+        if (Preferences.getDefaultSharedPreferences(this).getBoolean(Constants.AUTO_UPDATE_APP_KEY, getResources().getBoolean(R.bool.auto_update_app))) { CheckForAppUpdates.getBackgroundTask(this, this).start(); }
+    }
+
+    public void onCheckForUpdatesFinished(@NotNull final File downloaded_app_file, @NotNull final AppVersionData downloaded_app_version)
+    {
+        if (! isFinishedOrFinishing()) { onCheckForUpdatesFinished(this, false, downloaded_app_file, downloaded_app_version); }
+    }
+
+    public static void onCheckForUpdatesFinished(@NotNull final Activity activity, final boolean force, @NotNull final File downloaded_app_file, @NotNull final AppVersionData downloaded_app_version)
+    {
+        final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(activity);
+        final SharedPreferences.Editor editor = preferences.edit();
+        final long now = System.currentTimeMillis();
+        editor.putLong(LAST_CHECK_FOR_UPDATES_TIME_KEY, now);
+        if ((force) || (downloaded_app_version.code != preferences.getInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, 0)) || (preferences.getLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, 0) + NOTIFY_SAME_APP_VERSION_UPDATE_INTERVAL < System.currentTimeMillis())) {
+            editor.putInt(LAST_NOTIFIED_APP_UPDATED_VERSION_KEY, downloaded_app_version.code).putLong(LAST_NOTIFIED_APP_UPDATED_TIME_KEY, now);
+            UI.showConfirmDialog(activity, activity.getString(R.string.there_is_an_update_version, activity.getString(Main.getInstance().isPreRelease() ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, activity.getString(R.string.app_version_name_value), activity.getResources().getInteger(R.integer.app_version_number_value)), activity.getString(downloaded_app_version.preRelease ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, downloaded_app_version.name, downloaded_app_version.code)), R.string.install_now, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    activity.startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(FileProvider.getUriForFile(activity, activity.getPackageName() + ".provider", downloaded_app_file), "application/vnd.android.package-archive").setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION));
+                }
+            });
+        }
+        editor.apply();
     }
 }

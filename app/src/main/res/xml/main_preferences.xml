@@ -62,6 +62,8 @@
 
         <CheckBoxPreference android:key="auto-update-app-only-in-wifi" android:title="@string/auto_update_app_only_in_wifi" android:summary="@string/auto_update_app_only_in_wifi_summary" android:defaultValue="@bool/auto_update_app_only_in_wifi" android:dependency="auto-update-app" />
 
+        <Preference android:key="check-for-updates" android:title="@string/search_for_updates" android:summary="@string/search_for_updates_summary" />
+
         <Preference android:key="open-source-licenses" android:title="@string/open_source_licenses" android:summary="@string/open_source_licenses_summary" />
 
         <Preference android:key="app-version" android:title="@string/app_version" />

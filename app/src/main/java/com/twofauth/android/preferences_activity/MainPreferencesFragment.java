@@ -25,9 +25,12 @@ import com.twofauth.android.Authenticator.OnAuthenticatorFinishListener;
 import com.twofauth.android.Constants;
 import com.twofauth.android.HtmlActivity;
 import com.twofauth.android.Main;
+import com.twofauth.android.MainActivity;
 import com.twofauth.android.PreferencesActivity;
 import com.twofauth.android.R;
 import com.twofauth.android.api_tasks.ResetAccountsLastUsage;
+import com.twofauth.android.main_activity.tasks.CheckForAppUpdates;
+import com.twofauth.android.main_activity.tasks.CheckForAppUpdates.OnCheckForUpdatesListener;
 import com.twofauth.android.utils.Preferences;
 import com.twofauth.android.utils.UI;
 import com.twofauth.android.utils.Vibrator;
@@ -42,11 +45,12 @@ import com.twofauth.android.api_tasks.ResetAccountsLastUsage.OnAccountsLastUsage
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainPreferencesFragment extends PreferenceFragmentCompat implements OnServerIdentitiesLoadedListener, OnAccountsLastUsageDoneListener, OnAuthenticatorFinishListener, OnPinRequestFinishedListener, OnBiometricAuthenticationFinishedListener, OnPreferenceClickListener, OnPreferenceChangeListener, FragmentResultListener {
+public class MainPreferencesFragment extends PreferenceFragmentCompat implements OnServerIdentitiesLoadedListener, OnCheckForUpdatesListener,  OnAccountsLastUsageDoneListener, OnAuthenticatorFinishListener, OnPinRequestFinishedListener, OnBiometricAuthenticationFinishedListener, OnPreferenceClickListener, OnPreferenceChangeListener, FragmentResultListener {
     public static enum Theme { LIGHT, DARK };
 
     public static final String SERVER_IDENTITIES_CHANGED = "server-identities-changed";
@@ -55,6 +59,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     private static final String RESET_ACCOUNTS_LAST_USE_KEY = "reset-accounts-last-use-data";
     private static final String PIN_ACCESS_ENABLED_KEY = "pin-access";
     private static final String GITHUB_REPO_KEY = "github-repo";
+    private static final String CHECK_FOR_UPDATES_KEY = "check-for-updates";
     private static final String OPEN_SOURCE_LICENSES_KEY = "open-source-licenses";
     private static final String APP_VERSION_KEY = "app-version";
 
@@ -165,6 +170,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.AUTO_UPDATE_APP_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.AUTO_UPDATE_APP_INCLUDE_PRERELEASES_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.AUTO_UPDATE_APP_ONLY_IN_WIFI_KEY).setOnPreferenceChangeListener(this);
+        findPreference(CHECK_FOR_UPDATES_KEY).setOnPreferenceClickListener(this);
         findPreference(OPEN_SOURCE_LICENSES_KEY).setOnPreferenceClickListener(this);
         String app_version = getString(Main.getInstance().isPreRelease() ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, getString(R.string.app_version_name_value), resources.getInteger(R.integer.app_version_number_value));
         if (Main.getInstance().isDebugRelease()) { app_version = getString(R.string.app_version_is_debug_release, app_version); }
@@ -224,6 +230,10 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         else if (GITHUB_REPO_KEY.equals(preference.getKey())) {
             HtmlActivity.openInWebBrowser(getActivity(), Constants.GITHUB_REPO);
         }
+        else if (CHECK_FOR_UPDATES_KEY.equals(preference.getKey())) {
+            preference.setEnabled(false);
+            CheckForAppUpdates.getBackgroundTask(getContext(), true, this);
+        }
         else if (OPEN_SOURCE_LICENSES_KEY.equals(preference.getKey())) {
             startActivity(new Intent(context, HtmlActivity.class).putExtra(HtmlActivity.EXTRA_FILE_PATHNAME, "file:///android_asset/open-source-licenses.html"));
             return true;
@@ -264,6 +274,13 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         }
         onSettingValueChanged(preference.getKey());
         return true;
+    }
+
+    // Called when a update is available
+
+    @Override
+    public void onCheckForUpdatesFinished(File downloaded_app_file, CheckForAppUpdates.AppVersionData downloaded_app_version) {
+        if (isAdded()) { MainActivity.onCheckForUpdatesFinished(getActivity(), true, downloaded_app_file, downloaded_app_version); }
     }
 
     // This procedure is triggered when user tries to disable PIN access and has been properly authenticated
