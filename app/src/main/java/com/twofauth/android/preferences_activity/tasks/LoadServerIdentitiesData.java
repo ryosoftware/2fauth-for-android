@@ -78,8 +78,11 @@ public class LoadServerIdentitiesData {
                 final SQLiteDatabase database = Main.getInstance().getDatabaseHelper().open(false);
                 if (database != null) {
                     try {
-                        for (final TwoFactorServerIdentity server_identity : Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(database)) {
-                            mServerIdentities.add(new TwoFactorServerIdentityWithSyncDataAndAccountNumbers(database, server_identity));
+                        final List<TwoFactorServerIdentity> server_identities = Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(database);
+                        if (server_identities != null) {
+                            for (final TwoFactorServerIdentity server_identity : server_identities) {
+                                mServerIdentities.add(new TwoFactorServerIdentityWithSyncDataAndAccountNumbers(database, server_identity));
+                            }
                         }
                         mSuccess = true;
                     }

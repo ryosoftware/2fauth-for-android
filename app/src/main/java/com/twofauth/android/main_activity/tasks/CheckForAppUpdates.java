@@ -87,10 +87,12 @@ public class CheckForAppUpdates {
 
     private static class CheckForAppUpdatesImplementation implements Main.OnBackgroundTaskExecutionListener {
         private final Context mContext;
+        private final boolean mForce;
         private final OnCheckForUpdatesListener mListener;
 
-        public CheckForAppUpdatesImplementation(@NotNull final Context context, @NotNull final OnCheckForUpdatesListener listener) {
+        public CheckForAppUpdatesImplementation(@NotNull final Context context, final boolean force, @NotNull final OnCheckForUpdatesListener listener) {
             mContext = context;
+            mForce = force;
             mListener = listener;
         }
 
@@ -197,7 +199,7 @@ public class CheckForAppUpdates {
                 final Resources resources = mContext.getResources();
                 if (! Main.getInstance().isDebugRelease()) {
                     final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(mContext);
-                    if ((! preferences.getBoolean(Constants.AUTO_UPDATE_APP_ONLY_IN_WIFI_KEY, resources.getBoolean(R.bool.auto_update_app_only_in_wifi))) || Network.isWifiConnected(mContext)) {
+                    if (mForce || (! preferences.getBoolean(Constants.AUTO_UPDATE_APP_ONLY_IN_WIFI_KEY, resources.getBoolean(R.bool.auto_update_app_only_in_wifi))) || Network.isWifiConnected(mContext)) {
                         final File apk_local_file = getApkLocalFile();
                         final JSONObject object = getLatestReleaseData(preferences.getBoolean(Constants.AUTO_UPDATE_APP_INCLUDE_PRERELEASES_KEY, resources.getBoolean(R.bool.auto_update_app_include_prereleases)), true);
                         if (object != null) {
@@ -236,7 +238,11 @@ public class CheckForAppUpdates {
         }
     }
 
+    public static @NotNull Thread getBackgroundTask(@NotNull final Context context, final boolean force, @NotNull final OnCheckForUpdatesListener listener) {
+        return Main.getInstance().getBackgroundTask(new CheckForAppUpdatesImplementation(context, force, listener));
+    }
+
     public static @NotNull Thread getBackgroundTask(@NotNull final Context context, @NotNull final OnCheckForUpdatesListener listener) {
-        return Main.getInstance().getBackgroundTask(new CheckForAppUpdatesImplementation(context, listener));
+        return getBackgroundTask(context, false, listener);
     }
 }
