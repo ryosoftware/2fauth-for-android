@@ -188,6 +188,9 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     // On hide, we lock the app then, if activity is not being finish, we hide accounts (and header and list index)
 
     @Override
+    public void onResumeFirstTime() { loadData(); }
+
+    @Override
     public void onResume() {
         super.onResume();
         if (MainService.getLastSyncTime(this) > mLastLoadTime) { loadData(); }
@@ -420,7 +423,11 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     }
 
     @Override
-    public void onDataLoadError() {}
+    public void onDataLoadError() {
+        int i = 0;
+        int j = i;
+        int k = j;
+    }
 
     @Override
     public void onDataLoadSuccess(@Nullable final List<TwoFactorServerIdentity> server_identities, @Nullable final Map<Long, List<TwoFactorGroup>> groups, @Nullable final Map<Long, List<TwoFactorAccount>> accounts, final boolean alpha_sorted_accounts) {
