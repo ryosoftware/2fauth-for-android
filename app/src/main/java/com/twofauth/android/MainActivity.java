@@ -400,11 +400,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     }
 
     @Override
-    public void onDataLoadError() {
-        int i = 0;
-        int j = i;
-        int k = j;
-    }
+    public void onDataLoadError() {}
 
     @Override
     public void onDataLoadSuccess(@Nullable final List<TwoFactorServerIdentity> server_identities, @Nullable final Map<Long, List<TwoFactorGroup>> groups, @Nullable final Map<Long, List<TwoFactorAccount>> accounts, final boolean alpha_sorted_accounts) {

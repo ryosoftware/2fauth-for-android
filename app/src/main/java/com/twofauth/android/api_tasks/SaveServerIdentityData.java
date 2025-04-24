@@ -1,12 +1,15 @@
 package com.twofauth.android.api_tasks;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorServerIdentity;
 import com.twofauth.android.preferences_activity.tasks.LoadServerIdentitiesData.TwoFactorServerIdentityWithSyncDataAndAccountNumbers;
+import com.twofauth.android.utils.Preferences;
 import com.twofauth.android.utils.Strings;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
@@ -43,8 +46,9 @@ public class SaveServerIdentityData {
                 if (database != null) {
                     try {
                         if (Main.getInstance().getDatabaseHelper().beginTransaction(database)) {
+                            final boolean in_database = mServerIdentity.storedData.inDatabase();
                             try {
-                                final TwoFactorServerIdentity stored_server_identity = mServerIdentity.storedData.inDatabase() ? Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(mServerIdentity.storedData.getRowId()) : null;
+                                final TwoFactorServerIdentity stored_server_identity = in_database ? Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(mServerIdentity.storedData.getRowId()) : null;
                                 final boolean is_server_or_token_changed = ((stored_server_identity != null) && ((! Strings.equals(mServerIdentity.storedData.getServer(), stored_server_identity.getServer())) || (! Strings.equals(mServerIdentity.storedData.getToken(), stored_server_identity.getToken()))));
                                 if (is_server_or_token_changed) {
                                     final List<TwoFactorAccount> accounts = Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().get(mServerIdentity.storedData, false);
@@ -60,6 +64,7 @@ public class SaveServerIdentityData {
                             }
                             finally {
                                 Main.getInstance().getDatabaseHelper().endTransaction(database, mSuccess);
+                                if (! in_database) { final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(mContext); preferences.edit().putInt(Constants.SERVER_IDENTITIES_COUNT_KEY, preferences.getInt(Constants.SERVER_IDENTITIES_COUNT_KEY, 0) + 1).apply(); }
                             }
                         }
                     }

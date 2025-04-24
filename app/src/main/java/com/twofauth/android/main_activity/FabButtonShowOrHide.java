@@ -154,7 +154,7 @@ public class FabButtonShowOrHide {
         }
         if (set_visibility_according_to_current_state && (floating_action_buttons != null)) {
             for (final FloatingActionButton button : floating_action_buttons) {
-                if (! mFloatingActionButtons.contains(button)) { setViewVisibility(button); }
+                setViewVisibility(button);
             }
         }
         Lists.setItems(mFloatingActionButtons, floating_action_buttons);
@@ -170,7 +170,7 @@ public class FabButtonShowOrHide {
         }
         if (set_visibility_according_to_current_state && (other_views != null)) {
             for (final View view : other_views) {
-                if (! mOtherViews.contains(view)) { setViewVisibility(view); }
+                setViewVisibility(view);
             }
         }
         Lists.setItems(mOtherViews, other_views);

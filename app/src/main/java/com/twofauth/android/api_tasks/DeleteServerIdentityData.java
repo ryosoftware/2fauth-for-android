@@ -1,12 +1,15 @@
 package com.twofauth.android.api_tasks;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.preferences_activity.tasks.LoadServerIdentitiesData.TwoFactorServerIdentityWithSyncDataAndAccountNumbers;
+import com.twofauth.android.utils.Preferences;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
 
@@ -60,7 +63,9 @@ public class DeleteServerIdentityData {
                                 mServerIdentity.onDataDeleted(mContext);
                             }
                             finally {
+                                final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(mContext);
                                 Main.getInstance().getDatabaseHelper().endTransaction(database, mSuccess);
+                                preferences.edit().putInt(Constants.SERVER_IDENTITIES_COUNT_KEY, preferences.getInt(Constants.SERVER_IDENTITIES_COUNT_KEY, 1) - 1).apply();
                             }
                         }
                     }

@@ -232,7 +232,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         }
         else if (CHECK_FOR_UPDATES_KEY.equals(preference.getKey())) {
             preference.setEnabled(false);
-            CheckForAppUpdates.getBackgroundTask(getContext(), true, this);
+            CheckForAppUpdates.getBackgroundTask(getContext(), true, this).start();
         }
         else if (OPEN_SOURCE_LICENSES_KEY.equals(preference.getKey())) {
             startActivity(new Intent(context, HtmlActivity.class).putExtra(HtmlActivity.EXTRA_FILE_PATHNAME, "file:///android_asset/open-source-licenses.html"));
