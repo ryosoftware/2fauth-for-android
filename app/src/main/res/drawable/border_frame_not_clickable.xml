@@ -5,9 +5,9 @@
 
     <item
         android:state_selected="true"
-        android:drawable="@drawable/border_frame_solid" />
+        android:drawable="@drawable/border_frame_selected" />
 
     <item
-        android:drawable="@drawable/border_frame_transparent" />
+        android:drawable="@drawable/border_frame" />
 
 </selector>

@@ -12,7 +12,6 @@ import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.main_activity.AppearanceOptions;
-import com.twofauth.android.utils.UI;
 import com.twofauth.android.utils.Vibrator;
 
 import org.jetbrains.annotations.NotNull;
@@ -36,9 +35,7 @@ public class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     public void draw(@NotNull final Context context, @NotNull final TwoFactorGroup group, final boolean is_active, @NotNull final AppearanceOptions options) {
-        final Resources resources = context.getResources();
         mGroup.setText(options.getServerIdentityAndGroupNames(context, group));
-        mGroup.setTextColor(is_active ? resources.getColor(R.color.accent_foreground, context.getTheme()) : UI.getSystemColor(context, android.R.attr.textColorSecondary));
         mGroup.setSelected(is_active);
     }
 

@@ -41,14 +41,14 @@ public class ToggleAccountDataDeletionState {
             if (mAccount.getRemoteId() == 0) { mAccount.delete(database, mContext); }
             else { mAccount.save(database, mContext); }
             mSuccess = true;
-            mSynced = ((mAccount.getRemoteId() == 0) || (mAccount.getServerIdentity().isSyncingImmediately() && API.syncAccount(database, mContext, mAccount, true)));
+            mSynced = ((mAccount.getRemoteId() == 0) || (mAccount.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, mAccount, true)));
         }
 
         private void undelete(@NotNull final SQLiteDatabase database) throws Exception {
             mAccount.setStatus(TwoFactorAccount.STATUS_DEFAULT);
             mAccount.save(database, mContext);
             mSuccess = true;
-            mSynced = (mAccount.getServerIdentity().isSyncingImmediately() && API.syncAccount(database, mContext, mAccount, true));
+            mSynced = (mAccount.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, mAccount, true));
         }
 
         @Override

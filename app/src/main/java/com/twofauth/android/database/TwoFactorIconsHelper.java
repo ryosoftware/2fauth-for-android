@@ -1,9 +1,11 @@
 package com.twofauth.android.database;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 
 import com.twofauth.android.DatabaseHelper;
+import com.twofauth.android.utils.Lists;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
 
@@ -11,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TwoFactorIconsHelper extends TableHelper<TwoFactorIcon> {
@@ -46,6 +49,33 @@ public class TwoFactorIconsHelper extends TableHelper<TwoFactorIcon> {
 
     public @Nullable TwoFactorIcon get(final long id) throws Exception {
         return super.get(id);
+    }
+
+    @SuppressLint("DefaultLocale")
+    public @Nullable List<TwoFactorIcon> get(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorServerIdentity server_identity, final boolean only_not_synced_icons) throws Exception {
+        final StringBuilder query = new StringBuilder();
+        query.append("SELECT ");
+        for (int i = 0; i < TwoFactorIcon.PROJECTION.length; i ++) {
+            if (i > 0) { query.append(", "); }
+            query.append(String.format("%s.%s", TABLE_NAME, TwoFactorIcon.PROJECTION[i]));
+        }
+        query.append(String.format(" FROM %s JOIN %s ON %s.%s=%s.%s WHERE %s.%s=?", TwoFactorAccountsHelper.TABLE_NAME, TABLE_NAME, TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.ICON, TABLE_NAME, TwoFactorIcon.ROW_ID, TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.SERVER_IDENTITY));
+        if (only_not_synced_icons) { query.append(String.format(" AND %s.%s IS NULL", TABLE_NAME, TwoFactorIcon.SOURCE)); }
+        try (final Cursor cursor = database.rawQuery(query.toString(), new String[] { String.valueOf(server_identity.getRowId()) })) {
+            if ((cursor != null) && (cursor.getCount() > 0) && cursor.moveToFirst()) {
+                final List<TwoFactorIcon> icons = new ArrayList<TwoFactorIcon>();
+                while (! cursor.isAfterLast()) {
+                    icons.add(new TwoFactorIcon(cursor));
+                    cursor.moveToNext();
+                }
+                return icons;
+            }
+        }
+        return null;
+    }
+
+    public @Nullable List<TwoFactorIcon> get(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorServerIdentity server_identity) throws Exception {
+        return get(database, server_identity, false);
     }
 
     private void deleteFiles(@NotNull final Context context) {

@@ -9,6 +9,7 @@ import android.util.Log;
 import com.twofauth.android.API;
 import com.twofauth.android.utils.Bitmaps;
 import com.twofauth.android.Main;
+import com.twofauth.android.utils.Files;
 import com.twofauth.android.utils.Strings;
 import com.twofauth.android.utils.UI;
 
@@ -64,11 +65,20 @@ public class TwoFactorIcon extends TableRow {
         mSourceId = null;
     }
 
+    public boolean isReferenced(@NotNull final SQLiteDatabase database) {
+        try (final Cursor cursor = database.query(true, TwoFactorAccountsHelper.TABLE_NAME, new String[] { "COUNT(*)" }, String.format("%s=?", TwoFactorAccount.ICON), new String[] { String.valueOf(_id) }, null, null, null, null, null)) {
+            if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) {
+                return cursor.getInt(0) > 0;
+            }
+        }
+        return false;
+    }
+
     public String getSource() {
         return mSource;
     }
 
-    private void setSource(@Nullable final String source) {
+    public void setSource(@Nullable final String source) {
         if (! Strings.equals(mSource, source)) { setDirty(SOURCE, mSource = source); }
     }
 
@@ -76,7 +86,7 @@ public class TwoFactorIcon extends TableRow {
         return mSourceId;
     }
 
-    private void setSourceId(@Nullable final String source_id) {
+    public void setSourceId(@Nullable final String source_id) {
         if (! Strings.equals(mSourceId, source_id)) { setDirty(SOURCE_ID, mSourceId = source_id); }
     }
 
@@ -161,6 +171,20 @@ public class TwoFactorIcon extends TableRow {
         return (bitmap == null) ? getBitmap(context, null) : bitmap;
     }
 
+    public boolean hasBitmaps(@NotNull final Context context) {
+        if ((mBitmapThemeNoneDirty) && (mStoreableBitmapThemeNone != null)) { return true; }
+        else if ((! mBitmapThemeNoneDirty) && Files.exists(getBitmapFile(context, null))) { return true; }
+        if ((mBitmapThemeDarkDirty) && (mStoreableBitmapThemeDark != null)) { return true; }
+        else if ((! mBitmapThemeDarkDirty) && Files.exists(getBitmapFile(context, BitmapTheme.DARK))) { return true; }
+        if ((mBitmapThemeLightDirty) && (mStoreableBitmapThemeLight != null)) { return true; }
+        else if ((! mBitmapThemeLightDirty) && Files.exists(getBitmapFile(context, BitmapTheme.LIGHT))) { return true; }
+        return false;
+    }
+
+    public boolean isSynced() {
+        return getSource() != null;
+    }
+
     @Override
     public boolean isDirty() {
         return super.isDirty() || mBitmapThemeNoneDirty || mBitmapThemeDarkDirty || mBitmapThemeLightDirty;
@@ -200,18 +224,6 @@ public class TwoFactorIcon extends TableRow {
         for (final BitmapTheme theme : new BitmapTheme[] { null, BitmapTheme.DARK, BitmapTheme.LIGHT }) {
             final File file = getBitmapFile(context, theme);
             if (file != null) { file.delete(); }
-        }
-    }
-
-    @Override
-    public synchronized void delete(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {
-        if (API.ICON_SOURCE_DEFAULT.equals(getSource()) && (! Strings.isEmptyOrNull(getSourceId()))) {
-            deleteFiles(context);
-            setSource(null);
-            save(database, context);
-        }
-        else if ((getSource() != null) || Strings.isEmptyOrNull(getSourceId())) {
-            super.delete(database, context);
         }
     }
 

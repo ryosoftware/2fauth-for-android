@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -17,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -24,6 +28,8 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.twofauth.android.Authenticator.OnAuthenticatorFinishListener;
@@ -74,13 +80,20 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             return null;
         }
 
+        private static void setColors(@NotNull final Context context, @NotNull final Button button) {
+            final Resources resources = context.getResources();
+            final Theme theme = context.getTheme();
+            final boolean is_selected = button.isSelected(), is_enabled = button.isEnabled();
+            button.setBackgroundColor(resources.getColor(is_selected ? is_enabled ? R.color.otp_attribute_background_selected : R.color.otp_attribute_background_disabled_selected : is_enabled ? R.color.otp_attribute_background : R.color.otp_attribute_background_disabled, theme));
+            button.setTextColor(resources.getColor(is_selected ? is_enabled ? R.color.otp_attribute_foreground_selected : R.color.otp_attribute_foreground_disabled_selected :  is_enabled ? R.color.otp_attribute_foreground : R.color.otp_attribute_foreground_disabled, theme));
+        }
+
         public static void setSelected(@NotNull final Context context, @NotNull final ViewGroup container, @Nullable final String tag) {
-            final int accent_foreground = context.getResources().getColor(R.color.accent_foreground, context.getTheme()), text_color_secondary = UI.getSystemColor(context, android.R.attr.textColorSecondary);
             for (int i = 0; i < container.getChildCount(); i ++) {
-                final View view = container.getChildAt(i);
-                final boolean is_selected = Objects.equals(tag, view.getTag());
-                view.setSelected(is_selected);
-                ((TextView) view).setTextColor(is_selected ? accent_foreground : text_color_secondary);
+                final Button button = (Button) container.getChildAt(i);
+                final boolean is_selected = Objects.equals(tag, button.getTag());
+                button.setSelected(is_selected);
+                setColors(context, button);
             }
         }
 
@@ -90,9 +103,11 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             return tag;
         }
 
-        public static void setEnabled(@NotNull final ViewGroup container, final boolean enable) {
+        public static void setEnabled(@NotNull final Context context, @NotNull final ViewGroup container, final boolean enable) {
             for (int i = 0; i < container.getChildCount(); i ++) {
-                container.getChildAt(i).setEnabled(enable);
+                final Button button = (Button) container.getChildAt(i);
+                button.setEnabled(enable);
+                setColors(context, button);
             }
         }
     }
@@ -156,23 +171,25 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
 
     private ImageView mIconImageView;
     private TextView mIconSourceTextView;
+    private Button mSelectIconButton;
+    private Button mDeleteIconButton;
+    private Button mCopyIconToServerButton;
     private View mServerIdentityContainer;
     private Spinner mServerIdentitySpinner;
     private EditText mServiceEditText;
     private EditText mAccountEditText;
     private Spinner mGroupSpinner;
-    private View mAddGroupButton;
     private ViewGroup mOtpTypeContainer;
     private EditText mSecretEditText;
-    private View mCopySecretButton;
+    private Button mCopySecretButton;
     private ViewGroup mDigitsContainer;
     private ViewGroup mAlgorithmContainer;
     private View mPeriodContainer;
     private EditText mPeriodEditText;
     private View mCounterContainer;
     private EditText mCounterEditText;
-    private View mShowAdvancedDataButton;
-    private View mAdvancedDataLayout;
+    private Button mToggleOtpGenerationAttributesButton;
+    private View mOtpAttributesLayout;
     private FloatingActionButton mEditOrSaveAccountDataButton;
     private FloatingActionButton mDeleteOrUndeleteAccountDataButton;
     private FloatingActionButton mCloneAccountDataButton;
@@ -194,9 +211,14 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mAuthenticator = new Authenticator(this);
         setResult(Activity.RESULT_CANCELED);
         setContentView(R.layout.edit_account_data_activity);
-        mIconSourceTextView = (TextView) findViewById(R.id.icon_source);
         mIconImageView = (ImageView) findViewById(R.id.icon);
-        mIconImageView.setOnClickListener(this);
+        mIconSourceTextView = (TextView) findViewById(R.id.icon_source);
+        mSelectIconButton = (Button) findViewById(R.id.select_icon);
+        mSelectIconButton.setOnClickListener(this);
+        mDeleteIconButton = (Button) findViewById(R.id.delete_icon);
+        mDeleteIconButton.setOnClickListener(this);
+        mCopyIconToServerButton = (Button) findViewById(R.id.copy_icon_to_server);
+        mCopyIconToServerButton.setOnClickListener(this);
         mServerIdentityContainer = findViewById(R.id.server_identity_layout);
         mServerIdentitySpinner = (Spinner) findViewById(R.id.server_identity_selector);
         mServerIdentitySpinner.setOnItemSelectedListener(this);
@@ -206,13 +228,11 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mAccountEditText.addTextChangedListener(this);
         mGroupSpinner = (Spinner) findViewById(R.id.group);
         mGroupSpinner.setOnItemSelectedListener(this);
-        mAddGroupButton = findViewById(R.id.add_group);
-        mAddGroupButton.setOnClickListener(this);
         mOtpTypeContainer = (ViewGroup) findViewById(R.id.otp_types_container);
         ViewUtils.setChildrenViewsOnClickListener(mOtpTypeContainer, this);
         mSecretEditText = (EditText) findViewById(R.id.secret);
         mSecretEditText.addTextChangedListener(this);
-        mCopySecretButton = findViewById(R.id.copy_secret);
+        mCopySecretButton = (Button) findViewById(R.id.copy_secret);
         mCopySecretButton.setOnClickListener(this);
         mDigitsContainer = (ViewGroup) findViewById(R.id.digits_container);
         ViewUtils.setChildrenViewsOnClickListener(mDigitsContainer, this);
@@ -224,10 +244,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mCounterContainer = findViewById(R.id.counter_block_container);
         mCounterEditText = (EditText) findViewById(R.id.counter);
         mCounterEditText.addTextChangedListener(this);
-        mShowAdvancedDataButton = findViewById(R.id.show_advanced_data);
-        mShowAdvancedDataButton.setOnClickListener(this);
-        mAdvancedDataLayout = findViewById(R.id.advanced_data_layout);
-        mAdvancedDataLayout.setVisibility(View.GONE);
+        mToggleOtpGenerationAttributesButton = (Button) findViewById(R.id.toggle_otp_generation_attributes_visualization);
+        mToggleOtpGenerationAttributesButton.setOnClickListener(this);
+        mOtpAttributesLayout = findViewById(R.id.otp_generation_attributes_layout);
         mEditOrSaveAccountDataButton = (FloatingActionButton) findViewById(R.id.edit_or_save_account_data);
         mEditOrSaveAccountDataButton.setOnClickListener(this);
         mDeleteOrUndeleteAccountDataButton = (FloatingActionButton) findViewById(R.id.delete_or_undelete_account_data);
@@ -282,12 +301,14 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     @Override
     public void onAuthenticationSuccess(Object object) {
         final AuthenticatedActions action = (AuthenticatedActions) object;
-        if (action == AuthenticatedActions.SHOW_ADVANCED_DATA) { showAdvancedData(); }
+        if (action == AuthenticatedActions.SHOW_ADVANCED_DATA) { setShowOtpAttributesVisibility(true); }
         else if (action == AuthenticatedActions.COPY_SECRET_CODE_TO_CLIPBOARD) { copySecretToClipboard(); }
         else if (action == AuthenticatedActions.DELETE_ACCOUNT) { onDeleteOrUndeleteDataConfirmed(); }
         else if (action == AuthenticatedActions.SHOW_QR) { UI.showBase64ImageDialog(getActivity(), mAccountQR); }
         else if (action == AuthenticatedActions.ENABLE_ACCOUNT_EDITION) { enableEdition(); }
     }
+
+    // Enable or disable edition
 
     private void enableEdition() {
         UI.animateIconChange(mEditOrSaveAccountDataButton, R.drawable.ic_actionbar_accept, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, true);
@@ -300,6 +321,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         UI.animateShowOrHide(mToggleSubmenuVisibilityButton, true, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
         mEditing = false;
     }
+
+    // Copy secret code to clipboard
+
     private void copySecretToClipboard() {
         if (! isFinishedOrFinishing()) {
             Clipboard.copy(this, mCurrentAccountData.getSecret(), true, null);
@@ -360,7 +384,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mEditOrSaveAccountDataButton.setEnabled(buttons_available && (! mCurrentAccountData.isDeleted()) && ((! mEditing) || (isValid() && (isChanged() || (! mCurrentAccountData.inDatabase())))));
         mToggleSubmenuVisibilityButton.setEnabled(buttons_available);
         mDeleteOrUndeleteAccountDataButton.setEnabled(buttons_available);
-        mCloneAccountDataButton.setEnabled(buttons_available && mCurrentAccountData.inDatabase());
+        mCloneAccountDataButton.setEnabled(buttons_available && mCurrentAccountData.inDatabase() && (! mCurrentAccountData.isDeleted()));
         mShowQRCodeButton.setEnabled(buttons_available && (mCurrentAccountData.getRemoteId() != 0) && (! isChanged()));
     }
 
@@ -370,47 +394,19 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     public void onClick(final View view) {
         final int view_id = view.getId();
         Vibrator.vibrate(this, Constants.NORMAL_HAPTIC_FEEDBACK);
-        if (view_id == R.id.icon) {
-            startActivityFromIntent(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI));
-        }
-        else if (view_id == R.id.show_advanced_data) {
-            showOrHideAdvancedData();
-        }
-        else if (view_id == R.id.otp_type) {
-            setOtpTypeDependencies((String) view.getTag());
-            mCurrentAccountData.setOtpType(ViewUtils.setSelected(this, view));
-            setButtonsAvailability();
-        }
-        else if (view_id == R.id.digit) {
-            mCurrentAccountData.setOtpLength(Integer.parseInt(ViewUtils.setSelected(this, view)));
-            setButtonsAvailability();
-        }
-        else if (view_id == R.id.algorithm) {
-            mCurrentAccountData.setAlgorithm(ViewUtils.setSelected(this, view));
-            setButtonsAvailability();
-        }
-        else if (view_id == R.id.add_group) {
-            addGroup();
-        }
-        else if (view_id == R.id.copy_secret) {
-            mAuthenticator.authenticate(this, AuthenticatedActions.COPY_SECRET_CODE_TO_CLIPBOARD);
-        }
-        else if (view_id == R.id.edit_or_save_account_data) {
-            if (mEditing) { saveData(); }
-            else { mAuthenticator.authenticate(this, AuthenticatedActions.ENABLE_ACCOUNT_EDITION); }
-        }
-        else if (view_id == R.id.toggle_submenu) {
-            UI.animateSubmenuOpenOrClose(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, mSubmenuButtons);
-        }
-        else if (view_id == R.id.delete_or_undelete_account_data) {
-            deleteOrUnDeleteData();
-        }
-        else if (view_id == R.id.clone_account_data) {
-            cloneAccountData();
-        }
-        else if (view_id == R.id.show_qr_code) {
-            showQR();
-        }
+        if (view_id == R.id.select_icon) { startActivityFromIntent(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)); }
+        else if (view_id == R.id.delete_icon) { deleteIcon(); }
+        else if (view_id == R.id.copy_icon_to_server) { copyIconToServer(); }
+        else if (view_id == R.id.toggle_otp_generation_attributes_visualization) { toggleOtpAttributesVisibility(); }
+        else if (view_id == R.id.otp_type) { setOtpTypeDependencies((String) view.getTag()); mCurrentAccountData.setOtpType(ViewUtils.setSelected(this, view)); setButtonsAvailability(); }
+        else if (view_id == R.id.digit) { mCurrentAccountData.setOtpLength(Integer.parseInt(ViewUtils.setSelected(this, view))); setButtonsAvailability(); }
+        else if (view_id == R.id.algorithm) { mCurrentAccountData.setAlgorithm(ViewUtils.setSelected(this, view)); setButtonsAvailability(); }
+        else if (view_id == R.id.copy_secret) { mAuthenticator.authenticate(this, AuthenticatedActions.COPY_SECRET_CODE_TO_CLIPBOARD); }
+        else if (view_id == R.id.edit_or_save_account_data) { if (mEditing) { saveData(); }  else { mAuthenticator.authenticate(this, AuthenticatedActions.ENABLE_ACCOUNT_EDITION); } }
+        else if (view_id == R.id.toggle_submenu) { UI.animateSubmenuOpenOrClose(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, mSubmenuButtons); }
+        else if (view_id == R.id.delete_or_undelete_account_data) { deleteOrUnDeleteData(); }
+        else if (view_id == R.id.clone_account_data) { cloneAccountData(); }
+        else if (view_id == R.id.show_qr_code) { showQR(); }
     }
 
     @Override
@@ -439,8 +435,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             }
         }
         else if (view_id == R.id.group) {
-            final List<TwoFactorGroup> groups = getGroupsBySelectedServerIdentity();
-            mCurrentAccountData.setGroup(((position <= 0) || (groups == null)) ? null : groups.get(position - 1));
+            if (position <= 0) { mCurrentAccountData.setGroup(null); }
+            else if (position == 1) { addGroup(); }
+            else { mCurrentAccountData.setGroup(getGroupsBySelectedServerIdentity().get(position - 2)); }
         }
         setButtonsAvailability();
     }
@@ -456,13 +453,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             try {
                 final Bitmap bitmap = Bitmaps.cropToSquare(this, result.getData().getData(), null);
                 if (bitmap == null) { throw new Exception("Cannot load or crop image"); }
-                mIconImageView.setImageBitmap(bitmap);
-                if (! mCurrentAccountData.hasIcon()) { mCurrentAccountData.setIcon(new TwoFactorIcon()); }
-                final TwoFactorIcon icon = mCurrentAccountData.getIcon();
-                icon.setSourceData(null, null);
-                icon.setBitmaps(bitmap, null, null);
-                mIconSourceTextView.setVisibility(View.GONE);
-                setButtonsAvailability();
+                setIcon(bitmap);
             }
             catch (Exception e) {
                 UI.showToast(this, R.string.cannot_load_selected_image);
@@ -471,28 +462,52 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         }
     }
 
+    private void setIcon(@NotNull final Bitmap bitmap) {
+        if (! mCurrentAccountData.hasIcon()) { mCurrentAccountData.setIcon(new TwoFactorIcon()); }
+        final TwoFactorIcon icon = mCurrentAccountData.getIcon();
+        icon.setSource(null);
+        icon.setBitmaps(bitmap, null, null);
+        mIconSourceTextView.setText(R.string.icon_source_local_storage);
+        mIconImageView.setImageBitmap(bitmap);
+        for (final View view : new View[] { mIconSourceTextView, mDeleteIconButton, mIconImageView }) { view.setVisibility(View.VISIBLE); }
+        mCopyIconToServerButton.setVisibility(View.GONE);
+        setButtonsAvailability();
+    }
+
+    private void deleteIcon() {
+        final TwoFactorIcon icon = mCurrentAccountData.getIcon();
+        icon.setSource(null);
+        icon.setBitmaps((Bitmap) null, (Bitmap) null, (Bitmap) null);
+        for (final View view : new View[] { mIconSourceTextView, mDeleteIconButton, mCopyIconToServerButton, mIconImageView }) { view.setVisibility(View.GONE); }
+        setButtonsAvailability();
+    }
+
+    private void copyIconToServer() {
+        mCurrentAccountData.getIcon().setSourceId(null);
+        setIcon(mCurrentAccountData.getIcon().getBitmap(this));
+    }
+
     // Set initial form values and state
 
     private void setSelectableGroups() {
         final List<TwoFactorGroup> groups = getGroupsBySelectedServerIdentity();
         final List<String> groups_names = new ArrayList<String>();
-        Lists.setItems(groups_names, new String[] { getString(R.string.no_group) }, TwoFactorGroupsUtils.getNames(this, groups));
+        Lists.setItems(groups_names, new String[] { getString(R.string.no_group), getString(R.string.add_group) }, TwoFactorGroupsUtils.getNames(this, groups));
         final ArrayAdapter<String> groups_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, groups_names);
         groups_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mGroupSpinner.setAdapter(groups_adapter);
-        mGroupSpinner.setSelection(TwoFactorGroupsUtils.indexOf(groups, mCurrentAccountData.hasGroup() ? mCurrentAccountData.getGroup().getRowId() : -1) + 1);
+        final int selected_group_index = TwoFactorGroupsUtils.indexOf(groups, mCurrentAccountData.hasGroup() ? mCurrentAccountData.getGroup().getRowId() : -1);
+        mGroupSpinner.setSelection(selected_group_index < 0 ? 0 : selected_group_index + 2);
     }
 
     private void setEditableAccountData() {
-        if (mCurrentAccountData.hasIcon()) {
-            final Bitmap bitmap = mCurrentAccountData.getIcon().getBitmap(this, null);
-            if (bitmap != null) {
-                mIconImageView.setImageBitmap(bitmap);
-                mIconImageView.setBackground(null);
-                mIconSourceTextView.setText(API.ICON_SOURCE_DEFAULT.equals(mCurrentAccountData.getIcon().getSource()) ? getString(R.string.icon_source_bubka) : API.ICON_SOURCE_DASHBOARD.equals(mCurrentAccountData.getIcon().getSource()) ? getString(R.string.icon_source_dashboard_icons) : null);
-            }
-        }
-        mIconSourceTextView.setVisibility(Strings.isEmptyOrNull(mIconSourceTextView.getText().toString()) ? View.GONE : View.VISIBLE);
+        final boolean has_icon = (mCurrentAccountData.hasIcon() && mCurrentAccountData.getIcon().hasBitmaps(this));
+        final String icon_source = has_icon ? mCurrentAccountData.getIcon().getSource() : null;
+        mIconImageView.setImageBitmap(has_icon ? mCurrentAccountData.getIcon().getBitmap(this) : null);
+        mIconSourceTextView.setText(API.ICON_SOURCE_DEFAULT.equals(icon_source) ? getString(R.string.icon_source_bubka) : API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? getString(R.string.icon_source_dashboard_icons) : getString(R.string.icon_source_local_storage));
+        mIconSourceTextView.setVisibility(has_icon ? View.VISIBLE : View.GONE);
+        mDeleteIconButton.setVisibility(has_icon ? View.VISIBLE : View.GONE);
+        mCopyIconToServerButton.setVisibility(API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? View.VISIBLE : View.GONE);
         final ArrayAdapter<String> server_identities_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, TwoFactorServerIdentitiesUtils.getNames(mServerIdentities));
         server_identities_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mServerIdentitySpinner.setAdapter(server_identities_adapter);
@@ -502,15 +517,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mServiceEditText.setText(mCurrentAccountData.getService());
         mAccountEditText.setText(mCurrentAccountData.getAccount());
         setSelectableGroups();
-        final boolean adding_new_account = ! mCurrentAccountData.inDatabase();
-        mShowAdvancedDataButton.setVisibility(adding_new_account ? View.GONE : View.VISIBLE);
-        mAdvancedDataLayout.setVisibility(adding_new_account ? View.VISIBLE : View.GONE);
+        setShowOtpAttributesVisibility(! mCurrentAccountData.inDatabase());
         final String otp_type = mCurrentAccountData.getOtpType();
         ViewUtils.setSelected(this, mOtpTypeContainer, otp_type);
-        mSecretEditText.setInputType(adding_new_account ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD : InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        mSecretEditText.setTransformationMethod(adding_new_account ? null : new PasswordTransformationMethod());
         mSecretEditText.setText(mCurrentAccountData.getSecret());
-        mSecretEditText.setEnabled(adding_new_account);
         ViewUtils.setSelected(this, mDigitsContainer, String.valueOf(mCurrentAccountData.getOtpLength()));
         ViewUtils.setSelected(this, mAlgorithmContainer, mCurrentAccountData.getAlgorithm());
         mPeriodEditText.setText(String.valueOf(mCurrentAccountData.getPeriod()));
@@ -557,15 +567,20 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mServiceEditText.setEnabled(enable && mEditing);
         mAccountEditText.setEnabled(enable && mEditing);
         mGroupSpinner.setEnabled(enable && mEditing);
-        mAddGroupButton.setEnabled(enable && mEditing);
-        mIconImageView.setEnabled(enable && mEditing);
-        ViewUtils.setEnabled(mOtpTypeContainer, enable && mEditing);
+        mSelectIconButton.setEnabled(enable && mEditing);
+        mDeleteIconButton.setEnabled(false);
+        mCopyIconToServerButton.setEnabled(false);
+        if (enable && mEditing && mCurrentAccountData.hasIcon() && mCurrentAccountData.getIcon().hasBitmaps(this)) {
+            mDeleteIconButton.setEnabled(true);
+            mCopyIconToServerButton.setEnabled(API.ICON_SOURCE_DASHBOARD.equals(mCurrentAccountData.getIcon().getSource()));
+        }
+        ViewUtils.setEnabled(this, mOtpTypeContainer, enable && mEditing);
         mSecretEditText.setInputType(enable && mEditing ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD : InputType.TYPE_TEXT_VARIATION_PASSWORD);
         mSecretEditText.setTransformationMethod(enable && mEditing ? null : new PasswordTransformationMethod());
         mSecretEditText.setEnabled(enable && mEditing);
         mCopySecretButton.setEnabled((mWorking.getVisibility() != View.VISIBLE) && (! Strings.isEmptyOrNull(mCurrentAccountData.getSecret())));
-        ViewUtils.setEnabled(mDigitsContainer, enable && mEditing);
-        ViewUtils.setEnabled(mAlgorithmContainer, enable && mEditing);
+        ViewUtils.setEnabled(this, mDigitsContainer, enable && mEditing);
+        ViewUtils.setEnabled(this, mAlgorithmContainer, enable && mEditing);
         mPeriodEditText.setEnabled(enable && mEditing);
         mCounterEditText.setEnabled(enable && mEditing);
     }
@@ -604,6 +619,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
                         mGroups.computeIfAbsent(current_server_identity.getRowId(), k -> new ArrayList<TwoFactorGroup>()).add(group);
                         mCurrentAccountData.setGroup(group);
                         mCurrentAccountData.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
+                        mGroupSpinner.setSelection(mGroups.get(current_server_identity.getRowId()).size() - 1 + 2);
                         setSelectableGroups();
                     }
                 }
@@ -619,6 +635,12 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         account.setService(getString(R.string.cloned_service, account.hasService() ? account.getService() : ""));
         account.setRowId(-1);
         account.setRemoteId(0);
+        if (account.hasIcon()) {
+            final TwoFactorIcon new_icon = new TwoFactorIcon(), source_icon = account.getIcon();
+            new_icon.setSourceData(null, null);
+            new_icon.setBitmaps(source_icon.getBitmap(this, null), source_icon.getBitmap(this, TwoFactorIcon.BitmapTheme.DARK), source_icon.getBitmap(this, TwoFactorIcon.BitmapTheme.LIGHT));
+            account.setIcon(new_icon);
+        }
         account.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
         onAccountEditionNeededDataLoaded(mServerIdentities, mGroups, account);
         mCurrentAccountData.setOtpType(otp_type);
@@ -629,15 +651,18 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     // Shows or not advanced data (OTP type, secret, period...)
     // This rarely will be changed
 
-    private void showOrHideAdvancedData() {
-        final boolean advanced_data_edition_will_be_visible = ! mShowAdvancedDataButton.isSelected();
-        if (advanced_data_edition_will_be_visible) { mAuthenticator.authenticate(this, AuthenticatedActions.SHOW_ADVANCED_DATA); }
-        else { mShowAdvancedDataButton.setSelected(false); mAdvancedDataLayout.setVisibility(View.GONE); }
+    private void toggleOtpAttributesVisibility() {
+        final boolean opt_attributes_layout_will_be_visible = (mOtpAttributesLayout.getVisibility() == View.GONE);
+        if (opt_attributes_layout_will_be_visible) { mAuthenticator.authenticate(this, AuthenticatedActions.SHOW_ADVANCED_DATA); }
+        else { setShowOtpAttributesVisibility(false); }
     }
 
-    private void showAdvancedData() {
-        mShowAdvancedDataButton.setSelected(true);
-        mAdvancedDataLayout.setVisibility(View.VISIBLE);
+    private void setShowOtpAttributesVisibility(final boolean show) {
+        mToggleOtpGenerationAttributesButton.setText(show ? R.string.hide_otp_generation_attributes : R.string.show_otp_generation_attributes);
+        Drawable drawable = ContextCompat.getDrawable(this, show ? R.drawable.ic_actionbar_opened : R.drawable.ic_actionbar_closed);
+        if (drawable != null) { drawable = DrawableCompat.wrap(drawable); DrawableCompat.setTintList(drawable, mToggleOtpGenerationAttributesButton.getTextColors()); }
+        mToggleOtpGenerationAttributesButton.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+        mOtpAttributesLayout.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     // Functions related with the save process

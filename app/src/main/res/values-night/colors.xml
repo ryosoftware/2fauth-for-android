@@ -2,15 +2,26 @@
 
 <resources>
 
-    <color name="ic_launcher_background">#FF530066</color>
-
-    <color name="accent_background">#FF4F378B</color>
-    <color name="accent_foreground">@color/white</color>
-
     <color name="light_blue">#FFBABFFC</color>
     <color name="light_yellow">#FFFCF3CF</color>
     <color name="light_red">#FFFCBABF</color>
 
-    <color name="edit_text_background">#FF393939</color>
+    <color name="ic_launcher_background">#FF530066</color>
+
+    <color name="floating_action_buttons_background">#FF4F378B</color>
+    <color name="floating_action_buttons_foreground">@color/white</color>
+    <color name="floating_action_buttons_foreground_disabled">#FF767279</color>
+
+    <color name="border_frame_border">@android:color/white</color>
+
+    <color name="otp_attribute_background">#FFD0BCFF</color>
+    <color name="otp_attribute_background_disabled">#FFD7CCE9</color>
+    <color name="otp_attribute_background_selected">#FF4F378B</color>
+    <color name="otp_attribute_background_disabled_selected">#FF49454F</color>
+
+    <color name="otp_attribute_foreground">@color/otp_attribute_background_selected</color>
+    <color name="otp_attribute_foreground_selected">@color/otp_attribute_background</color>
+    <color name="otp_attribute_foreground_disabled">@color/otp_attribute_background_disabled_selected</color>
+    <color name="otp_attribute_foreground_disabled_selected">@color/otp_attribute_background_disabled</color>
 
 </resources>

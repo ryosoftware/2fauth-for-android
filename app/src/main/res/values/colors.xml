@@ -2,24 +2,41 @@
 
 <resources>
 
-    <color name="ic_launcher_background">#FF530066</color>
-
-    <color name="accent_background">#FFEADDFF</color>
-    <color name="accent_foreground">@color/ic_launcher_background</color>
-
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#FF49454F</color>
+
     <color name="light_blue">#FF6768B0</color>
+    <color name="light_yellow">#FFF7DC6F</color>
     <color name="light_red">#FFB06769</color>
+
+    <color name="ic_launcher_background">#FF530066</color>
+
+    <color name="floating_action_buttons_background">#FFEADDFF</color>
+    <color name="floating_action_buttons_foreground">@color/ic_launcher_background</color>
+    <color name="floating_action_buttons_foreground_disabled">#FF8E8793</color>
+
+    <color name="border_frame_background">@android:color/transparent</color>
+    <color name="border_frame_border">@color/black</color>
+    <color name="border_frame_foreground">@color/border_frame_border</color>
+    <color name="border_frame_background_selected">@color/floating_action_buttons_background</color>
+    <color name="border_frame_border_selected">@color/floating_action_buttons_foreground</color>
+    <color name="border_frame_foreground_selected">@color/border_frame_border_selected</color>
+
+    <color name="otp_attribute_background">#FFEADDFF</color>
+    <color name="otp_attribute_background_disabled">#FFD7CCE9</color>
+    <color name="otp_attribute_background_selected">#FF6750A4</color>
+    <color name="otp_attribute_background_disabled_selected">#FF9e96aa</color>
+
+    <color name="otp_attribute_foreground">@color/otp_attribute_background_selected</color>
+    <color name="otp_attribute_foreground_disabled">@color/otp_attribute_background_disabled_selected</color>
+    <color name="otp_attribute_foreground_selected">@color/otp_attribute_background</color>
+    <color name="otp_attribute_foreground_disabled_selected">@color/otp_attribute_background_disabled</color>
 
     <color name="otp_hidden">@color/gray</color>
     <color name="otp_visible_normal">@color/light_blue</color>
-    <color name="light_yellow">#FFF7DC6F</color>
 
     <color name="otp_visible_near_of_last_seconds">@color/light_yellow</color>
     <color name="otp_visible_last_seconds">@color/light_red</color>
-
-    <color name="edit_text_background">#FFFFFFFF</color>
 
 </resources>

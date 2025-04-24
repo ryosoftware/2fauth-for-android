@@ -62,14 +62,19 @@ public class FabButtonShowOrHide {
     private final Map<View, ViewPropertyAnimator> mActiveVisualizationAnimations = new HashMap<View, ViewPropertyAnimator>();
     private final Map<View, ViewPropertyAnimator> mActiveHidingAnimations = new HashMap<View, ViewPropertyAnimator>();
 
-    private DisplayState mDisplayState = null;
+    private DisplayState mDisplayState;
 
-    public FabButtonShowOrHide(@NotNull final RecyclerView recycler_view, final boolean take_into_account_automatic_scroll_events, @NotNull final FloatingActionButton[] floating_action_buttons, @Nullable final View[] other_views) {
+    public FabButtonShowOrHide(@NotNull final RecyclerView recycler_view, final boolean take_into_account_automatic_scroll_events, @NotNull final FloatingActionButton[] floating_action_buttons, @Nullable final View[] other_views, @Nullable final DisplayState initial_display_state) {
         final RecyclerViewOnScrollListener mRecyclerViewOnScrollListener = new RecyclerViewOnScrollListener(this);
         mRecyclerViewOnScrollListener.setTakeIntoAccountAutomaticScrollEvents(take_into_account_automatic_scroll_events);
         recycler_view.addOnScrollListener(mRecyclerViewOnScrollListener);
         setFloatingActionButtons(floating_action_buttons);
         setOtherViews(other_views);
+        mDisplayState = initial_display_state;
+    }
+
+    public FabButtonShowOrHide(@NotNull final RecyclerView recycler_view, final boolean take_into_account_automatic_scroll_events, @NotNull final FloatingActionButton[] floating_action_buttons, @Nullable final View[] other_views) {
+        this(recycler_view, take_into_account_automatic_scroll_events, floating_action_buttons, other_views, null);
     }
 
     private void cancelAnimation(@NotNull final View view) {
@@ -95,9 +100,9 @@ public class FabButtonShowOrHide {
         }
     }
 
-    private synchronized boolean onAnimationFinished(@Nullable final View view, @NotNull final DisplayState state) {
+    private synchronized void onAnimationFinished(@Nullable final View view, @NotNull final DisplayState state) {
         final Map<View, ViewPropertyAnimator> active_animations_map = (state == DisplayState.VISIBLE) ? mActiveVisualizationAnimations : mActiveHidingAnimations;
-        return active_animations_map.remove(view) != null;
+        active_animations_map.remove(view);
     }
 
     private void hide(@NotNull final View view) {

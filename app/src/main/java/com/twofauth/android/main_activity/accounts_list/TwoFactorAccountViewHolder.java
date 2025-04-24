@@ -129,7 +129,6 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mAccount.setText(account.getAccount());
         final String server_identity_and_group_names = options.getServerIdentityAndGroupNames(context, account);
         mServerIdentityAndGroupNames.setText(server_identity_and_group_names);
-        mServerIdentityAndGroupNames.setBackgroundResource(R.drawable.border_frame_not_clickable);
         mServerIdentityAndGroupNames.setVisibility(server_identity_and_group_names == null ? View.GONE : View.VISIBLE);
         final Bitmap bitmap = account.hasIcon() ? account.getIcon().getBitmap(context) : null;
         mIcon.setImageBitmap(bitmap);
@@ -142,7 +141,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         if (millis_until_next_otp == Long.MAX_VALUE) { mOtpCounter.setText(context.getString(R.string.hotp_counter, account.getCounter())); }
         else { setOtpAnimationByState(millis_until_next_otp); }
         mOtpCounter.setVisibility(millis_until_next_otp == Long.MAX_VALUE ? View.VISIBLE : View.GONE);
-        mAccountDataNotSynced.setVisibility(! account.isSynced() ? View.VISIBLE : View.GONE);
+        mAccountDataNotSynced.setVisibility(account.isSynced() && ((! account.hasGroup()) || account.getGroup().isSynced()) && ((! account.hasIcon()) || account.getIcon().isSynced()) ? View.GONE : View.VISIBLE);
         mAccountDataDeleted.setVisibility(account.isDeleted() ? View.VISIBLE : View.GONE);
         final boolean error = ((! is_otp_type_supported) || (otp == null));
         mOtpError.setText(is_otp_type_supported ? context.getString(millis_until_next_otp == Long.MAX_VALUE ? R.string.otp_generation_error_for_counter : R.string.otp_generation_error, account.getCounter()) : context.getString(R.string.otp_type_is_unsupported, account.getOtpType().toUpperCase(), account.getAlgorithm().toUpperCase()));

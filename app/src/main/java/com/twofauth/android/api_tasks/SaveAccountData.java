@@ -6,6 +6,8 @@ import android.util.Log;
 import com.twofauth.android.API;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorAccount;
+import com.twofauth.android.database.TwoFactorIcon;
+import com.twofauth.android.utils.Strings;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
 
@@ -53,8 +55,8 @@ public class SaveAccountData {
                                 mSuccess = true;
                                 if (mAccount.getServerIdentity().isSyncingImmediately()) {
                                     mSynced = true;
-                                    if ((stored_account != null) && (stored_account.getRowId() != mAccount.getRowId())) { mSynced &= API.syncAccount(database, mContext, stored_account, true); }
-                                    mSynced &= API.syncAccount(database, mContext, mAccount, true);
+                                    if ((stored_account != null) && (stored_account.getRowId() != mAccount.getRowId())) { mSynced &= API.synchronizeAccount(database, mContext, stored_account, true); }
+                                    mSynced &= API.synchronizeAccount(database, mContext, mAccount, true);
                                 }
                             }
                             finally {

@@ -16,7 +16,6 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
@@ -317,17 +316,18 @@ public class UI {
     public static long startRotationAnimation(@NotNull final View view, final int angle, final long duration, @Nullable final OnAnimationEndListener listener) {
         if (allowAnimations) {
             final float from = view.getRotation(), to = from + angle;
-            final ObjectAnimator animation = ObjectAnimator.ofFloat(view, "rotation", from, to);
+            final ObjectAnimator object_animation = ObjectAnimator.ofFloat(view, "rotation", from, to);
             final long real_duration = angle * duration / 360;
-            animation.setDuration(real_duration);
-            animation.addListener(new AnimatorListenerAdapter() {
+            object_animation.setDuration(real_duration);
+            object_animation.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(@NotNull final Animator animation) {
+                    object_animation.removeListener(this);
                     view.setRotation(to % 360);
                     if (listener != null) { listener.onAnimationEnd(view); }
                 }
             });
-            animation.start();
+            object_animation.start();
             return real_duration;
         }
         else if (listener != null) {
@@ -343,12 +343,13 @@ public class UI {
             animator_set.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(@NotNull final Animator animation) {
-                    button.setImageResource(new_icon);
-                    if (toggle_enabled_state) { button.setEnabled(! button.isEnabled()); }
-                    final AnimatorSet animator_set = new AnimatorSet();
-                    animator_set.playTogether(ObjectAnimator.ofFloat(button, "scaleX", 0f, 1f), ObjectAnimator.ofFloat(button, "scaleY", 0f, 1f));
-                    animator_set.setDuration(duration / 2);
-                    animator_set.start();
+                animator_set.removeListener(this);
+                button.setImageResource(new_icon);
+                if (toggle_enabled_state) { button.setEnabled(! button.isEnabled()); }
+                final AnimatorSet animator_set = new AnimatorSet();
+                animator_set.playTogether(ObjectAnimator.ofFloat(button, "scaleX", 0f, 1f), ObjectAnimator.ofFloat(button, "scaleY", 0f, 1f));
+                animator_set.setDuration(duration / 2);
+                animator_set.start();
                 }
             });
             animator_set.setDuration(duration / 2);
@@ -367,17 +368,18 @@ public class UI {
     public static @Nullable ViewPropertyAnimator animateShowOrHide(@NotNull final View view, final boolean show, final long duration, @Nullable final OnAnimationEndListener listener) {
         if (allowAnimations) {
             if (show && (view.getVisibility() != View.VISIBLE)) { setViewMinimized(view); }
-            final ViewPropertyAnimator animation = view.animate().alpha(1f).scaleX(show ? 1f : 0f).scaleY(show ? 1f : 0f).setDuration(duration);
+            final ViewPropertyAnimator view_property_animator = view.animate().alpha(1f).scaleX(show ? 1f : 0f).scaleY(show ? 1f : 0f).setDuration(duration);
             if (listener != null) {
-                animation.setListener(new AnimatorListenerAdapter() {
+                view_property_animator.setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(@NotNull final Animator animation) {
+                        view_property_animator.setListener(null);
                         listener.onAnimationEnd(view);
                     }
                 });
             }
-            animation.start();
-            return animation;
+            view_property_animator.start();
+            return view_property_animator;
         }
         else {
             view.setVisibility(show ? View.VISIBLE : View.GONE);

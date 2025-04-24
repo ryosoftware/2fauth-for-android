@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<selector
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<ripple
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
 
-    <item
-        android:state_selected="true"
-        android:drawable="@drawable/border_frame_solid" />
+    <item>
 
-    <item
-        android:state_pressed="true"
-        android:drawable="@drawable/border_frame_solid" />
+        <selector>
 
-    <item
-        android:drawable="@drawable/border_frame_transparent" />
+            <item
+                android:state_selected="true"
+                android:drawable="@drawable/border_frame_selected" />
 
-</selector>
+            <item
+                android:state_pressed="true"
+                android:drawable="@drawable/border_frame_selected" />
+
+            <item
+                android:drawable="@drawable/border_frame" />
+
+        </selector>
+
+    </item>
+
+</ripple>

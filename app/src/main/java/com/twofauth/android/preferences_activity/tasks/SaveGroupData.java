@@ -47,7 +47,7 @@ public class SaveGroupData {
                                 else { mGroup.save(database, mContext); }
                                 mGroupWithReferencesInformation = new TwoFactorGroupWithReferencesInformation(database, mGroup);
                                 mSuccess = true;
-                                if (mGroup.getServerIdentity().isSyncingImmediately()) { mSynced = API.syncGroup(database, mContext, mGroup, true); }
+                                if (mGroup.getServerIdentity().isSyncingImmediately()) { mSynced = API.synchronizeGroup(database, mContext, mGroup, true); }
                             }
                             finally {
                                 Main.getInstance().getDatabaseHelper().endTransaction(database, mSuccess);
