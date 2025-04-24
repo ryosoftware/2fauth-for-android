@@ -63,7 +63,7 @@
     <string name="sync_error">Se ha producido un error en la sincronización</string>
     <string name="sync_completed">La sincronización se ha completado</string>
     <string name="last_sync_error">La última sincronización fue el %2$s, pero no se completó debido al siguiente error: %1$s</string>
-    <string name="account_never_synced">La cuetna nunca se ha sincronizado</string>
+    <string name="account_never_synced">La cuenta nunca se ha sincronizado</string>
 
     <plurals name="sync_details">
         <item quantity="one">La última sincronización fue el %2$s y se leyeron los datos de una cuenta</item>
