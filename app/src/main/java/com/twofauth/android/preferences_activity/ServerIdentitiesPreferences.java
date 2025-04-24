@@ -196,7 +196,6 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
 
     private void onServerIdentitiesChanged(final boolean propagate_result) {
         if (propagate_result) { getParentFragmentManager().setFragmentResult(EDIT_IDENTITIES, mResultBundle); }
-        Preferences.getDefaultSharedPreferences(getContext()).edit().putInt(Constants.SERVER_IDENTITIES_COUNT_KEY, mServerIdentities.size()).apply();
         initializePreferences();
         mEmptyView.setVisibility(mServerIdentities.isEmpty() ? View.VISIBLE : View.GONE);
     }
