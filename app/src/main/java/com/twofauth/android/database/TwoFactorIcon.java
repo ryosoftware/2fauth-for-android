@@ -6,8 +6,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.twofauth.android.API;
 import com.twofauth.android.utils.Bitmaps;
 import com.twofauth.android.Main;
+import com.twofauth.android.utils.Files;
 import com.twofauth.android.utils.Strings;
 import com.twofauth.android.utils.UI;
 
@@ -63,11 +65,20 @@ public class TwoFactorIcon extends TableRow {
         mSourceId = null;
     }
 
+    public boolean isReferenced(@NotNull final SQLiteDatabase database) {
+        try (final Cursor cursor = database.query(true, TwoFactorAccountsHelper.TABLE_NAME, new String[] { "COUNT(*)" }, String.format("%s=?", TwoFactorAccount.ICON), new String[] { String.valueOf(_id) }, null, null, null, null, null)) {
+            if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) {
+                return cursor.getInt(0) > 0;
+            }
+        }
+        return false;
+    }
+
     public String getSource() {
         return mSource;
     }
 
-    private void setSource(@Nullable final String source) {
+    public void setSource(@Nullable final String source) {
         if (! Strings.equals(mSource, source)) { setDirty(SOURCE, mSource = source); }
     }
 
@@ -75,7 +86,7 @@ public class TwoFactorIcon extends TableRow {
         return mSourceId;
     }
 
-    private void setSourceId(@Nullable final String source_id) {
+    public void setSourceId(@Nullable final String source_id) {
         if (! Strings.equals(mSourceId, source_id)) { setDirty(SOURCE_ID, mSourceId = source_id); }
     }
 
@@ -104,7 +115,7 @@ public class TwoFactorIcon extends TableRow {
         setBitmap(Bitmaps.get(file), theme);
     }
 
-    public void setBitmaps(@Nullable Bitmap not_themed_bitmap, @Nullable final Bitmap dark_themed_bitmap, @Nullable final Bitmap light_themed_bitmap) throws Exception {
+    public void setBitmaps(@Nullable Bitmap not_themed_bitmap, @Nullable final Bitmap dark_themed_bitmap, @Nullable final Bitmap light_themed_bitmap) {
         setBitmap(not_themed_bitmap, null);
         setBitmap(dark_themed_bitmap, BitmapTheme.DARK);
         setBitmap(light_themed_bitmap, BitmapTheme.LIGHT);
@@ -160,6 +171,20 @@ public class TwoFactorIcon extends TableRow {
         return (bitmap == null) ? getBitmap(context, null) : bitmap;
     }
 
+    public boolean hasBitmaps(@NotNull final Context context) {
+        if ((mBitmapThemeNoneDirty) && (mStoreableBitmapThemeNone != null)) { return true; }
+        else if ((! mBitmapThemeNoneDirty) && Files.exists(getBitmapFile(context, null))) { return true; }
+        if ((mBitmapThemeDarkDirty) && (mStoreableBitmapThemeDark != null)) { return true; }
+        else if ((! mBitmapThemeDarkDirty) && Files.exists(getBitmapFile(context, BitmapTheme.DARK))) { return true; }
+        if ((mBitmapThemeLightDirty) && (mStoreableBitmapThemeLight != null)) { return true; }
+        else if ((! mBitmapThemeLightDirty) && Files.exists(getBitmapFile(context, BitmapTheme.LIGHT))) { return true; }
+        return false;
+    }
+
+    public boolean isSynced() {
+        return getSource() != null;
+    }
+
     @Override
     public boolean isDirty() {
         return super.isDirty() || mBitmapThemeNoneDirty || mBitmapThemeDarkDirty || mBitmapThemeLightDirty;
@@ -195,12 +220,16 @@ public class TwoFactorIcon extends TableRow {
         super.onDataSaved(context);
     }
 
-    @Override
-    protected void onDataDeleted(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {
+    private void deleteFiles(@NotNull final Context context) {
         for (final BitmapTheme theme : new BitmapTheme[] { null, BitmapTheme.DARK, BitmapTheme.LIGHT }) {
             final File file = getBitmapFile(context, theme);
             if (file != null) { file.delete(); }
         }
+    }
+
+    @Override
+    protected void onDataDeleted(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {
+        deleteFiles(context);
         super.onDataDeleted(database, context);
     }
 }

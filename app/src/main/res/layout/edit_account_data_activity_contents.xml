@@ -2,6 +2,7 @@
 
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -12,33 +13,54 @@
         android:layout_marginEnd="10dp"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:scaleType="centerInside" />
+
+        <TextView
+            android:id="@+id/icon_source"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"
+            android:maxLines="1" />
 
-            <ImageButton
-                android:id="@+id/icon"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center_horizontal"
-                android:src="@drawable/ic_upload"
-                android:scaleType="centerInside" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/icon_source"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:paddingTop="10dp"
-                android:paddingStart="20dp"
-                android:paddingBottom="10dp"
-                android:paddingEnd="20dp"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center"
-                android:maxLines="1"
-                android:background="@drawable/border_frame_clickable"
-                android:visibility="gone" />
+            <Button
+                android:id="@+id/select_icon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="10dp"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                app:icon="@drawable/ic_actionbar_select_icon" />
+
+            <Button
+                android:id="@+id/delete_icon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="10dp"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                app:icon="@drawable/ic_actionbar_delete" />
+
+            <Button
+                android:id="@+id/copy_icon_to_server"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="10dp"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                app:icon="@drawable/ic_actionbar_clone" />
 
         </LinearLayout>
 
@@ -112,52 +134,24 @@
                 android:layout_height="wrap_content"
                 android:text="@string/group" />
 
-            <LinearLayout
+            <Spinner
+                android:id="@+id/group"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Spinner
-                    android:id="@+id/group"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginTop="10dp" />
-
-                <ImageButton
-                    android:id="@+id/add_group"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_gravity="center_vertical"
-                    android:padding="5dp"
-                    android:gravity="center"
-                    android:maxLines="1"
-                    android:src="@drawable/ic_add"
-                    android:background="@drawable/border_frame_clickable" />
-
-            </LinearLayout>
+                android:layout_marginTop="10dp" />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/show_advanced_data"
+        <Button
+            android:id="@+id/toggle_otp_generation_attributes_visualization"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:paddingTop="10dp"
-            android:paddingStart="20dp"
-            android:paddingBottom="10dp"
-            android:paddingEnd="20dp"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center"
-            android:maxLines="1"
-            android:background="@drawable/border_frame_clickable"
-            android:text="@string/show_advanced_data" />
+            android:layout_gravity="center_horizontal" />
 
         <LinearLayout
-            android:id="@+id/advanced_data_layout"
-            android:layout_width="wrap_content"
+            android:id="@+id/otp_generation_attributes_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
@@ -179,52 +173,39 @@
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <Button
                         android:id="@+id/otp_type"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="totp"
-                        android:text="@string/otp_type_totp" />
+                        android:layout_marginEnd="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/otp_type_totp"
+                        android:tag="totp" />
 
-                    <TextView
+                    <Button
                         android:id="@id/otp_type"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="hotp"
-                        android:text="@string/otp_type_hotp" />
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/otp_type_hotp"
+                        android:tag="hotp" />
 
-                    <TextView
+                    <Button
                         android:id="@id/otp_type"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="steamtotp"
-                        android:text="@string/otp_type_steam" />
+                        android:layout_marginStart="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/otp_type_steam"
+                        android:tag="steamtotp" />
 
                 </LinearLayout>
 
@@ -242,20 +223,18 @@
                     android:text="@string/secret" />
 
                 <RelativeLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <ImageButton
+                    <Button
                         android:id="@+id/copy_secret"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:layout_marginStart="10dp"
                         android:layout_alignParentEnd="true"
-                        android:padding="10dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:src="@drawable/ic_copy"
-                        android:background="@drawable/border_frame_clickable" />
+                        android:paddingStart="15dp"
+                        android:paddingEnd="15dp"
+                        app:icon="@drawable/ic_actionbar_copy" />
 
                     <EditText
                         android:id="@+id/secret"
@@ -290,84 +269,63 @@
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <Button
                         android:id="@+id/digit"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="6"
-                        android:text="@string/number_6" />
+                        android:layout_marginEnd="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/number_6"
+                        android:tag="6" />
 
-                    <TextView
+                    <Button
                         android:id="@id/digit"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="7"
-                        android:text="@string/number_7" />
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/number_7"
+                        android:tag="7" />
 
-                    <TextView
+                    <Button
                         android:id="@id/digit"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="8"
-                        android:text="@string/number_8" />
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/number_8"
+                        android:tag="8" />
 
-                    <TextView
+                    <Button
                         android:id="@id/digit"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="9"
-                        android:text="@string/number_9" />
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/number_9"
+                        android:tag="9" />
 
-                    <TextView
+                    <Button
                         android:id="@id/digit"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="10"
-                        android:text="@string/number_10" />
+                        android:layout_marginStart="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/number_10"
+                        android:tag="10" />
 
                 </LinearLayout>
 
@@ -393,68 +351,51 @@
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <Button
                         android:id="@+id/algorithm"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="sha1"
-                        android:text="@string/algorithm_sha1" />
+                        android:layout_marginEnd="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/algorithm_sha1"
+                        android:tag="sha1" />
 
-                    <TextView
+                    <Button
                         android:id="@id/algorithm"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="sha256"
-                        android:text="@string/algorithm_sha256" />
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/algorithm_sha256"
+                        android:tag="sha256" />
 
-                    <TextView
+                    <Button
                         android:id="@id/algorithm"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="sha512"
-                        android:text="@string/algorithm_sha512" />
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/algorithm_sha512"
+                        android:tag="sha512" />
 
-                    <TextView
+                    <Button
                         android:id="@id/algorithm"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:paddingTop="10dp"
-                        android:paddingStart="20dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="20dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:background="@drawable/border_frame_clickable"
-                        android:tag="md5"
-                        android:text="@string/algorithm_md5" />
+                        android:layout_marginStart="5dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/algorithm_md5"
+                        android:tag="md5" />
 
                 </LinearLayout>
 

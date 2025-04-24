@@ -34,9 +34,8 @@ public class IndexEntryViewHolder extends RecyclerView.ViewHolder implements Vie
     }
 
     public void draw(@NotNull final Context context, final Character letter, final boolean is_active) {
-        final Resources resources = context.getResources();
         mLetter.setText(letter.toString().toUpperCase());
-        mLetter.setTextColor(is_active ? resources.getColor(R.color.accent_foreground, context.getTheme()) : UI.getSystemColor(context, android.R.attr.textColorSecondary));
+        mLetter.setTextColor(context.getResources().getColor(is_active ? R.color.floating_action_buttons_foreground : R.color.floating_action_buttons_foreground_disabled, context.getTheme()));
         mLetter.setTypeface(null, is_active ? Typeface.BOLD : Typeface.NORMAL);
         mLetter.setSelected(is_active);
     }

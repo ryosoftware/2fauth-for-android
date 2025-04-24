@@ -18,14 +18,14 @@ public abstract class BaseActivityWithTextController extends BaseActivity implem
         else { observer.removeOnGlobalLayoutListener(this); }
     }
 
-    protected void onKeyboardVisibikityChange(final boolean visible) {}
+    protected void onKeyboardVisibilityChange(final boolean visible) {}
 
     @Override
     public void onGlobalLayout() {
         final boolean keyboard_visible = UI.isKeyboardVisible(this);
         if (mKeyboardVisible != keyboard_visible) {
             mKeyboardVisible = keyboard_visible;
-            onKeyboardVisibikityChange(keyboard_visible);
+            onKeyboardVisibilityChange(keyboard_visible);
         }
     }
 

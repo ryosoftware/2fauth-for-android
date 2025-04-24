@@ -196,7 +196,9 @@
     <string name="account">Cuenta</string>
     <string name="group">Grupo</string>
     <string name="no_group">Ninguno</string>
-    <string name="show_advanced_data">Mostrar datos avanzados</string>
+    <string name="add_group">Añadir un grupo</string>
+    <string name="show_otp_generation_attributes">Mostrar atributos de generación de OTP</string>
+    <string name="hide_otp_generation_attributes">Ocultar atributos de generación de OTP</string>
     <string name="otp_type">Tipo de autenticación</string>
     <string name="otp_type_totp">TOTP</string>
     <string name="otp_type_hotp">HOTP</string>
@@ -224,12 +226,18 @@
     <string name="deleted_group">%1$s [borrado]</string>
 
     <string name="icon_source_bubka">Icono descargado de su servidor 2FA</string>
-    <string name="icon_source_dashboard_icons">Icono descargado de "Dashboard Icons"</string>
+    <string name="icon_source_dashboard_icons">Icono descargado de \"Dashboard Icons\"</string>
+    <string name="icon_source_local_storage">Icono cargado desde su dispositivo</string>
+
+    <string name="select_icon">Seleccionar un icono</string>
+    <string name="delete_icon">Eliminar icono</string>
+    <string name="copy_to_the_server">Copiar a su servidor 2FA</string>
 
     <string name="cannot_load_account_data">No se han podido cargar los datos de la cuenta</string>
     <string name="cancel_account_edition_message">Los datos de la cuenta han cambiado.\n\n¿Qué desea hacer?</string>
     <string name="cancel_account_creation_message">@string/cancel_account_edition_message</string>
     <string name="server_identity_changed_message">Ha cambiado la identidad a la que se asocia la cuenta, lo que provocará que la cuenta se elimine de la identidad anterior y se añada a la nueva.\n\nSi la sincronización no se puede hacer de forma inmediata, es posible que, temporalmente, aparezcan una cuenta extra (marcada como eliminada) en la lista de cuentas.\n\n¿Está seguro de que desea continuar?</string>
+    <string name="server_identity_has_been_deleted">La identidad se ha eliminado</string>
     <string name="delete_account_data_message">Esta operación no se puede deshacer.\n\n¿Seguro que desea eliminar los datos de la cuenta?</string>
     <string name="undelete_account_data_message">Se recuperarán los datos de la cuenta en el estado que estaban cuando la eliminó.\n\nSi cuando la eliminó había datos sin sincronizar, los cambios se perderán cuando realice una sincronización de datos con el servidor</string>
     <string name="error_while_loading_account_data">No se han podido leer los datos de la cuenta</string>
@@ -249,7 +257,7 @@
     <string name="server_identity_label">\@ %1$s</string>
     <string name="group_label">%2$s</string>
 
-    <string name="add_group_dialog_title">Añadir un grupo</string>
+    <string name="add_group_dialog_title">@string/add_group</string>
     <string name="add_group_dialog_message">Introduzca el nombre del grupo</string>
     <string name="edit_group_name_dialog_title">Editar un grupo</string>
     <string name="edit_group_name_dialog_message">@string/add_group_dialog_message</string>

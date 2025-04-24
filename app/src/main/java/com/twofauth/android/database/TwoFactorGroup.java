@@ -17,15 +17,9 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class TwoFactorGroup extends TableRow {
+public class TwoFactorGroup extends SynceableTableRow {
     public static final String SERVER_IDENTITY = "server_identity";
-    public static final String REMOTE_ID = "remote_id";
     public static final String NAME = "name";
-    public static final String STATUS = "status";
-
-    public static final int STATUS_DEFAULT = 0;
-    public static final int STATUS_NOT_SYNCED = 1;
-    public static final int STATUS_DELETED = 2;
 
     protected static final String[] PROJECTION = new String[] {
         ROW_ID,
@@ -41,23 +35,17 @@ public class TwoFactorGroup extends TableRow {
     private static final int STATUS_ORDER = NAME_ORDER + 1;
 
     private TwoFactorServerIdentity mServerIdentity;
-    private int mRemoteId;
     private String mName;
-    private int mStatus;
 
     public TwoFactorGroup(@NotNull final SQLiteDatabase database, @NotNull final Cursor cursor) throws Exception {
-        super(TwoFactorGroupsHelper.TABLE_NAME, cursor);
+        super(TwoFactorGroupsHelper.TABLE_NAME, cursor, REMOTE_ID_ORDER, STATUS_ORDER);
         mServerIdentity = Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().instance(database, cursor.getLong(SERVER_IDENTITY_ORDER));
-        mRemoteId = cursor.getInt(REMOTE_ID_ORDER);
         mName = cursor.getString(NAME_ORDER);
-        mStatus = cursor.getInt(STATUS_ORDER);
     }
 
     public TwoFactorGroup() {
         super(TwoFactorGroupsHelper.TABLE_NAME);
-        mRemoteId = 0;
         mName = null;
-        mStatus = STATUS_NOT_SYNCED;
     }
 
     public @NotNull JSONObject toJSONObject() {
@@ -94,34 +82,6 @@ public class TwoFactorGroup extends TableRow {
         return false;
     }
 
-    public boolean isReferenced() {
-        final SQLiteDatabase database = Main.getInstance().getDatabaseHelper().open(false);
-        if (database != null) {
-            try {
-                return isReferenced(database);
-            }
-            finally {
-                Main.getInstance().getDatabaseHelper().close(database);
-            }
-        }
-        return false;
-    }
-
-    public boolean isRemote() {
-        return mRemoteId != 0;
-    }
-
-    public int getRemoteId() {
-        return mRemoteId;
-    }
-
-    public void setRemoteId(final int server_id) {
-        if ((! isDeleted()) && (mRemoteId != server_id)) {
-            setDirty(REMOTE_ID, mRemoteId = server_id);
-            setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
-        }
-    }
-
     public boolean hasName() { return ! Strings.isEmptyOrNull(getName()); }
 
     public @Nullable String getName() {
@@ -135,29 +95,12 @@ public class TwoFactorGroup extends TableRow {
         }
     }
 
-    public boolean isDeleted() {
-        return mStatus == STATUS_DELETED;
-    }
-
-    public boolean isSynced() {
-        return (mStatus == STATUS_DEFAULT);
-    }
-
-    public int getStatus() {
-        return mStatus;
-    }
-
-    public void setStatus(final int status) {
-        if (mStatus != status) { setDirty(STATUS, mStatus = status); }
-    }
-
     protected void setDatabaseValues(@NotNull final ContentValues values) {
         if (values.size() == 0) {
             if (mServerIdentity == null) { throw new SQLException("Server Identity cannot be NULL"); }
             values.put(SERVER_IDENTITY, mServerIdentity.getRowId());
-            values.put(REMOTE_ID, mRemoteId);
+            super.setDatabaseValues(values);
             values.put(NAME, mName);
-            values.put(STATUS, mStatus);
         }
         else {
             if (values.containsKey(SERVER_IDENTITY)) {

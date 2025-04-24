@@ -195,7 +195,9 @@
     <string name="account">Account</string>
     <string name="group">Group</string>
     <string name="no_group">None</string>
-    <string name="show_advanced_data">Show advanced data</string>
+    <string name="add_group">Add a group</string>
+    <string name="show_otp_generation_attributes">Show OTP generation attributes</string>
+    <string name="hide_otp_generation_attributes">Hide OTP generation attributes</string>
     <string name="otp_type">OTP Type</string>
     <string name="otp_type_totp">TOTP</string>
     <string name="otp_type_hotp">HOTP</string>
@@ -223,12 +225,18 @@
     <string name="deleted_group">%1$s [deleted]</string>
 
     <string name="icon_source_bubka">Icon downloaded from your 2FA server</string>
-    <string name="icon_source_dashboard_icons">Icon downloaded from "Dashboard icons"</string>
+    <string name="icon_source_dashboard_icons">Icon downloaded  from \"Dashboard icons\"</string>
+    <string name="icon_source_local_storage">Icon loaded from your local storage</string>
+
+    <string name="select_icon">Select a icon</string>
+    <string name="delete_icon">Delete icon</string>
+    <string name="copy_to_the_server">Copy to your 2FA server</string>
 
     <string name="cannot_load_account_data">Cannot load account data</string>
     <string name="cancel_account_edition_message">Account data has been changed.\n\nWhat do you want to do?</string>
     <string name="cancel_account_creation_message">@string/cancel_account_edition_message</string>
     <string name="server_identity_changed_message">The identity associated with the account has changed, which will cause the account to be removed from the previous identity and added to the new one.\n\nIf synchronization cannot be completed immediately, an extra account (marked as removed) may temporarily appear in the accounts list.\n\nAre you sure you want to continue?</string>
+    <string name="server_identity_has_been_deleted">Identity has been deleted</string>
     <string name="delete_account_data_message">This operation cannot be undone.\n\nAre you sure that you want to delete account data?</string>
     <string name="undelete_account_data_message">Account data will be restored to the state it was in when you deleted it.\n\nIf there was unsynced changes at the account data when you deleted it, these changes will be lost when data synced to the server</string>
     <string name="error_while_loading_account_data">Error trying to load account data</string>
@@ -248,7 +256,7 @@
     <string name="server_identity_label">\@ %1$s</string>
     <string name="group_label">%2$s</string>
 
-    <string name="add_group_dialog_title">Add a group</string>
+    <string name="add_group_dialog_title">@string/add_group</string>
     <string name="add_group_dialog_message">Enter the name of the group</string>
     <string name="edit_group_name_dialog_title">Edit a group</string>
     <string name="edit_group_name_dialog_message">@string/add_group_dialog_message</string>

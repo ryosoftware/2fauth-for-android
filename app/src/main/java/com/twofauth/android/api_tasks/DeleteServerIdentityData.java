@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorAccount;
+import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.preferences_activity.tasks.LoadServerIdentitiesData.TwoFactorServerIdentityWithSyncDataAndAccountNumbers;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
@@ -42,10 +43,16 @@ public class DeleteServerIdentityData {
                     try {
                         if (Main.getInstance().getDatabaseHelper().beginTransaction(database)) {
                             try {
-                                final List<TwoFactorAccount> accounts = Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().get(mServerIdentity.storedData, false);
+                                final List<TwoFactorAccount> accounts = Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().get(database, mServerIdentity.storedData);
                                 if (accounts != null) {
                                     for (final TwoFactorAccount account : accounts) {
                                         account.delete(database, mContext);
+                                    }
+                                }
+                                final List<TwoFactorGroup> groups = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database, mServerIdentity.storedData);
+                                if (groups != null) {
+                                    for (final TwoFactorGroup group : groups) {
+                                        group.delete(database, mContext);
                                     }
                                 }
                                 mServerIdentity.storedData.delete(database, mContext);

@@ -32,9 +32,8 @@ import java.util.HashMap;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-public class TwoFactorAccount extends TableRow {
+public class TwoFactorAccount extends SynceableTableRow {
     public static final String SERVER_IDENTITY = "server_identity";
-    public static final String REMOTE_ID = "remote_id";
     public static final String SERVICE = "service";
     public static final String ACCOUNT = "account";
     public static final String GROUP = "group_id";
@@ -45,12 +44,7 @@ public class TwoFactorAccount extends TableRow {
     public static final String ALGORITHM = "algorithm";
     public static final String PERIOD = "period";
     public static final String COUNTER = "counter";
-    public static final String STATUS = "status";
     public static final String LAST_USE = "last_use";
-
-    public static final int STATUS_DEFAULT = 0;
-    public static final int STATUS_NOT_SYNCED = 1;
-    public static final int STATUS_DELETED = 2;
 
     protected static final String[] PROJECTION = new String[] {
         ROW_ID,
@@ -222,7 +216,6 @@ public class TwoFactorAccount extends TableRow {
     }
 
     private TwoFactorServerIdentity mServerIdentity;
-    private int mRemoteId;
     private String mService;
     private String mAccount;
     private TwoFactorGroup mGroup;
@@ -233,17 +226,13 @@ public class TwoFactorAccount extends TableRow {
     private String mAlgorithm;
     private int mPeriod;
     private int mCounter;
-
     private long mLastUse;
-
-    private int mStatus;
 
     private Object mPasswordGenerator = null;
 
     public TwoFactorAccount(@NotNull final SQLiteDatabase database, @NotNull final Cursor cursor) throws Exception {
-        super(TwoFactorAccountsHelper.TABLE_NAME, cursor);
+        super(TwoFactorAccountsHelper.TABLE_NAME, cursor, REMOTE_ID_ORDER, STATUS_ORDER);
         mServerIdentity = Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().instance(database, cursor.getLong(SERVER_IDENTITY_ORDER));
-        mRemoteId = cursor.getInt(REMOTE_ID_ORDER);
         mService = cursor.getString(SERVICE_ORDER);
         mAccount = cursor.getString(ACCOUNT_ORDER);
         mGroup = cursor.isNull(GROUP_ORDER) ? null : Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().instance(database, cursor.getLong(GROUP_ORDER));
@@ -255,13 +244,11 @@ public class TwoFactorAccount extends TableRow {
         mPeriod = cursor.getInt(PERIOD_ORDER);
         mCounter = cursor.getInt(COUNTER_ORDER);
         mLastUse = cursor.getLong(LAST_USE_ORDER);
-        mStatus = cursor.getInt(STATUS_ORDER);
     }
 
     public TwoFactorAccount() {
         super(TwoFactorAccountsHelper.TABLE_NAME);
         mServerIdentity = null;
-        mRemoteId = 0;
         mService = "";
         mAccount = "";
         mGroup = null;
@@ -273,7 +260,6 @@ public class TwoFactorAccount extends TableRow {
         mPeriod = Constants.DEFAULT_PERIOD;
         mCounter = Constants.DEFAULT_COUNTER;
         mLastUse = 0;
-        mStatus = STATUS_NOT_SYNCED;
     }
 
     public TwoFactorAccount(@NotNull final TwoFactorAccount account) {
@@ -376,21 +362,6 @@ public class TwoFactorAccount extends TableRow {
                 setDirty(SERVER_IDENTITY, true);
                 setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
             }
-        }
-    }
-
-    public boolean isRemote() {
-        return mRemoteId != 0;
-    }
-
-    public int getRemoteId() {
-        return mRemoteId;
-    }
-
-    public void setRemoteId(final int id) {
-        if ((! isDeleted()) && (mRemoteId != id)) {
-            setDirty(REMOTE_ID, mRemoteId = id);
-            setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
         }
     }
 
@@ -668,22 +639,6 @@ public class TwoFactorAccount extends TableRow {
         }
     }
 
-    public boolean isDeleted() {
-        return mStatus == STATUS_DELETED;
-    }
-
-    public boolean isSynced() {
-        return (mStatus == STATUS_DEFAULT);
-    }
-
-    public int getStatus() {
-        return mStatus;
-    }
-
-    public void setStatus(final int status) {
-        if (mStatus != status) { setDirty(STATUS, mStatus = status); }
-    }
-
     @Override
     public boolean isDirty() {
         return ((hasIcon() && getIcon().isDirty()) || (hasGroup() && getGroup().isDirty()) || super.isDirty());
@@ -700,7 +655,7 @@ public class TwoFactorAccount extends TableRow {
         if (values.size() == 0) {
             if (mServerIdentity == null) { throw new SQLException("Server Identity cannot be NULL"); }
             values.put(SERVER_IDENTITY, mServerIdentity.getRowId());
-            values.put(REMOTE_ID, mRemoteId);
+            super.setDatabaseValues(values);
             values.put(SERVICE, mService);
             values.put(ACCOUNT, mAccount);
             values.put(GROUP, mGroup == null ? null : mGroup.getRowId());
@@ -712,7 +667,6 @@ public class TwoFactorAccount extends TableRow {
             values.put(PERIOD, mPeriod);
             values.put(COUNTER, mCounter);
             values.put(LAST_USE, mLastUse);
-            values.put(STATUS, mStatus);
         }
         else {
             if (values.containsKey(SERVER_IDENTITY)) {
@@ -731,16 +685,6 @@ public class TwoFactorAccount extends TableRow {
 
     protected void onDataDeleted(@NotNull final SQLiteDatabase database, @NotNull final Context context) {
         try {
-            if (mGroup != null) {
-                try {
-                    mGroup.delete(database, context);
-                }
-                catch (SQLiteConstraintException ignored) {
-                }
-                catch (Exception e) {
-                    Log.e(Main.LOG_TAG_NAME, "Exception while trying to delete a group", e);
-                }
-            }
             if (mIcon != null) {
                 try {
                     mIcon.delete(database, context);

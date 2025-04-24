@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.twofauth.android.API;
 import com.twofauth.android.Main;
-import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
@@ -44,7 +43,7 @@ public class SaveGroupData {
                             try {
                                 mGroup.save(database, mContext);
                                 mSuccess = true;
-                                if (mGroup.getServerIdentity().isSyncingImmediately()) { mSynced = API.syncGroup(database, mContext, mGroup, true); }
+                                if (mGroup.getServerIdentity().isSyncingImmediately()) { mSynced = API.synchronizeGroup(database, mContext, mGroup, true); }
                             }
                             finally {
                                 Main.getInstance().getDatabaseHelper().endTransaction(database, mSuccess);

@@ -49,4 +49,8 @@ public class Files {
     public static @Nullable File createTempFile(@NotNull final Context context, @NotNull final String prefix) {
         return createTempFile(context, prefix, null);
     }
+
+    public static boolean exists(@Nullable File file) {
+        return ((file != null) && file.exists());
+    }
 }

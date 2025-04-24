@@ -65,6 +65,14 @@ public class TwoFactorAccountsHelper extends TableHelper<TwoFactorAccount> {
         return super.get(database, new QueryOptions(server_identity, only_not_synced_accounts, sort_mode));
     }
 
+    public @Nullable List<TwoFactorAccount> get(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, final boolean only_not_synced_accounts) throws Exception {
+        return super.get(database, new QueryOptions(server_identity, only_not_synced_accounts, null));
+    }
+
+    public @Nullable List<TwoFactorAccount> get(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity) throws Exception {
+        return super.get(database, new QueryOptions(server_identity, false, null));
+    }
+
     public @Nullable List<TwoFactorAccount> get(@Nullable final TwoFactorServerIdentity server_identity, final boolean only_not_synced_accounts, final SortMode sort_mode) throws Exception {
         final SQLiteDatabase database = Main.getInstance().getDatabaseHelper().open(false);
         if (database != null) {
@@ -104,9 +112,5 @@ public class TwoFactorAccountsHelper extends TableHelper<TwoFactorAccount> {
 
     public int count(@Nullable final TwoFactorServerIdentity server_identity, final boolean only_not_synced_accounts) throws Exception {
         return count(new QueryOptions(server_identity, only_not_synced_accounts, null));
-    }
-
-    public boolean exists(@Nullable final TwoFactorServerIdentity server_identity, final boolean only_not_synced_accounts) throws Exception {
-        return exists(new QueryOptions(server_identity, only_not_synced_accounts, null));
     }
 }

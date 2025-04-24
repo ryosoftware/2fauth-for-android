@@ -152,8 +152,8 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         mGroupsListRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NotNull final Rect out_rect, @NotNull final View view, @NotNull final RecyclerView parent, @NotNull final RecyclerView.State state) {
-            super.getItemOffsets(out_rect, view, parent, state);
-            out_rect.right = (parent.getChildAdapterPosition(view) == parent.getAdapter().getItemCount() - 1) ? 0 : UI.getPixelsFromDp(getBaseContext(), 10);
+                super.getItemOffsets(out_rect, view, parent, state);
+                out_rect.right = (parent.getChildAdapterPosition(view) == parent.getAdapter().getItemCount() - 1) ? 0 : UI.getPixelsFromDp(getBaseContext(), 10);
             }
         });
         mEmptyView = findViewById(R.id.empty_view);
@@ -163,9 +163,10 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         mOpenAppSettingsButton.setOnClickListener(this);
         mCopyToClipboardButton = (FloatingActionButton) findViewById(R.id.copy_to_clipboard);
         mCopyToClipboardButton.setOnClickListener(this);
+        mCopyToClipboardButton.setTag(null);
         mAddAccountDataButton = (FloatingActionButton) findViewById(R.id.add_account_data);
         mAddAccountDataButton.setOnClickListener(this);
-        mFabButtonShowOrHide = new FabButtonShowOrHide(mAccountsListRecyclerView, false, new FloatingActionButton[] { mSyncServerDataButton, mAddAccountDataButton, mOpenAppSettingsButton }, null);
+        mFabButtonShowOrHide = new FabButtonShowOrHide(mAccountsListRecyclerView, false, new FloatingActionButton[] { mSyncServerDataButton, mAddAccountDataButton, mOpenAppSettingsButton }, null, FabButtonShowOrHide.DisplayState.VISIBLE);
         mRemainingOtpTimeProgressBar = (ProgressBar) findViewById(R.id.otp_time);
         mFilterTextEditText = (EditText) findViewById(R.id.filter_text);
         mFilterTextEditText.addTextChangedListener(this);
@@ -187,17 +188,13 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     // On hide, we lock the app then, if activity is not being finish, we hide accounts (and header and list index)
 
     @Override
-    protected void onResumeFirstTime() {
-        super.onResumeFirstTime();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         if (MainService.getLastSyncTime(this) > mLastLoadTime) { loadData(); }
         setListenForKeyboardPresence(true);
         MainService.addListener(this);
         setSyncDataButtonAvailability();
+        setAccountsListIndexBounds();
         unlock();
     }
 
@@ -217,21 +214,20 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         super.onPause();
     }
 
-    // Cosmetic functions to show accounts list index only if portrait mode and keyboard not visible
+    // Cosmetic functions to show accounts list index only in portrait mode and keyboard not visible
 
     private void setAccountsListIndexBounds() {
         final ViewGroup.MarginLayoutParams button_params = (ViewGroup.MarginLayoutParams) mOpenAppSettingsButton.getLayoutParams();
-        int button_height = UI.getPixelsFromDp(this, 56) + button_params.topMargin + button_params.bottomMargin, number_of_visible_buttons = 3;
-        if (mCopyToClipboardButton.getVisibility() == View.VISIBLE) { number_of_visible_buttons ++; }
+        int button_height = UI.getHeight(mOpenAppSettingsButton) + button_params.topMargin + button_params.bottomMargin, number_of_visible_buttons = 3;
+        if (mCopyToClipboardButton.getTag() != null) { number_of_visible_buttons ++; }
         ViewGroup.MarginLayoutParams list_index_container_params = (ViewGroup.MarginLayoutParams) mAccountsListIndexContainer.getLayoutParams();
         list_index_container_params.bottomMargin = number_of_visible_buttons * button_height + button_params.topMargin + button_params.bottomMargin;
         mAccountsListIndexContainer.setLayoutParams(list_index_container_params);
     }
 
     private void setAccountsListIndexVisibility() {
-        final boolean accounts_list_index_container_will_be_visible = ((! Lists.isEmptyOrNull(mFilteredAccounts)) && mAlphaSortedAccounts && mUnlocked && (! mKeyboardVisible) && UI.isInPortraitMode(this)), fab_buttons_is_showing_elements = (mFabButtonShowOrHide.getDisplayState() != FabButtonShowOrHide.DisplayState.HIDDEN);
-        if (fab_buttons_is_showing_elements && accounts_list_index_container_will_be_visible) { UI.animateShowOrHide(mAccountsListIndexContainer, true, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
-        setAccountsListIndexBounds();
+        final boolean accounts_list_index_container_will_be_visible = ((! Lists.isEmptyOrNull(mFilteredAccounts)) && mAlphaSortedAccounts && mUnlocked && (! mKeyboardVisible) && UI.isInPortraitMode(this));
+        if (! accounts_list_index_container_will_be_visible) { UI.animateShowOrHide(mAccountsListIndexContainer, false, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
         mFabButtonShowOrHide.setOtherViews(accounts_list_index_container_will_be_visible ? new View[] { mAccountsListIndexContainer } : null, true);
     }
 
@@ -243,12 +239,11 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         ((GridLayoutManager) mAccountsListRecyclerView.getLayoutManager()).setSpanCount(UI.isInPortraitMode(this) ? preferences.getInt(Constants.ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY, resources.getInteger(R.integer.accounts_list_columns_portrait)) : preferences.getInt(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY, resources.getInteger(R.integer.accounts_list_columns_landscape)));
         mAccountsListRecyclerView.getAdapter().notifyDataSetChanged();
         setAccountsListIndexVisibility();
+        setAccountsListIndexBounds();
     }
 
     @Override
-    protected void onKeyboardVisibikityChange(final boolean visible) {
-        setAccountsListIndexVisibility();
-    }
+    protected void onKeyboardVisibilityChange(final boolean visible) { setAccountsListIndexVisibility(); }
 
     // Functions related to app unlock (PIN / Fingerprint)
     // Unlock function is triggered each time activity becomes visible.
@@ -267,9 +262,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         }
     }
 
-    public void onAuthenticationError(@Nullable final Object object) {
-        finish();
-    }
+    public void onAuthenticationError(@Nullable final Object object) { finish(); }
 
     private void unlock() {
         if (mUnlocked) { onAuthenticationSuccess(null); }
@@ -306,7 +299,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         UI.startRotationAnimation(mAddAccountDataButton, Constants.BUTTON_CLICK_ANIMATION_BEFORE_START_ACTION_DEGREES, Constants.BUTTON_360_DEGREES_ROTATION_ANIMATION_DURATION, new UI.OnAnimationEndListener() {
             @Override
             public void onAnimationEnd(View view) {
-                startActivityForResult(SelectHowAddAccountDataActivity.class);
+                startActivityForResult(AddAccountDataActivity.class);
             }
         });
     }
@@ -331,6 +324,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         mRemainingOtpTimeProgressBar.setVisibility(TwoFactorAccount.isHotp(otp_type) ? View.INVISIBLE : View.VISIBLE);
         if (mFabButtonShowOrHide.getDisplayState() != FabButtonShowOrHide.DisplayState.HIDDEN) { UI.animateShowOrHide(mCopyToClipboardButton, true, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
         mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { mSyncServerDataButton, mAddAccountDataButton, mOpenAppSettingsButton, mCopyToClipboardButton });
+        mCopyToClipboardButton.setTag(true);
         setAccountsListIndexBounds();
     }
 
@@ -344,8 +338,13 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     public void onOtpCodeHidden() {
         mRemainingOtpTimeProgressBar.setVisibility(View.INVISIBLE);
         mFabButtonShowOrHide.setFloatingActionButtons(new FloatingActionButton[] { mSyncServerDataButton, mAddAccountDataButton, mOpenAppSettingsButton });
-        UI.animateShowOrHide(mCopyToClipboardButton, false, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
-        setAccountsListIndexBounds();
+        UI.animateShowOrHide(mCopyToClipboardButton, false, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, new UI.OnAnimationEndListener() {
+            @Override
+            public void onAnimationEnd(View view) {
+                mCopyToClipboardButton.setTag(null);
+                setAccountsListIndexBounds();
+            }
+        });
     }
 
     @Override
@@ -355,7 +354,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         startActivityForResult(EditAccountDataActivity.class, bundle);
     }
 
-    // Set "sync server data" and "add account data" buttons availability
+    // Set Fab buttons availability
 
     private void setSyncDataButtonAvailability() {
         if (! isFinishedOrFinishing()) {
@@ -534,7 +533,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
                     onAppearanceOptionsChanged();
                 }
             }
-            else if (EditAccountDataActivity.class.getName().equals(mStartedActivityForResult) || SelectHowAddAccountDataActivity.class.getName().equals(mStartedActivityForResult)) {
+            else if (EditAccountDataActivity.class.getName().equals(mStartedActivityForResult) || AddAccountDataActivity.class.getName().equals(mStartedActivityForResult)) {
                 loadData();
             }
         }

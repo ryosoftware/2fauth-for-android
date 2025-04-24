@@ -84,18 +84,50 @@ public class ServerDataSynchronizer
             mIdentityToSynchronize = identity_to_synchronize;
         }
 
-        private void synchronizeGroupsData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorGroup> local_loaded_groups, final boolean raise_exception_on_network_error) throws Exception {
-            if (local_loaded_groups != null) {
-                for (final TwoFactorGroup group : local_loaded_groups) {
-                    API.syncGroup(database, mService, group, raise_exception_on_network_error);
+        private void synchronizeIconsData(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorServerIdentity server_identity, @Nullable final List<TwoFactorIcon> local_loaded_icons, final boolean raise_exception_on_network_error) throws Exception {
+            if (local_loaded_icons != null) {
+                for (final TwoFactorIcon icon : local_loaded_icons) {
+                    API.synchronizeIcon(server_identity, database, mService, icon, raise_exception_on_network_error);
                 }
             }
         }
 
-        private void synchronizeAccountsData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorAccount> local_loaded_accounts, final boolean raise_exception_on_network_error) throws Exception {
+        private void synchronizeGroupsData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorGroup> local_loaded_groups, final boolean raise_exception_on_network_error) throws Exception {
+            if (local_loaded_groups != null) {
+                for (final TwoFactorGroup group : local_loaded_groups) {
+                    API.synchronizeGroup(database, mService, group, raise_exception_on_network_error);
+                }
+            }
+        }
+
+        private void synchronizeAccountsData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorAccount> local_loaded_accounts, @Nullable final List<TwoFactorGroup> local_loaded_groups, @Nullable final List<TwoFactorIcon> local_loaded_icons, final boolean raise_exception_on_network_error) throws Exception {
             if (local_loaded_accounts != null) {
+                final Map<Long, TwoFactorGroup> local_loaded_groups_map = (local_loaded_groups == null) ? null : new HashMap<Long, TwoFactorGroup>();
+                final Map<Long, TwoFactorIcon> local_loaded_icons_map = (local_loaded_icons == null) ? null : new HashMap<Long, TwoFactorIcon>();
+                if (local_loaded_groups != null) {
+                    for (final TwoFactorGroup local_loaded_group : local_loaded_groups) {
+                        local_loaded_groups_map.put(local_loaded_group.getRowId(), local_loaded_group);
+                    }
+                }
+                if (local_loaded_icons != null) {
+                    for (final TwoFactorIcon local_loaded_icon : local_loaded_icons) {
+                        local_loaded_icons_map.put(local_loaded_icon.getRowId(), local_loaded_icon);
+                    }
+                }
                 for (final TwoFactorAccount account : local_loaded_accounts) {
-                    API.syncAccount(database, mService, account, raise_exception_on_network_error);
+                    boolean will_be_synchronized = account.isDeleted() || (! account.isSynced());
+                    if (account.hasGroup() && (local_loaded_groups_map != null) && local_loaded_groups_map.containsKey(account.getGroup().getRowId())) {
+                        account.setGroup(local_loaded_groups_map.get(account.getGroup().getRowId()));
+                        will_be_synchronized = true;
+                    }
+                    if (account.hasIcon() && (local_loaded_icons_map != null) && local_loaded_icons_map.containsKey(account.getIcon().getRowId())) {
+                        account.setIcon(local_loaded_icons_map.get(account.getIcon().getRowId()));
+                        will_be_synchronized = true;
+                    }
+                    if (will_be_synchronized) {
+                        if (account.isSynced()) { account.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED); }
+                        API.synchronizeAccount(database, mService, account, raise_exception_on_network_error);
+                    }
                 }
             }
         }
@@ -223,11 +255,12 @@ public class ServerDataSynchronizer
                                     // Refresh server identity data
                                     API.refreshIdentityData(server_identity, true);
                                     // Synchronize out of sync accounts and groups (deleted, updated or added accounts) with server before start download
-                                    // We do not raise error if we can't sync accounts at this stage
-                                    List<TwoFactorGroup> not_synced_groups = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database, server_identity, true);
-                                    List<TwoFactorAccount> not_synced_accounts = Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().get(database, server_identity, true, null);
-                                    synchronizeGroupsData(database, not_synced_groups, false);
-                                    synchronizeAccountsData(database, not_synced_accounts, false);
+                                    final List<TwoFactorIcon> not_synced_icons = Main.getInstance().getDatabaseHelper().getTwoFactorIconsHelper().get(database, server_identity, true);
+                                    final List<TwoFactorGroup> not_synced_groups = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database, server_identity, true);
+                                    final List<TwoFactorAccount> not_synced_accounts = Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().get(database, server_identity, false, null);
+                                    synchronizeIconsData(database, server_identity, not_synced_icons, true);
+                                    synchronizeGroupsData(database, not_synced_groups, true);
+                                    synchronizeAccountsData(database, not_synced_accounts, not_synced_groups, not_synced_icons, true);
                                     // Gets server data (we raise an exception if we can't access data)
                                     final List<JSONObject> server_loaded_accounts_raw = API.getAccounts(server_identity, true);
                                     final List<TwoFactorGroup> server_loaded_groups = API.getGroups(server_identity, true);

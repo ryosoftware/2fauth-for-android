@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
+    android:background="?attr/selectableItemBackground"
     android:orientation="vertical">
 
     <LinearLayout
@@ -70,12 +71,19 @@
                 android:textColor="?android:textColorSecondary"
                 style="@style/Base.TextAppearance.AppCompat.Body1" />
 
-            <include
+            <TextView
                 android:id="@+id/group"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                layout="@layout/account_group" />
+                android:paddingTop="10dp"
+                android:paddingStart="20dp"
+                android:paddingBottom="10dp"
+                android:paddingEnd="20dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/border_frame_not_clickable"
+                android:background="@drawable/border_frame_not_clickable"
+                style="@style/Base.TextAppearance.AppCompat.Body2" />
 
             <LinearLayout
                 android:id="@+id/otp_container"

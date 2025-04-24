@@ -392,9 +392,9 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
     public void onServerIdentityDeleted(boolean success) {
         if (isAdded()) {
             mRunningTasks = false;
-            if (success) { setFragmentResultThenFinish(EditIdentityResultType.DELETED); return; }
-            setButtonsAvailability();
-            UI.showToast(getContext(), R.string.cannot_process_request_due_to_an_internal_error);
+            UI.showToast(getContext(), success ? R.string.server_identity_has_been_deleted : R.string.cannot_process_request_due_to_an_internal_error);
+            if (success) { setFragmentResultThenFinish(EditIdentityResultType.DELETED); }
+            else { setButtonsAvailability(); }
         }
     }
 

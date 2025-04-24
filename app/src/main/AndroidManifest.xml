@@ -53,7 +53,7 @@
             android:theme="@style/Theme.AppTheme" />
 
         <activity
-            android:name=".SelectHowAddAccountDataActivity"
+            android:name=".AddAccountDataActivity"
             android:exported="true"
             android:theme="@style/Theme.AppTheme" />
 

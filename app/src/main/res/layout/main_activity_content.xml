@@ -46,7 +46,7 @@
                     android:drawablePadding="5dp"
                     android:inputType="text"
                     android:hint="@string/search"
-                    android:background="@drawable/border_frame_transparent" />
+                    android:background="@drawable/border_frame" />
 
                 <ImageButton
                     android:id="@+id/server_identity_selector"
@@ -96,12 +96,10 @@
             android:layout_alignParentEnd="true"
             android:layout_below="@id/accounts_list_header"
             android:layout_marginEnd="@dimen/fab_margin"
-            android:layout_marginTop="@dimen/fab_margin"
-            android:layout_marginBottom="345dp"
             android:layout_alignWithParentIfMissing="true"
             android:elevation="6dp"
             android:stateListAnimator="@null"
-            android:background="@drawable/border_frame_solid_no_border"
+            android:background="@drawable/floating_action_button_background"
             android:orientation="vertical"
             android:visibility="gone">
 

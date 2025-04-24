@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
+    android:background="?attr/selectableItemBackground"
     android:orientation="vertical">
 
     <TextView
@@ -14,7 +15,6 @@
         android:layout_margin="10dp"
         android:layout_gravity="center"
         android:maxLines="1"
-        android:textColor="@color/accent_foreground"
         style="@style/Base.TextAppearance.AppCompat.Body1" />
 
 </LinearLayout>
