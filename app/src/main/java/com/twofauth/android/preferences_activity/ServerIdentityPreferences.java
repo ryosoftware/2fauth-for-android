@@ -66,6 +66,9 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
 
     private static enum AuthenticatedActions { DELETE_SERVER_IDENTITY, ENABLE_SERVER_IDENTITY_EDITION, MANAGE_GROUPS, COPY_TOKEN_TO_CLIPBOARD };
 
+    private static final String HTTPS_PROTOCOL = "https://";
+    private static final String HTTP_PROTOCOL = "http://";
+
     private boolean mAnimatingSyncDataButton = false;
 
     private final List<TwoFactorServerIdentityWithSyncDataAndAccountNumbers> mServerIdentities;
@@ -465,9 +468,9 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
                 }
             }
             else if (SERVER_LOCATION_KEY.equals(preference.getKey())) {
-                final String trimmed_new_value = new_value.toString().trim();
+                final String trimmed_new_value = standarizeUrl(new_value.toString());
                 if (! Strings.equals(trimmed_new_value, mCurrentServerIdentity.storedData.getServer())) {
-                    if (trimmed_new_value.toLowerCase().startsWith("http:")) {
+                    if (trimmed_new_value.toLowerCase().startsWith(HTTP_PROTOCOL)) {
                         UI.showConfirmDialog(getActivity(), R.string.server_http_is_insecure_warning, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -502,6 +505,13 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
             }
         }
         return false;
+    }
+
+    private @NotNull String standarizeUrl(@NotNull final String url) {
+        String standarized_url = url.trim().replaceAll("/+$", "");
+        final String standarized_url_lowercased = standarized_url.toLowerCase();
+        if ((! standarized_url_lowercased.startsWith(HTTPS_PROTOCOL)) && (! standarized_url_lowercased.startsWith(HTTP_PROTOCOL))) { standarized_url = HTTPS_PROTOCOL + standarized_url; }
+        return standarized_url;
     }
 
     // Events related to the authentication
