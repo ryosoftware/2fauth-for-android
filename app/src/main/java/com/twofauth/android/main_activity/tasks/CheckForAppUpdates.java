@@ -50,7 +50,9 @@ public class CheckForAppUpdates {
     private static final String APK_VERSION_DETAILS_NAME = "app-release-data.json";
 
     public interface OnCheckForUpdatesListener {
-        public abstract void onCheckForUpdatesFinished(File downloaded_app_file, AppVersionData downloaded_app_version);
+        public abstract void onCheckForUpdatesUpdateFound(File downloaded_app_file, AppVersionData downloaded_app_version);
+        public abstract void onCheckForUpdatesNoUpdates();
+        public abstract void onCheckForUpdatesError(String error);
     }
 
     public static class AppVersionData {
@@ -227,14 +229,16 @@ public class CheckForAppUpdates {
             }
             catch (Exception e) {
                 Log.e(Main.LOG_TAG_NAME, "Exception while checking for app updates", e);
+                return e;
             }
             return null;
         }
 
-
         @Override
         public void onBackgroundTaskFinished(@Nullable final Object data) {
-            if (data != null) { mListener.onCheckForUpdatesFinished(((DownloadedAppVersionData) data).file, ((DownloadedAppVersionData) data).version); }
+            if (data == null) { mListener.onCheckForUpdatesNoUpdates(); }
+            else if (data instanceof DownloadeableAppVersionData) { mListener.onCheckForUpdatesUpdateFound(((DownloadedAppVersionData) data).file, ((DownloadedAppVersionData) data).version); }
+            else { mListener.onCheckForUpdatesError(((Exception) data).getMessage()); }
         }
     }
 
