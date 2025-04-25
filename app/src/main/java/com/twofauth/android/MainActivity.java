@@ -547,10 +547,17 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         if (Preferences.getDefaultSharedPreferences(this).getBoolean(Constants.AUTO_UPDATE_APP_KEY, getResources().getBoolean(R.bool.auto_update_app))) { CheckForAppUpdates.getBackgroundTask(this, this).start(); }
     }
 
-    public void onCheckForUpdatesFinished(@NotNull final File downloaded_app_file, @NotNull final AppVersionData downloaded_app_version)
+    @Override
+    public void onCheckForUpdatesUpdateFound(@NotNull final File downloaded_app_file, @NotNull final AppVersionData downloaded_app_version)
     {
         if (! isFinishedOrFinishing()) { onCheckForUpdatesFinished(this, false, downloaded_app_file, downloaded_app_version); }
     }
+
+    @Override
+    public void onCheckForUpdatesNoUpdates() {}
+
+    @Override
+    public void onCheckForUpdatesError(@Nullable final String error) {}
 
     public static void onCheckForUpdatesFinished(@NotNull final Activity activity, final boolean force, @NotNull final File downloaded_app_file, @NotNull final AppVersionData downloaded_app_version)
     {

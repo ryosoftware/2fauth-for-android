@@ -276,11 +276,30 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         return true;
     }
 
-    // Called when a update is available
+    // Entry point for the check for app updates process
 
     @Override
-    public void onCheckForUpdatesFinished(File downloaded_app_file, CheckForAppUpdates.AppVersionData downloaded_app_version) {
-        if (isAdded()) { MainActivity.onCheckForUpdatesFinished(getActivity(), true, downloaded_app_file, downloaded_app_version); }
+    public void onCheckForUpdatesUpdateFound(File downloaded_app_file, CheckForAppUpdates.AppVersionData downloaded_app_version) {
+        if (isAdded()) {
+            findPreference(CHECK_FOR_UPDATES_KEY).setEnabled(true);
+            MainActivity.onCheckForUpdatesFinished(getActivity(), true, downloaded_app_file, downloaded_app_version);
+        }
+    }
+
+    @Override
+    public void onCheckForUpdatesNoUpdates() {
+        if (isAdded()) {
+            findPreference(CHECK_FOR_UPDATES_KEY).setEnabled(true);
+            UI.showToast(getContext(), R.string.search_for_updates_no_updates);
+        }
+    }
+
+    @Override
+    public void onCheckForUpdatesError(@Nullable final String error) {
+        if (isAdded()) {
+            findPreference(CHECK_FOR_UPDATES_KEY).setEnabled(true);
+            UI.showToast(getContext(), R.string.search_for_updates_error);
+        }
     }
 
     // This procedure is triggered when user tries to disable PIN access and has been properly authenticated

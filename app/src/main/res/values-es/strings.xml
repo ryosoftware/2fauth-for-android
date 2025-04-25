@@ -171,7 +171,9 @@
     <string name="auto_update_app_summary">Cuando inicie la app se conectará con el repositorio para comprobar si existen actualizaciones, procediendo a su descarga y a su instalación, si es el caso</string>
     <string name="there_is_an_update_version">Está usando la versión %1$s de la aplicación, pero la versión %2$s ya está disponible.\n\n¿Desea actualizar ahora?</string>
     <string name="search_for_updates">Comprobar actualizaciónes ahora</string>
-    <string name="search_for_updates_summary">Haga clic para comprobar si hay disponible alguna actualización de la app e instalarla, si es el caso</string>
+    <string name="search_for_updates_summary">Haga clic para comprobar ahora, independientemente del tipo de conexión, si hay disponible alguna actualización de la app e instalarla, si es el caso</string>
+    <string name="search_for_updates_no_updates">No se han encontrado actualizaciones</string>
+    <string name="search_for_updates_error">Se ha producido un error al buscar actualizaciones de la appp</string>
 
     <string name="auto_update_app_include_prereleases">Incluir versiones preliminares</string>
     <string name="auto_update_app_include_prereleases_summary">Las versiones preliminares incluyen nuevas funcionalidades, que pueden ser inestables; las funcionalidades anteriores también pueden resultar afectadas.\nPor favor, no olvide reportar cualquier error de funcionamiento que encuentre</string>
