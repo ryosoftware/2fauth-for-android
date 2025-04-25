@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class ServerDataSynchronizer
 {
-    public static final int SYNCHRONIZE_ALL_IDENTITIES = 0;
+    public static final long SYNCHRONIZE_ALL_IDENTITIES = 0;
 
     private static class ServerDataSynchronizerImplementation implements OnBackgroundTaskExecutionListener {
         private static class TwoFactorGroupUtils {

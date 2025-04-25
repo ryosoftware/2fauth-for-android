@@ -47,7 +47,7 @@ public class MainService extends Service {
     private SyncResultType mSyncResultType = null;
 
     private static boolean mIsAppStartup;
-    private static int mIdentityToSynchronize;
+    private static long mIdentityToSynchronize;
 
     @Override
     public void onCreate() {
@@ -73,7 +73,7 @@ public class MainService extends Service {
                 if (mIsAppStartup) { task = ServerDataSynchronizer.getBackgroundTask(this, true); }
             }
             if ((task == null) && intent.hasExtra(EXTRA_IDENTITY_TO_SYNCHRONIZE)) {
-                mIdentityToSynchronize = intent.getIntExtra(EXTRA_IDENTITY_TO_SYNCHRONIZE, ServerDataSynchronizer.SYNCHRONIZE_ALL_IDENTITIES);
+                mIdentityToSynchronize = intent.getLongExtra(EXTRA_IDENTITY_TO_SYNCHRONIZE, ServerDataSynchronizer.SYNCHRONIZE_ALL_IDENTITIES);
                 task = ServerDataSynchronizer.getBackgroundTask(this, mIdentityToSynchronize);
             }
         }
