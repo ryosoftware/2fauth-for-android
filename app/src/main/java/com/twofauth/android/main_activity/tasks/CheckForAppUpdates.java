@@ -237,7 +237,7 @@ public class CheckForAppUpdates {
         @Override
         public void onBackgroundTaskFinished(@Nullable final Object data) {
             if (data == null) { mListener.onCheckForUpdatesNoUpdates(); }
-            else if (data instanceof DownloadeableAppVersionData) { mListener.onCheckForUpdatesUpdateFound(((DownloadedAppVersionData) data).file, ((DownloadedAppVersionData) data).version); }
+            else if (data instanceof DownloadedAppVersionData) { mListener.onCheckForUpdatesUpdateFound(((DownloadedAppVersionData) data).file, ((DownloadedAppVersionData) data).version); }
             else { mListener.onCheckForUpdatesError(((Exception) data).getMessage()); }
         }
     }
