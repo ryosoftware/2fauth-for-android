@@ -20,6 +20,7 @@ To do this, we have developed an Android App that reads 2FA accounts from a user
 - Alphabetic/last use sorting
 - Search by name/issuer
 - Shortcuts to fast access to accounts by first service name letter or by group
+- Add an account by QR code or by a form (QR code is not shared with other than your server)
 - Full Groups and icons management
 - Icons not at your 2FA server are downloaded from other sources (optionally)
 - Ability to copy server token or account secret code
