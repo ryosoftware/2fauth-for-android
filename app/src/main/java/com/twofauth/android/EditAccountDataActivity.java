@@ -205,6 +205,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
 
     private boolean mEditing = false;
 
+    private boolean mAddingIconFromQrCode;
+
     @Override
     protected void onCreate(@Nullable final Bundle saved_instance_state) {
         super.onCreate(saved_instance_state);
@@ -264,7 +266,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mWorking = findViewById(R.id.working);
         mContents = findViewById(R.id.contents);
         final Intent intent = getIntent();
-        if (intent.hasExtra(EXTRA_ACCOUNT_DATA)) { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getStringExtra(EXTRA_ACCOUNT_DATA), this); }
+        mAddingIconFromQrCode = intent.hasExtra(EXTRA_ACCOUNT_DATA);
+        if (mAddingIconFromQrCode) { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getStringExtra(EXTRA_ACCOUNT_DATA), this); }
         else { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getLongExtra(EXTRA_ACCOUNT_ID, -1), this); }
         mDataLoader.start();;
     }
@@ -545,7 +548,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             mServerIdentities = server_identities;
             mGroups = (groups == null) ? new HashMap<Long, List<TwoFactorGroup>>() : groups;
             mInitialAccountData = account;
-            mInitialAccountData.setOtpType(account.inDatabase() ? account.getOtpType() : null);
+            mInitialAccountData.setOtpType(account.inDatabase() || mAddingIconFromQrCode ? account.getOtpType() : null);
             if (! mInitialAccountData.hasServerIdentity()) { mInitialAccountData.setServerIdentity(mServerIdentities.get(0)); }
             mDeleteOrUndeleteAccountDataButton.setImageResource(mInitialAccountData.isDeleted() ? R.drawable.ic_actionbar_undelete : R.drawable.ic_actionbar_delete);
             mCurrentAccountData = new TwoFactorAccount(mInitialAccountData);
