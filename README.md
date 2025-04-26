@@ -31,7 +31,7 @@ To do this, we have developed an Android App that reads 2FA accounts from a user
 
 # VIDEOS
 
-[1](assets/Screenshots/1.jpg) [2](assets/Screenshots/2.jpg)
+[1](assets/Videos/1.mp4) [2](assets/Videos/2.mp4)
 
 # CONTACT
 
