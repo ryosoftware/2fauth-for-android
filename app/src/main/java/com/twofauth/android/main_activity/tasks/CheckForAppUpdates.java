@@ -236,6 +236,7 @@ public class CheckForAppUpdates {
 
         @Override
         public void onBackgroundTaskFinished(@Nullable final Object data) {
+            Preferences.getDefaultSharedPreferences(mContext).edit().putLong(Constants.LAST_CHECK_FOR_UPDATES_TIME_KEY, System.currentTimeMillis()).apply();
             if (data == null) { mListener.onCheckForUpdatesNoUpdates(); }
             else if (data instanceof DownloadedAppVersionData) { mListener.onCheckForUpdatesUpdateFound(((DownloadedAppVersionData) data).file, ((DownloadedAppVersionData) data).version); }
             else { mListener.onCheckForUpdatesError(((Exception) data).getMessage()); }
