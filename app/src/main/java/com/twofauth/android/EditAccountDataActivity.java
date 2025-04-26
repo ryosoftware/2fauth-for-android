@@ -205,6 +205,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
 
     private boolean mEditing = false;
 
+    private boolean mAddingIconFromQrCode;
+
     @Override
     protected void onCreate(@Nullable final Bundle saved_instance_state) {
         super.onCreate(saved_instance_state);
@@ -264,7 +266,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mWorking = findViewById(R.id.working);
         mContents = findViewById(R.id.contents);
         final Intent intent = getIntent();
-        if (intent.hasExtra(EXTRA_ACCOUNT_DATA)) { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getStringExtra(EXTRA_ACCOUNT_DATA), this); }
+        mAddingIconFromQrCode = intent.hasExtra(EXTRA_ACCOUNT_DATA);
+        if (mAddingIconFromQrCode) { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getStringExtra(EXTRA_ACCOUNT_DATA), this); }
         else { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getLongExtra(EXTRA_ACCOUNT_ID, -1), this); }
         mDataLoader.start();;
     }
@@ -470,6 +473,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mIconSourceTextView.setText(R.string.icon_source_local_storage);
         mIconImageView.setImageBitmap(bitmap);
         for (final View view : new View[] { mIconSourceTextView, mDeleteIconButton, mIconImageView }) { view.setVisibility(View.VISIBLE); }
+        mDeleteIconButton.setEnabled(true);
         mCopyIconToServerButton.setVisibility(View.GONE);
         setButtonsAvailability();
     }
@@ -505,9 +509,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         final String icon_source = has_icon ? mCurrentAccountData.getIcon().getSource() : null;
         mIconImageView.setImageBitmap(has_icon ? mCurrentAccountData.getIcon().getBitmap(this) : null);
         mIconSourceTextView.setText(API.ICON_SOURCE_DEFAULT.equals(icon_source) ? getString(R.string.icon_source_bubka) : API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? getString(R.string.icon_source_dashboard_icons) : getString(R.string.icon_source_local_storage));
-        mIconSourceTextView.setVisibility(has_icon ? View.VISIBLE : View.GONE);
-        mDeleteIconButton.setVisibility(has_icon ? View.VISIBLE : View.GONE);
-        mCopyIconToServerButton.setVisibility(API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? View.VISIBLE : View.GONE);
+        for (final View view : new View[] { mIconImageView, mIconSourceTextView, mDeleteIconButton }) {
+            view.setVisibility(has_icon ? View.VISIBLE : View.GONE);
+        }
+        mCopyIconToServerButton.setVisibility(has_icon && API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? View.VISIBLE : View.GONE);
         final ArrayAdapter<String> server_identities_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, TwoFactorServerIdentitiesUtils.getNames(mServerIdentities));
         server_identities_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mServerIdentitySpinner.setAdapter(server_identities_adapter);
@@ -543,7 +548,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             mServerIdentities = server_identities;
             mGroups = (groups == null) ? new HashMap<Long, List<TwoFactorGroup>>() : groups;
             mInitialAccountData = account;
-            mInitialAccountData.setOtpType(account.inDatabase() ? account.getOtpType() : null);
+            mInitialAccountData.setOtpType(account.inDatabase() || mAddingIconFromQrCode ? account.getOtpType() : null);
             if (! mInitialAccountData.hasServerIdentity()) { mInitialAccountData.setServerIdentity(mServerIdentities.get(0)); }
             mDeleteOrUndeleteAccountDataButton.setImageResource(mInitialAccountData.isDeleted() ? R.drawable.ic_actionbar_undelete : R.drawable.ic_actionbar_delete);
             mCurrentAccountData = new TwoFactorAccount(mInitialAccountData);
