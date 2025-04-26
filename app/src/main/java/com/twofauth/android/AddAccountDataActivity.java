@@ -154,7 +154,7 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
                     account.setServerIdentity(mServerIdentities.get(mServerIdentitySpinner.getSelectedItemPosition()));
                     bundle.putString(EditAccountDataActivity.EXTRA_ACCOUNT_DATA, JSON.toString(account.toJSONObject()));
                     mChoosingImage = false;
-                    startActivityForResult(EditAccountDataActivity.class, bundle);
+                    addAccountFromQR(bundle);
                 }
                 catch (JSONException e) {
                     UI.showToast(this, R.string.cannot_process_request_due_to_an_internal_error);
@@ -162,6 +162,10 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
                 }
             }
         }
+    }
+
+    private void addAccountFromQR(@NotNull final Bundle bundle) {
+        startActivityForResult(EditAccountDataActivity.class, bundle);
     }
 
     // User interacion
