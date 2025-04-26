@@ -470,6 +470,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mIconSourceTextView.setText(R.string.icon_source_local_storage);
         mIconImageView.setImageBitmap(bitmap);
         for (final View view : new View[] { mIconSourceTextView, mDeleteIconButton, mIconImageView }) { view.setVisibility(View.VISIBLE); }
+        mDeleteIconButton.setEnabled(true);
         mCopyIconToServerButton.setVisibility(View.GONE);
         setButtonsAvailability();
     }
@@ -505,9 +506,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         final String icon_source = has_icon ? mCurrentAccountData.getIcon().getSource() : null;
         mIconImageView.setImageBitmap(has_icon ? mCurrentAccountData.getIcon().getBitmap(this) : null);
         mIconSourceTextView.setText(API.ICON_SOURCE_DEFAULT.equals(icon_source) ? getString(R.string.icon_source_bubka) : API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? getString(R.string.icon_source_dashboard_icons) : getString(R.string.icon_source_local_storage));
-        mIconSourceTextView.setVisibility(has_icon ? View.VISIBLE : View.GONE);
-        mDeleteIconButton.setVisibility(has_icon ? View.VISIBLE : View.GONE);
-        mCopyIconToServerButton.setVisibility(API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? View.VISIBLE : View.GONE);
+        for (final View view : new View[] { mIconImageView, mIconSourceTextView, mDeleteIconButton }) {
+            view.setVisibility(has_icon ? View.VISIBLE : View.GONE);
+        }
+        mCopyIconToServerButton.setVisibility(has_icon && API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? View.VISIBLE : View.GONE);
         final ArrayAdapter<String> server_identities_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, TwoFactorServerIdentitiesUtils.getNames(mServerIdentities));
         server_identities_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mServerIdentitySpinner.setAdapter(server_identities_adapter);
