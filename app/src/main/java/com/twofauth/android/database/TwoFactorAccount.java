@@ -336,10 +336,12 @@ public class TwoFactorAccount extends SynceableTableRow {
             object.put(Constants.ACCOUNT_DATA_ICON_KEY, hasIcon() && API.ICON_SOURCE_DEFAULT.equals(getIcon().getSource()) ? getIcon().getSourceId() : JSONObject.NULL);
             object.put(Constants.ACCOUNT_DATA_OTP_TYPE_KEY, getOtpType());
             object.put(Constants.ACCOUNT_DATA_SECRET_KEY, getSecret());
-            object.put(Constants.ACCOUNT_DATA_OTP_LENGTH_KEY, getOtpLength());
-            object.put(Constants.ACCOUNT_DATA_ALGORITHM_KEY, getAlgorithm());
-            object.put(Constants.ACCOUNT_DATA_PERIOD_KEY, isTotp() ? getPeriod() : JSONObject.NULL);
-            object.put(Constants.ACCOUNT_DATA_COUNTER_KEY, isHotp() ? getCounter() : JSONObject.NULL);
+            if (! isSteam()) {
+                object.put(Constants.ACCOUNT_DATA_OTP_LENGTH_KEY, getOtpLength());
+                object.put(Constants.ACCOUNT_DATA_ALGORITHM_KEY, getAlgorithm());
+                if (isTotp()) { object.put(Constants.ACCOUNT_DATA_PERIOD_KEY, getPeriod()); }
+                if (isHotp()) { object.put(Constants.ACCOUNT_DATA_COUNTER_KEY, getCounter()); }
+            }
             return object;
         }
         catch (JSONException e) {
