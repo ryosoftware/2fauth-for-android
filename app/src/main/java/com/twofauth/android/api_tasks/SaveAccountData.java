@@ -54,9 +54,10 @@ public class SaveAccountData {
                                 mAccount.save(database, mContext);
                                 mSuccess = true;
                                 if (mAccount.getServerIdentity().isSyncingImmediately()) {
-                                    mSynced = true;
-                                    if ((stored_account != null) && (stored_account.getRowId() != mAccount.getRowId())) { mSynced &= API.synchronizeAccount(database, mContext, stored_account, true); }
-                                    mSynced &= API.synchronizeAccount(database, mContext, mAccount, true);
+                                    boolean synced = true;
+                                    if ((stored_account != null) && (stored_account.getRowId() != mAccount.getRowId())) { synced &= API.synchronizeAccount(database, mContext, stored_account, true); }
+                                    synced &= API.synchronizeAccount(database, mContext, mAccount, true);
+                                    mSynced = synced;
                                 }
                             }
                             finally {
