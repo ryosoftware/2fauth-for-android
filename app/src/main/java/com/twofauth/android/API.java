@@ -188,6 +188,11 @@ public class API {
         return getQR(account.getServerIdentity(), account.getRemoteId(), raise_exception_on_network_error);
     }
 
+    private static @NotNull final JSONObject standarizeAccountJsonObject(@NotNull final JSONObject object) throws Exception {
+        object.put(Constants.ACCOUNT_DATA_SECRET_KEY, object.optString(Constants.ACCOUNT_DATA_SECRET_KEY, "").replace(" ", ""));
+        return object;
+    }
+
     public static boolean synchronizeAccount(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account, boolean raise_exception_on_network_error) throws Exception {
         final URL url = new URL(account.isRemote() ? ACCOUNT_LOCATION.replace("%SERVER%", account.getServerIdentity().getServer()).replace("%ID%", String.valueOf(account.getRemoteId())) : ACCOUNTS_LOCATION.replace("%SERVER%", account.getServerIdentity().getServer()));
         final String authorization = AUTH_TOKEN.replace("%TOKEN%", account.getServerIdentity().getToken());
@@ -225,7 +230,7 @@ public class API {
             if (! account.hasGroup() || synchronizeGroup(database, context, account.getGroup(), raise_exception_on_network_error)) {
                 if (account.isRemote()) {
                     // Is an account that already exists at server, we try to update
-                    final HttpURLConnection connection = HTTP.put(url, authorization, JSON.toString(account.toJSONObject()));
+                    final HttpURLConnection connection = HTTP.put(url, authorization, JSON.toString(standarizeAccountJsonObject(account.toJSONObject())));
                     if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         // Account has been updated
                         account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
@@ -243,7 +248,7 @@ public class API {
                 }
                 else {
                     // Account doesn't exists at remote, we try to add
-                    final HttpURLConnection connection = HTTP.post(url, authorization, JSON.toString(account.toJSONObject()));
+                    final HttpURLConnection connection = HTTP.post(url, authorization, JSON.toString(standarizeAccountJsonObject(account.toJSONObject())));
                     if (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED) {
                         // Account has been added
                         final JSONObject object = JSON.toJSONObject(HTTP.getContentString(connection));
