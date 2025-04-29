@@ -20,11 +20,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +80,14 @@ public class API {
         }
     }
 
+    private static void raiseNetworkErrorException(@NotNull final HttpURLConnection connection) throws Exception {
+        if (connection.getResponseCode() == 422) {
+            final String explained_error = HTTP.getErrorString(connection);
+            if (! Strings.isEmptyOrNull(explained_error)) { throw new Exception(explained_error); }
+        }
+        throw new Exception(connection.getResponseMessage());
+    }
+
     public static boolean refreshIdentityData(@NotNull final TwoFactorServerIdentity server_identity, final boolean raise_exception_on_error) throws Exception {
         final HttpURLConnection connection = HTTP.get(new URL(GET_USER_DATA_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
@@ -87,7 +99,7 @@ public class API {
             return true;
         }
         else if (raise_exception_on_error) {
-            throw new Exception(connection.getResponseMessage());
+            raiseNetworkErrorException(connection);
         }
         return false;
     }
@@ -95,7 +107,7 @@ public class API {
     public static @Nullable List<JSONObject> getAccounts(@NotNull final TwoFactorServerIdentity server_identity, final boolean raise_exception_on_error) throws Exception {
         final HttpURLConnection connection = HTTP.get(new URL(LIST_ACCOUNTS_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return JSON.toListOfJSONObjects(HTTP.getContentString(connection)); }
-        else if (raise_exception_on_error) { throw new Exception(connection.getResponseMessage()); }
+        else if (raise_exception_on_error) { raiseNetworkErrorException(connection); }
         return null;
     }
 
@@ -119,7 +131,7 @@ public class API {
             }
         }
         else if (raise_exception_on_network_error) {
-            throw new Exception(connection.getResponseMessage());
+            raiseNetworkErrorException(connection);
         }
         return null;
     }
@@ -173,14 +185,14 @@ public class API {
     public static @Nullable Bitmap getIcon(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, final boolean raise_exception_on_network_error) throws Exception {
         final HttpURLConnection connection = HTTP.get(new URL(GET_ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", icon_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return Bitmaps.get(connection); }
-        else if (raise_exception_on_network_error) { throw new Exception(connection.getResponseMessage()); }
+        else if (raise_exception_on_network_error) { raiseNetworkErrorException(connection); }
         return null;
     }
 
     public static @Nullable String getQR(@NotNull final TwoFactorServerIdentity server_identity, final int account_id, final boolean raise_exception_on_network_error) throws Exception {
         final HttpURLConnection connection = HTTP.get(new URL(ACCOUNT_QR_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%ID%", String.valueOf(account_id))), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return JSON.toJSONObject(HTTP.getContentString(connection)).optString(QR_CODE_JSON_KEY); }
-        else if (raise_exception_on_network_error) { throw new Exception(connection.getResponseMessage()); }
+        else if (raise_exception_on_network_error) { raiseNetworkErrorException(connection); }
         return null;
     }
 
@@ -188,7 +200,7 @@ public class API {
         return getQR(account.getServerIdentity(), account.getRemoteId(), raise_exception_on_network_error);
     }
 
-    private static @NotNull final JSONObject standarizeAccountJsonObject(@NotNull final JSONObject object) throws Exception {
+    private static @NotNull JSONObject standarizeAccountJsonObject(@NotNull final JSONObject object) throws Exception {
         object.put(Constants.ACCOUNT_DATA_SECRET_KEY, object.optString(Constants.ACCOUNT_DATA_SECRET_KEY, "").replace(" ", ""));
         return object;
     }
@@ -212,7 +224,7 @@ public class API {
                     return true;
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
             }
             else {
@@ -243,7 +255,7 @@ public class API {
                         return true;
                     }
                     else if (raise_exception_on_network_error) {
-                        throw new Exception(connection.getResponseMessage());
+                        raiseNetworkErrorException(connection);
                     }
                 }
                 else {
@@ -258,7 +270,7 @@ public class API {
                         return true;
                     }
                     else if (raise_exception_on_network_error) {
-                        throw new Exception(connection.getResponseMessage());
+                        raiseNetworkErrorException(connection);
                     }
                 }
             }
@@ -286,7 +298,7 @@ public class API {
                     return true;
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
             }
             else {
@@ -313,7 +325,7 @@ public class API {
                     return true;
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
             }
             else {
@@ -328,7 +340,7 @@ public class API {
                     return true;
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
             }
             return false;
@@ -354,7 +366,7 @@ public class API {
                     else { icon.save(database, context); }
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
                 else {
                     success = false;
@@ -369,7 +381,7 @@ public class API {
                     icon.save(database, context);
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
                 else {
                     success = false;
