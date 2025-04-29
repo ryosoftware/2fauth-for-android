@@ -36,24 +36,8 @@ public class SaveAccountData {
             mListener = listener;
         }
 
-        private void downloadAccountIconFromExternalSources(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorAccount account) {
-            if (Preferences.getDefaultSharedPreferences(mContext).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, mContext.getResources().getBoolean(R.bool.download_icons_from_external_sources)) && ((! account.hasIcon()) || (! account.getIcon().hasBitmaps(mContext)))) {
-                try {
-                    API.setIconFromExternalSource(database, mContext, account);
-                }
-                catch (Exception e) {
-                    Log.e(Main.LOG_TAG_NAME, "Exception while trying to download an icon", e);
-                }
-            }
-        }
-
         private boolean synchronizeAccount(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorAccount account) throws Exception {
-            downloadAccountIconFromExternalSources(database, account);
-            if (account.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, account, true)) {
-                downloadAccountIconFromExternalSources(database, account);
-                return true;
-            }
-            return false;
+            return (account.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, account, true));
         }
 
         @Override

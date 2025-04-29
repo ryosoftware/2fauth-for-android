@@ -144,48 +144,47 @@ public class API {
         return null;
     }
 
+    public static TwoFactorIcon getIcon(@NotNull final TwoFactorServerIdentity server_identity, @Nullable final String server_icon_file, @Nullable final String service, @Nullable final Map<String, TwoFactorIcon> icons_map_by_icon_file, @Nullable final Map<String, TwoFactorIcon> icons_map_by_service, final boolean download_icons_from_external_sources, final boolean raise_exception_on_network_error) throws Exception {
+        TwoFactorIcon icon = null;
+        final boolean server_icon_supported = ((! Strings.isEmptyOrNull(server_icon_file)) && (! server_icon_file.toLowerCase().endsWith(".svg")));
+        for (final String theme : new String[] { null, DashBoardIconsUtils.DARK_THEMED_ICON, DashBoardIconsUtils.LIGHT_THEMED_ICON }) {
+            Bitmap bitmap = null;
+            if (server_icon_supported && (theme == null)) {
+                if ((icons_map_by_icon_file != null) && icons_map_by_icon_file.containsKey(server_icon_file)) {
+                    icon = icons_map_by_icon_file.get(server_icon_file);
+                    break;
+                }
+                bitmap = getIconFromServer(server_identity, server_icon_file, raise_exception_on_network_error);
+            }
+            else if ((! server_icon_supported) && (download_icons_from_external_sources) && (! Strings.isEmptyOrNull(service))) {
+                if ((icons_map_by_service != null) && icons_map_by_service.containsKey(service)) {
+                    icon = icons_map_by_service.get(service);
+                    break;
+                }
+                bitmap = DashBoardIconsUtils.getIcon(service, theme == null ? DashBoardIconsUtils.NO_THEMED_ICON : theme);
+            }
+            if (bitmap != null) {
+                if (icon == null) {
+                    icon = new TwoFactorIcon();
+                    icon.setSourceData(server_icon_supported ? ICON_SOURCE_DEFAULT : ICON_SOURCE_DASHBOARD, server_icon_supported ? server_icon_file : service);
+                }
+                icon.setBitmap(bitmap, DashBoardIconsUtils.DARK_THEMED_ICON.equals(theme) ? TwoFactorIcon.BitmapTheme.DARK.DARK : DashBoardIconsUtils.LIGHT_THEMED_ICON.equals(theme) ? TwoFactorIcon.BitmapTheme.LIGHT : null);
+            }
+        }
+        if (icon != null) {
+            if ((icons_map_by_icon_file != null) && server_icon_supported) { icons_map_by_icon_file.put(server_icon_file, icon); }
+            else if ((icons_map_by_service != null) && (! server_icon_supported)) { icons_map_by_service.put(service, icon); }
+        }
+        return icon;
+    }
+
     public static void getIcons(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context, @Nullable final Collection<JSONObject> accounts_objects, final boolean raise_exception_on_network_error) throws Exception {
         if (accounts_objects != null) {
             final Map<String, TwoFactorIcon> icons_map_by_icon_file = new HashMap<String, TwoFactorIcon>(), icons_map_by_service = new HashMap<String, TwoFactorIcon>();
-            final boolean download_icons_from_external_sources = Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources));
             for (final JSONObject account_object : accounts_objects) {
-                TwoFactorIcon icon = null;
-                final String server_icon_file = (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, service = (account_object.has(Constants.ACCOUNT_DATA_SERVICE_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_SERVICE_KEY))) ? DashBoardIconsUtils.standardizeServiceName(account_object.getString(Constants.ACCOUNT_DATA_SERVICE_KEY)) : null;
-                final boolean server_icon_supported = ((! Strings.isEmptyOrNull(server_icon_file)) && (! server_icon_file.toLowerCase().endsWith(".svg")));
                 account_object.remove(Constants.ACCOUNT_DATA_ICON_KEY);
-                for (final String theme : new String[] { null, DashBoardIconsUtils.DARK_THEMED_ICON, DashBoardIconsUtils.LIGHT_THEMED_ICON }) {
-                    Bitmap bitmap = null;
-                    if (server_icon_supported && (theme == null)) {
-                        if (icons_map_by_icon_file.containsKey(server_icon_file)) {
-                            icon = icons_map_by_icon_file.get(server_icon_file);
-                            break;
-                        }
-                        bitmap = getIconFromServer(server_identity, server_icon_file, raise_exception_on_network_error);
-                    }
-                    else if ((! server_icon_supported) && (download_icons_from_external_sources) && (! Strings.isEmptyOrNull(service))) {
-                        if (icons_map_by_service.containsKey(service)) {
-                            icon = icons_map_by_service.get(service);
-                            break;
-                        }
-                        bitmap = DashBoardIconsUtils.getIcon(service, theme == null ? DashBoardIconsUtils.NO_THEMED_ICON : theme);
-                    }
-                    if (bitmap != null) {
-                        if (icon == null) {
-                            icon = new TwoFactorIcon();
-                            icon.setSourceData(server_icon_supported ? ICON_SOURCE_DEFAULT : ICON_SOURCE_DASHBOARD, server_icon_supported ? server_icon_file : service);
-                        }
-                        icon.setBitmap(bitmap, DashBoardIconsUtils.DARK_THEMED_ICON.equals(theme) ? TwoFactorIcon.BitmapTheme.DARK.DARK : DashBoardIconsUtils.LIGHT_THEMED_ICON.equals(theme) ? TwoFactorIcon.BitmapTheme.LIGHT : null);
-                    }
-                }
-                if (icon != null) {
-                    if (server_icon_supported) {
-                        icons_map_by_icon_file.put(server_icon_file, icon);
-                    }
-                    else {
-                        icons_map_by_service.put(service, icon);
-                    }
-                    account_object.put(Constants.ACCOUNT_DATA_ICON_KEY, icon);
-                }
+                TwoFactorIcon icon = getIcon(server_identity, (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, (account_object.has(Constants.ACCOUNT_DATA_SERVICE_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_SERVICE_KEY))) ? DashBoardIconsUtils.standardizeServiceName(account_object.getString(Constants.ACCOUNT_DATA_SERVICE_KEY)) : null, icons_map_by_icon_file, icons_map_by_service, Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources)), raise_exception_on_network_error);
+                if (icon != null) { account_object.put(Constants.ACCOUNT_DATA_ICON_KEY, icon); }
             }
         }
     }
@@ -239,8 +238,20 @@ public class API {
                 // We sent the account data (if is not a new account we use put, in other case we use post)
                 final HttpURLConnection connection = account.isRemote() ? HTTP.put(url, authorization, JSON.toString(account.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(account.toJSONObject()));
                 if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
+                    final JSONObject account_object = JSON.toJSONObject(HTTP.getContentString(connection));
                     // Account has been updated or created we update values from the ones at server and set status to default
-                    account.fromJSONObject(database, JSON.toJSONObject(HTTP.getContentString(connection)));
+                    account.fromJSONObject(database, account_object);
+
+
+// Download icon
+final TwoFactorIcon icon = getIcon(account.getServerIdentity(), (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, DashBoardIconsUtils.standardizeServiceName(account.getService()), null, null, Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources)), raise_exception_on_network_error);
+if (icon != null) {
+    if (account.hasIcon()) { account.getIcon().setBitmaps(context, icon); }
+    else { account.setIcon(icon); }
+}
+////
+
+
                     account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
                     account.save(database, context);
                     return true;
