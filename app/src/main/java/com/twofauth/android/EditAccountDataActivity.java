@@ -348,7 +348,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         if (! mCurrentAccountData.hasServerIdentity()) { return false; }
         if (Strings.isEmptyOrNull(mCurrentAccountData.getService())) { return false; }
         if (Strings.isEmptyOrNull(mCurrentAccountData.getAccount())) { return false; }
-        if (Strings.isEmptyOrNull(mCurrentAccountData.getSecret())) { return false; }
+        if (mCurrentAccountData.getValidatedSecret() == null) { return false; }
         if (Strings.isEmptyOrNull(mCurrentAccountData.getOtpType())) { return false; }
         if (! mCurrentAccountData.isSteam()) {
             if (mCurrentAccountData.getOtpLength() == 0) { return false; }
@@ -504,7 +504,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mGroupSpinner.setSelection(selected_group_index < 0 ? 0 : selected_group_index + 2);
     }
 
-    private void setEditableAccountData() {
+    private void showAccountIcon() {
         final boolean has_icon = (mCurrentAccountData.hasIcon() && mCurrentAccountData.getIcon().hasBitmaps(this));
         final String icon_source = has_icon ? mCurrentAccountData.getIcon().getSource() : null;
         mIconImageView.setImageBitmap(has_icon ? mCurrentAccountData.getIcon().getBitmap(this) : null);
@@ -513,6 +513,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             view.setVisibility(has_icon ? View.VISIBLE : View.GONE);
         }
         mCopyIconToServerButton.setVisibility(has_icon && API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? View.VISIBLE : View.GONE);
+    }
+
+    private void setEditableAccountData() {
+        showAccountIcon();
         final ArrayAdapter<String> server_identities_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, TwoFactorServerIdentitiesUtils.getNames(mServerIdentities));
         server_identities_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mServerIdentitySpinner.setAdapter(server_identities_adapter);
@@ -678,9 +682,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             UI.showToast(this, success ? synced ? R.string.account_data_has_been_saved_and_synced : R.string.account_data_has_been_saved_but_not_synced : R.string.error_while_saving_account_data);
             if (success) { setResult(Activity.RESULT_OK); }
             mInitialAccountData = new TwoFactorAccount(mCurrentAccountData);
-            onSyncingDataFinished();
             disableEdition();
+            onSyncingDataFinished();
             setButtonsAvailability();
+            showAccountIcon();
         }
     }
 

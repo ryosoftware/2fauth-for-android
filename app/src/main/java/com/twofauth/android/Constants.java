@@ -33,6 +33,7 @@ public class Constants {
     public static final String AUTO_UPDATE_APP_KEY = "auto-update-app";
     public static final String AUTO_UPDATE_APP_INCLUDE_PRERELEASES_KEY = "auto-update-app-include-prereleases";
     public static final String AUTO_UPDATE_APP_ONLY_IN_WIFI_KEY = "auto-update-app-only-in-wifi";
+    public static final String LAST_CHECK_FOR_UPDATES_TIME_KEY = "last-check-for-updates-time";
 
     // App Runtime options
 

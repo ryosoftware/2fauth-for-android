@@ -84,7 +84,6 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
 
     private boolean mChoosingImage;
 
-    private File mCameraTempFile;
 
     private Spinner mServerIdentitySpinner;
 
@@ -94,7 +93,6 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
     @Override
     protected void onCreate(@Nullable final Bundle saved_instance_state) {
         super.onCreate(saved_instance_state);
-        mCameraTempFile = Files.createTempFile(this, CAMERA_IMAGE_TEMP_FILE_PREFIX);
         setContentView(R.layout.add_account_data_activity);
         mServerIdentitySpinner = (Spinner) findViewById(R.id.server_identity_selector);
         findViewById(R.id.use_qr).setOnClickListener(this);
@@ -107,7 +105,6 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
     protected void onDestroy() {
         super.onDestroy();
         Threads.interrupt(new Thread[] {mServerIdentitiesLoader, mDecoder });
-        if (mCameraTempFile != null) { mCameraTempFile.delete(); }
     }
 
     @Override
@@ -147,6 +144,7 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
         if (! isFinishedOrFinishing()) {
             if (account == null) {
                 UI.showToast(this, R.string.cannot_decode_selected_image);
+                findViewById(R.id.qr_layout).setVisibility(View.GONE);
             }
             else {
                 try {
@@ -181,12 +179,12 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
     private void openImagePicker(final boolean check_for_camera_permission) {
         try {
             final boolean has_camera_permission = hasPermission(permission.CAMERA);
-            if (check_for_camera_permission && (! has_camera_permission) && (mCameraTempFile != null)) {
+            if (check_for_camera_permission && (! has_camera_permission)) {
                 requestPermission(permission.CAMERA, REQUEST_FOR_CAMERA_PERMISSION_THEN_OPEN_IMAGE_CHOOSER);
             }
             else {
                 final Intent gallery_intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI), chooser = Intent.createChooser(gallery_intent, getString(R.string.select_a_image));
-                if (has_camera_permission && (mCameraTempFile != null)) { chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { new Intent(MediaStore.ACTION_IMAGE_CAPTURE).putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(this, getPackageName() + ".provider", mCameraTempFile)) }); }
+                if (has_camera_permission) { chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { new Intent(MediaStore.ACTION_IMAGE_CAPTURE) }); }
                 startActivityFromIntent(chooser);
             }
         }
@@ -208,11 +206,11 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
 
     @Override
     public void onActivityResult(@NotNull final ActivityResult result) {
-        if (result.getResultCode() == RESULT_OK) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
             if (mChoosingImage) {
                 if (result.getData() != null) {
                     final Uri selected_image_uri = result.getData().getData();
-                    final Bitmap bitmap = (selected_image_uri == null) ? BitmapUtils.getBitmapFromFile(this, mCameraTempFile) : BitmapUtils.getBitmapFromUri(this, selected_image_uri);
+                    final Bitmap bitmap = (selected_image_uri == null) ? (Bitmap) result.getData().getExtras().get("data") : BitmapUtils.getBitmapFromUri(this, selected_image_uri);
                     if (bitmap == null) { UI.showToast(this, R.string.cannot_load_selected_image); return; }
                     ((ImageView) findViewById(R.id.qr)).setImageBitmap(bitmap);
                     findViewById(R.id.qr_layout).setVisibility(View.VISIBLE);
@@ -224,7 +222,7 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
                 finish();
             }
         }
-        else if (!mChoosingImage) {
+        else if (! mChoosingImage) {
             finish();
         }
     }

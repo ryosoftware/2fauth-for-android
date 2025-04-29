@@ -140,16 +140,18 @@ public class HTTP {
         return delete(url, null);
     }
 
-    public static @NotNull String getContentString(@NotNull final HttpURLConnection connection) throws Exception {
-        try (final BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+    private static @NotNull String getConnectionString(@NotNull final HttpURLConnection connection, final boolean is_error) throws Exception {
+        try (final BufferedReader in = new BufferedReader(new InputStreamReader(is_error ? connection.getErrorStream() : connection.getInputStream()))) {
             final StringBuilder response = new StringBuilder();
             String line;
-            while ((line = in.readLine()) != null) {
-                response.append(line);
-            }
+            while ((line = in.readLine()) != null) { response.append(line); }
             return response.toString();
         }
     }
+
+    public static @NotNull String getContentString(@NotNull final HttpURLConnection connection) throws Exception { return getConnectionString(connection, false); }
+
+    public static @NotNull String getErrorString(@NotNull final HttpURLConnection connection) throws Exception { return getConnectionString(connection, true); }
 
     public static @NotNull void saveContent(@NotNull final HttpURLConnection connection, @NotNull final File file) throws Exception {
         int count;

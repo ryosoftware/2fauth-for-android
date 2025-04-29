@@ -48,6 +48,17 @@ public class TwoFactorGroup extends SynceableTableRow {
         mName = null;
     }
 
+    public TwoFactorGroup(@NotNull final SQLiteDatabase database, @NotNull final JSONObject object) throws Exception {
+        this();
+        setServerIdentity(object.optInt(SERVER_IDENTITY, -1) == -1 ? null : Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(database, object.getInt(SERVER_IDENTITY)));
+        fromJSONObject(object);
+    }
+
+    public void fromJSONObject(@NotNull final JSONObject object) {
+        setRemoteId(object.optInt(Constants.GROUP_DATA_ID_KEY, mRemoteId));
+        setName(object.optString(Constants.GROUP_DATA_NAME_KEY, mName));
+    }
+
     public @NotNull JSONObject toJSONObject() {
         try {
             final JSONObject object = new JSONObject();

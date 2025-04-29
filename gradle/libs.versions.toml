@@ -16,7 +16,7 @@ bastiaanJansenOtp = "2.1.0"
 androidxBiometric = "1.4.0-alpha03"
 androidxLifecycle = "2.2.0"
 gson = "2.13.1"
-sqlCipher = "4.7.2"
+sqlCipher = "4.8.0"
 sqlite = "2.5.0"
 
 [libraries]

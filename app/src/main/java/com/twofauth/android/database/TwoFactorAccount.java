@@ -80,7 +80,14 @@ public class TwoFactorAccount extends SynceableTableRow {
     private static final int STATUS_ORDER = LAST_USE_ORDER + 1;
 
     private static class Base32Utils {
-        private static final String ALPHABET = "ABCDEFGHIJKLMNOPQrSTUVWXYZ234567";
+        private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+        private static boolean isValid(@NotNull final String string) {
+            for (final char character : string.trim().replace("=", "").toCharArray()) {
+                if (ALPHABET.indexOf(character) < 0) { return false; }
+            }
+            return true;
+        }
 
         private static @NotNull byte[] decode(@NotNull String encoded_string) {
             encoded_string = encoded_string.replace("=", "");
@@ -93,7 +100,7 @@ public class TwoFactorAccount extends SynceableTableRow {
             int buffer = 0, bits_left = 0, byte_index = 0;
             for (final char character : encoded_string.toCharArray()) {
                 if (! map.containsKey(character)) {
-                    throw new IllegalArgumentException("Invelid Base32 character: " + character);
+                    throw new IllegalArgumentException("Invalid Base32 character: " + character);
                 }
                 buffer = (buffer << 5) | map.get(character);
                 bits_left += 5;
@@ -107,7 +114,7 @@ public class TwoFactorAccount extends SynceableTableRow {
     }
 
     private static class SteamOtpCodesGenerator {
-        private static final String ALPHABET = "23456789BCDFGHJKMNPQrTVWXY";
+        private static final String ALPHABET = "23456789BCDFGHJKMNPQRTVWXY";
         private static final String ALGORITHM = "HmacSHA1";
 
         private final byte[] mSecret;
@@ -284,17 +291,7 @@ public class TwoFactorAccount extends SynceableTableRow {
     public TwoFactorAccount(@NotNull final SQLiteDatabase database, @NotNull final JSONObject object) throws Exception {
         this();
         setServerIdentity(object.optInt(SERVER_IDENTITY, -1) == -1 ? null : Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(database, object.getInt(SERVER_IDENTITY)));
-        setRemoteId(object.optInt(Constants.ACCOUNT_DATA_ID_KEY, mRemoteId));
-        setService(object.optString(Constants.ACCOUNT_DATA_SERVICE_KEY, mService));
-        setAccount(object.optString(Constants.ACCOUNT_DATA_USER_KEY, mService));
-        setGroup(object.optInt(Constants.ACCOUNT_DATA_GROUP_KEY, 0) == 0 ? null : Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().instance(database, object.getInt(Constants.ACCOUNT_DATA_GROUP_KEY)));
-        setIcon(object.optInt(Constants.ACCOUNT_DATA_ICON_KEY, 0) == 0  ? null : Main.getInstance().getDatabaseHelper().getTwoFactorIconsHelper().instance(database, object.getInt(Constants.ACCOUNT_DATA_ICON_KEY)));
-        setOtpType(object.optString(Constants.ACCOUNT_DATA_OTP_TYPE_KEY, mOtpType));
-        setSecret(object.optString(Constants.ACCOUNT_DATA_SECRET_KEY, mSecret));
-        setOtpLength(object.optInt(Constants.ACCOUNT_DATA_OTP_LENGTH_KEY, mOtpLength));
-        setAlgorithm(object.optString(Constants.ACCOUNT_DATA_ALGORITHM_KEY, mAlgorithm));
-        setPeriod(object.optInt(Constants.ACCOUNT_DATA_PERIOD_KEY, mPeriod));
-        setCounter(object.optInt(Constants.ACCOUNT_DATA_COUNTER_KEY, mCounter));
+        fromJSONObject(database, object);
     }
 
     private @NotNull Object getOtpGenerator() {
@@ -325,6 +322,20 @@ public class TwoFactorAccount extends SynceableTableRow {
         return mPasswordGenerator;
     }
 
+    public void fromJSONObject(@NotNull final SQLiteDatabase database, @NotNull final JSONObject object) throws Exception {
+        setRemoteId(object.optInt(Constants.ACCOUNT_DATA_ID_KEY, mRemoteId));
+        setService(object.optString(Constants.ACCOUNT_DATA_SERVICE_KEY, mService));
+        setAccount(object.optString(Constants.ACCOUNT_DATA_USER_KEY, mService));
+        setGroup(object.optInt(Constants.ACCOUNT_DATA_GROUP_KEY, 0) == 0 ? null : Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().instance(database, object.getInt(Constants.ACCOUNT_DATA_GROUP_KEY)));
+        setIcon(object.optInt(Constants.ACCOUNT_DATA_ICON_KEY, 0) == 0  ? null : Main.getInstance().getDatabaseHelper().getTwoFactorIconsHelper().instance(database, object.getInt(Constants.ACCOUNT_DATA_ICON_KEY)));
+        setOtpType(object.optString(Constants.ACCOUNT_DATA_OTP_TYPE_KEY, mOtpType));
+        setSecret(object.optString(Constants.ACCOUNT_DATA_SECRET_KEY, mSecret));
+        setOtpLength(object.optInt(Constants.ACCOUNT_DATA_OTP_LENGTH_KEY, mOtpLength));
+        setAlgorithm(object.optString(Constants.ACCOUNT_DATA_ALGORITHM_KEY, mAlgorithm));
+        setPeriod(object.optInt(Constants.ACCOUNT_DATA_PERIOD_KEY, mPeriod));
+        setCounter(object.optInt(Constants.ACCOUNT_DATA_COUNTER_KEY, mCounter));
+    }
+
     public @NotNull JSONObject toJSONObject() {
         try {
             final JSONObject object = new JSONObject();
@@ -335,11 +346,11 @@ public class TwoFactorAccount extends SynceableTableRow {
             object.put(Constants.ACCOUNT_DATA_GROUP_KEY, hasGroup() ? getGroup().getRemoteId() : JSONObject.NULL);
             object.put(Constants.ACCOUNT_DATA_ICON_KEY, hasIcon() && API.ICON_SOURCE_DEFAULT.equals(getIcon().getSource()) ? getIcon().getSourceId() : JSONObject.NULL);
             object.put(Constants.ACCOUNT_DATA_OTP_TYPE_KEY, getOtpType());
-            object.put(Constants.ACCOUNT_DATA_SECRET_KEY, getSecret());
+            object.put(Constants.ACCOUNT_DATA_SECRET_KEY, getValidatedSecret());
             object.put(Constants.ACCOUNT_DATA_OTP_LENGTH_KEY, getOtpLength());
             object.put(Constants.ACCOUNT_DATA_ALGORITHM_KEY, getAlgorithm());
-            object.put(Constants.ACCOUNT_DATA_PERIOD_KEY, isTotp() ? getPeriod() : JSONObject.NULL);
-            object.put(Constants.ACCOUNT_DATA_COUNTER_KEY, isHotp() ? getCounter() : JSONObject.NULL);
+            if (isTotp()) { object.put(Constants.ACCOUNT_DATA_PERIOD_KEY, getPeriod()); }
+            if (isHotp()) { object.put(Constants.ACCOUNT_DATA_COUNTER_KEY, getCounter()); }
             return object;
         }
         catch (JSONException e) {
@@ -466,6 +477,7 @@ public class TwoFactorAccount extends SynceableTableRow {
     public void setOtpType(@NotNull final String otp_type) {
         if ((! isDeleted()) && (! Strings.equals(mOtpType, otp_type))) {
             setDirty(OTP_TYPE, mOtpType = otp_type);
+            if (isSteam()) { setAlgorithm(Constants.ALGORITHM_SHA1); setOtpLength(5); }
             setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
             mPasswordGenerator = null;
         }
@@ -473,6 +485,12 @@ public class TwoFactorAccount extends SynceableTableRow {
 
     public @Nullable String getSecret() {
         return mSecret;
+    }
+
+    public @Nullable String getValidatedSecret() {
+        String standarized_secret = mSecret;
+        if (standarized_secret != null) { standarized_secret = standarized_secret.replace(" ", "").toUpperCase(); }
+        return (Strings.isEmptyOrNull(standarized_secret) || (! Base32Utils.isValid(standarized_secret))) ? null : standarized_secret;
     }
 
     public void setSecret(@NotNull final String secret) {

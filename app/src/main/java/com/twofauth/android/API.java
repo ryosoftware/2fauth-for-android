@@ -3,6 +3,7 @@ package com.twofauth.android;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.util.Log;
 
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
@@ -64,16 +65,28 @@ public class API {
         public static final String LIGHT_THEMED_ICON = "-light";
         public static final String NO_THEMED_ICON = "";
 
-        private static @NotNull String standarizeServiceName(@NotNull final String service, @Nullable final String theme) {
-            String standarized_service_name = service.toLowerCase().replace(" ", "-");
+        public static @NotNull String standardizeServiceName(@NotNull final String service) {
+            return service.toLowerCase().replace(" ", "-");
+        }
+
+        private static @NotNull String standardizeServiceName(@NotNull final String service, @Nullable final String theme) {
+            String standarized_service_name = standardizeServiceName(service);
             if ((theme != null) && (! NO_THEMED_ICON.equals(theme))) { standarized_service_name += theme; }
             return standarized_service_name;
         }
 
         public static @NotNull Bitmap getIcon(@NotNull final String service, @Nullable final String theme) throws Exception {
-            final HttpURLConnection connection = HTTP.get(new URL(BASE_LOCATION.replace("%SERVICE%", standarizeServiceName(service, theme))));
+            final HttpURLConnection connection = HTTP.get(new URL(BASE_LOCATION.replace("%SERVICE%", standardizeServiceName(service, theme))));
             return (connection.getResponseCode() == HttpURLConnection.HTTP_OK) ? Bitmaps.get(connection) : null;
         }
+    }
+
+    private static void raiseNetworkErrorException(@NotNull final HttpURLConnection connection) throws Exception {
+        if (connection.getResponseCode() == 422) {
+            final String detailed_errors = HTTP.getErrorString(connection);
+            if (! Strings.isEmptyOrNull(detailed_errors)) { throw new Exception(detailed_errors); }
+        }
+        throw new Exception(connection.getResponseMessage());
     }
 
     public static boolean refreshIdentityData(@NotNull final TwoFactorServerIdentity server_identity, final boolean raise_exception_on_error) throws Exception {
@@ -87,7 +100,7 @@ public class API {
             return true;
         }
         else if (raise_exception_on_error) {
-            throw new Exception(connection.getResponseMessage());
+            raiseNetworkErrorException(connection);
         }
         return false;
     }
@@ -95,7 +108,7 @@ public class API {
     public static @Nullable List<JSONObject> getAccounts(@NotNull final TwoFactorServerIdentity server_identity, final boolean raise_exception_on_error) throws Exception {
         final HttpURLConnection connection = HTTP.get(new URL(LIST_ACCOUNTS_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return JSON.toListOfJSONObjects(HTTP.getContentString(connection)); }
-        else if (raise_exception_on_error) { throw new Exception(connection.getResponseMessage()); }
+        else if (raise_exception_on_error) { raiseNetworkErrorException(connection); }
         return null;
     }
 
@@ -119,8 +132,15 @@ public class API {
             }
         }
         else if (raise_exception_on_network_error) {
-            throw new Exception(connection.getResponseMessage());
+            raiseNetworkErrorException(connection);
         }
+        return null;
+    }
+
+    private static @Nullable Bitmap getIconFromServer(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, final boolean raise_exception_on_network_error) throws Exception {
+        final HttpURLConnection connection = HTTP.get(new URL(GET_ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", icon_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
+        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return Bitmaps.get(connection); }
+        else if (raise_exception_on_network_error) { raiseNetworkErrorException(connection); }
         return null;
     }
 
@@ -130,7 +150,7 @@ public class API {
             final boolean download_icons_from_external_sources = Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources));
             for (final JSONObject account_object : accounts_objects) {
                 TwoFactorIcon icon = null;
-                final String server_icon_file = (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, service = (account_object.has(Constants.ACCOUNT_DATA_SERVICE_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_SERVICE_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_SERVICE_KEY) : null;
+                final String server_icon_file = (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, service = (account_object.has(Constants.ACCOUNT_DATA_SERVICE_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_SERVICE_KEY))) ? DashBoardIconsUtils.standardizeServiceName(account_object.getString(Constants.ACCOUNT_DATA_SERVICE_KEY)) : null;
                 final boolean server_icon_supported = ((! Strings.isEmptyOrNull(server_icon_file)) && (! server_icon_file.toLowerCase().endsWith(".svg")));
                 account_object.remove(Constants.ACCOUNT_DATA_ICON_KEY);
                 for (final String theme : new String[] { null, DashBoardIconsUtils.DARK_THEMED_ICON, DashBoardIconsUtils.LIGHT_THEMED_ICON }) {
@@ -140,7 +160,7 @@ public class API {
                             icon = icons_map_by_icon_file.get(server_icon_file);
                             break;
                         }
-                        bitmap = getIcon(server_identity, server_icon_file, raise_exception_on_network_error);
+                        bitmap = getIconFromServer(server_identity, server_icon_file, raise_exception_on_network_error);
                     }
                     else if ((! server_icon_supported) && (download_icons_from_external_sources) && (! Strings.isEmptyOrNull(service))) {
                         if (icons_map_by_service.containsKey(service)) {
@@ -170,17 +190,10 @@ public class API {
         }
     }
 
-    public static @Nullable Bitmap getIcon(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, final boolean raise_exception_on_network_error) throws Exception {
-        final HttpURLConnection connection = HTTP.get(new URL(GET_ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", icon_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
-        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return Bitmaps.get(connection); }
-        else if (raise_exception_on_network_error) { throw new Exception(connection.getResponseMessage()); }
-        return null;
-    }
-
     public static @Nullable String getQR(@NotNull final TwoFactorServerIdentity server_identity, final int account_id, final boolean raise_exception_on_network_error) throws Exception {
         final HttpURLConnection connection = HTTP.get(new URL(ACCOUNT_QR_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%ID%", String.valueOf(account_id))), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return JSON.toJSONObject(HTTP.getContentString(connection)).optString(QR_CODE_JSON_KEY); }
-        else if (raise_exception_on_network_error) { throw new Exception(connection.getResponseMessage()); }
+        else if (raise_exception_on_network_error) { raiseNetworkErrorException(connection); }
         return null;
     }
 
@@ -207,7 +220,7 @@ public class API {
                     return true;
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
             }
             else {
@@ -223,41 +236,25 @@ public class API {
             synchronizeIcon(account.getServerIdentity(), database, context, account.getIcon(), raise_exception_on_network_error);
             // After synchronize icon we try to synchronize account, but before we synchronize or create group data, if account belongs to a group
             if (! account.hasGroup() || synchronizeGroup(database, context, account.getGroup(), raise_exception_on_network_error)) {
-                if (account.isRemote()) {
-                    // Is an account that already exists at server, we try to update
-                    final HttpURLConnection connection = HTTP.put(url, authorization, JSON.toString(account.toJSONObject()));
-                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        // Account has been updated
-                        account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                        account.save(database, context);
-                        return true;
-                    }
-                    else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                        // Account is not found at server we delete locally
-                        account.delete(database, context);
-                        return true;
-                    }
-                    else if (raise_exception_on_network_error) {
-                        throw new Exception(connection.getResponseMessage());
-                    }
+                // We sent the account data (if is not a new account we use put, in other case we use post)
+                final HttpURLConnection connection = account.isRemote() ? HTTP.put(url, authorization, JSON.toString(account.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(account.toJSONObject()));
+                if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
+                    // Account has been updated or created we update values from the ones at server and set status to default
+                    account.fromJSONObject(database, JSON.toJSONObject(HTTP.getContentString(connection)));
+                    account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
+                    account.save(database, context);
+                    return true;
                 }
-                else {
-                    // Account doesn't exists at remote, we try to add
-                    final HttpURLConnection connection = HTTP.post(url, authorization, JSON.toString(account.toJSONObject()));
-                    if (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED) {
-                        // Account has been added
-                        final JSONObject object = JSON.toJSONObject(HTTP.getContentString(connection));
-                        account.setRemoteId(object.getInt(Constants.ACCOUNT_DATA_ID_KEY));
-                        account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                        account.save(database, context);
-                        return true;
-                    }
-                    else if (raise_exception_on_network_error) {
-                        throw new Exception(connection.getResponseMessage());
-                    }
+                else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                    // Is an update but account is not found at server: we delete locally
+                    account.delete(database, context);
+                    return true;
                 }
+                else if (raise_exception_on_network_error) {
+                    raiseNetworkErrorException(connection);
+                }
+                return false;
             }
-            return false;
         }
         return true;
     }
@@ -281,7 +278,7 @@ public class API {
                     return true;
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
             }
             else {
@@ -292,39 +289,22 @@ public class API {
             return false;
         }
         else if (! group.isSynced()) {
-            // Group is out of sync
-            if (group.isRemote()) {
-                // Is an group that already exists at server, we try to update
-                final HttpURLConnection connection = HTTP.put(url, authorization, JSON.toString(group.toJSONObject()));
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    // Group has been updated
-                    group.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                    group.save(database, context);
-                    return true;
-                }
-                else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                    // Group is not found at server we delete locally
-                    group.delete(database, context);
-                    return true;
-                }
-                else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
-                }
+            // Group is out of sync (we use a put if group already exists and post in other case)
+            final HttpURLConnection connection = group.isRemote() ? HTTP.put(url, authorization, JSON.toString(group.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(group.toJSONObject()));
+            if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
+                // Group has been updated or created
+                group.fromJSONObject(JSON.toJSONObject(HTTP.getContentString(connection)));
+                group.setStatus(TwoFactorAccount.STATUS_DEFAULT);
+                group.save(database, context);
+                return true;
             }
-            else {
-                // Group doesn't exists at remote, we try to add
-                final HttpURLConnection connection = HTTP.post(url, authorization, JSON.toString(group.toJSONObject()));
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED) {
-                    // Group has been added
-                    final JSONObject object = JSON.toJSONObject(HTTP.getContentString(connection));
-                    group.setRemoteId(object.getInt(Constants.GROUP_DATA_ID_KEY));
-                    group.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                    group.save(database, context);
-                    return true;
-                }
-                else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
-                }
+            else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                // Group is not found at server we delete locally
+                group.delete(database, context);
+                return true;
+            }
+            else if (raise_exception_on_network_error) {
+                raiseNetworkErrorException(connection);
             }
             return false;
         }
@@ -349,7 +329,7 @@ public class API {
                     else { icon.save(database, context); }
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
                 else {
                     success = false;
@@ -364,7 +344,7 @@ public class API {
                     icon.save(database, context);
                 }
                 else if (raise_exception_on_network_error) {
-                    throw new Exception(connection.getResponseMessage());
+                    raiseNetworkErrorException(connection);
                 }
                 else {
                     success = false;
@@ -402,4 +382,22 @@ public class API {
         }
         return null;
     }
+
+    public static void setIconFromExternalSource(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account) throws Exception {
+        if ((! account.hasIcon()) || (account.getIcon().getBitmap(context, null) == null)) {
+            final String service = DashBoardIconsUtils.standardizeServiceName(account.getService());
+            final Bitmap bitmap = DashBoardIconsUtils.getIcon(service, DashBoardIconsUtils.NO_THEMED_ICON);
+            if (bitmap != null) {
+                final TwoFactorIcon icon = account.hasIcon() ? account.getIcon() : new TwoFactorIcon();
+                icon.setSourceData(ICON_SOURCE_DASHBOARD, service);
+                icon.setBitmaps(bitmap, null, null);
+                icon.save(database, context);
+                if (! account.hasIcon()) {
+                    account.setIcon(icon);
+                    account.save(database, context);
+                }
+            }
+        }
+    }
 }
+

@@ -11,6 +11,7 @@ import com.twofauth.android.Main.OnBackgroundTaskExecutionListener;
 import com.twofauth.android.MainService;
 import com.twofauth.android.MainService.SyncResultType;
 import com.twofauth.android.R;
+import com.twofauth.android.database.SynceableTableRow;
 import com.twofauth.android.main_service.TwoFactorServerIdentityWithSyncData;
 import com.twofauth.android.utils.Lists;
 import com.twofauth.android.utils.Strings;
@@ -183,6 +184,7 @@ public class ServerDataSynchronizer
             local_loaded_account.setPeriod(server_loaded_account.getPeriod());
             local_loaded_account.setCounter(server_loaded_account.getCounter());
             local_loaded_account.setLastUse(server_loaded_account.getLastUse());
+            local_loaded_account.setStatus(SynceableTableRow.STATUS_DEFAULT);
         }
 
         private void combineData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorAccount> server_loaded_accounts, @Nullable final List<TwoFactorAccount> local_loaded_accounts, @Nullable final List<TwoFactorGroup> server_loaded_groups) throws Exception {
