@@ -3,6 +3,7 @@ package com.twofauth.android;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.util.Log;
 
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
@@ -20,15 +21,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -68,14 +65,18 @@ public class API {
         public static final String LIGHT_THEMED_ICON = "-light";
         public static final String NO_THEMED_ICON = "";
 
-        private static @NotNull String standarizeServiceName(@NotNull final String service, @Nullable final String theme) {
-            String standarized_service_name = service.toLowerCase().replace(" ", "-");
+        public static @NotNull String standardizeServiceName(@NotNull final String service) {
+            return service.toLowerCase().replace(" ", "-");
+        }
+
+        private static @NotNull String standardizeServiceName(@NotNull final String service, @Nullable final String theme) {
+            String standarized_service_name = standardizeServiceName(service);
             if ((theme != null) && (! NO_THEMED_ICON.equals(theme))) { standarized_service_name += theme; }
             return standarized_service_name;
         }
 
         public static @NotNull Bitmap getIcon(@NotNull final String service, @Nullable final String theme) throws Exception {
-            final HttpURLConnection connection = HTTP.get(new URL(BASE_LOCATION.replace("%SERVICE%", standarizeServiceName(service, theme))));
+            final HttpURLConnection connection = HTTP.get(new URL(BASE_LOCATION.replace("%SERVICE%", standardizeServiceName(service, theme))));
             return (connection.getResponseCode() == HttpURLConnection.HTTP_OK) ? Bitmaps.get(connection) : null;
         }
     }
@@ -136,13 +137,20 @@ public class API {
         return null;
     }
 
+    private static @Nullable Bitmap getIconFromServer(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, final boolean raise_exception_on_network_error) throws Exception {
+        final HttpURLConnection connection = HTTP.get(new URL(GET_ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", icon_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
+        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return Bitmaps.get(connection); }
+        else if (raise_exception_on_network_error) { raiseNetworkErrorException(connection); }
+        return null;
+    }
+
     public static void getIcons(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context, @Nullable final Collection<JSONObject> accounts_objects, final boolean raise_exception_on_network_error) throws Exception {
         if (accounts_objects != null) {
             final Map<String, TwoFactorIcon> icons_map_by_icon_file = new HashMap<String, TwoFactorIcon>(), icons_map_by_service = new HashMap<String, TwoFactorIcon>();
             final boolean download_icons_from_external_sources = Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources));
             for (final JSONObject account_object : accounts_objects) {
                 TwoFactorIcon icon = null;
-                final String server_icon_file = (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, service = (account_object.has(Constants.ACCOUNT_DATA_SERVICE_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_SERVICE_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_SERVICE_KEY) : null;
+                final String server_icon_file = (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, service = (account_object.has(Constants.ACCOUNT_DATA_SERVICE_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_SERVICE_KEY))) ? DashBoardIconsUtils.standardizeServiceName(account_object.getString(Constants.ACCOUNT_DATA_SERVICE_KEY)) : null;
                 final boolean server_icon_supported = ((! Strings.isEmptyOrNull(server_icon_file)) && (! server_icon_file.toLowerCase().endsWith(".svg")));
                 account_object.remove(Constants.ACCOUNT_DATA_ICON_KEY);
                 for (final String theme : new String[] { null, DashBoardIconsUtils.DARK_THEMED_ICON, DashBoardIconsUtils.LIGHT_THEMED_ICON }) {
@@ -152,7 +160,7 @@ public class API {
                             icon = icons_map_by_icon_file.get(server_icon_file);
                             break;
                         }
-                        bitmap = getIcon(server_identity, server_icon_file, raise_exception_on_network_error);
+                        bitmap = getIconFromServer(server_identity, server_icon_file, raise_exception_on_network_error);
                     }
                     else if ((! server_icon_supported) && (download_icons_from_external_sources) && (! Strings.isEmptyOrNull(service))) {
                         if (icons_map_by_service.containsKey(service)) {
@@ -180,13 +188,6 @@ public class API {
                 }
             }
         }
-    }
-
-    public static @Nullable Bitmap getIcon(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, final boolean raise_exception_on_network_error) throws Exception {
-        final HttpURLConnection connection = HTTP.get(new URL(GET_ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", icon_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
-        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return Bitmaps.get(connection); }
-        else if (raise_exception_on_network_error) { raiseNetworkErrorException(connection); }
-        return null;
     }
 
     public static @Nullable String getQR(@NotNull final TwoFactorServerIdentity server_identity, final int account_id, final boolean raise_exception_on_network_error) throws Exception {
@@ -381,4 +382,22 @@ public class API {
         }
         return null;
     }
+
+    public static void setIconFromExternalSource(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account) throws Exception {
+        if ((! account.hasIcon()) || (account.getIcon().getBitmap(context, null) == null)) {
+            final String service = DashBoardIconsUtils.standardizeServiceName(account.getService());
+            final Bitmap bitmap = DashBoardIconsUtils.getIcon(service, DashBoardIconsUtils.NO_THEMED_ICON);
+            if (bitmap != null) {
+                final TwoFactorIcon icon = account.hasIcon() ? account.getIcon() : new TwoFactorIcon();
+                icon.setSourceData(ICON_SOURCE_DASHBOARD, service);
+                icon.setBitmaps(bitmap, null, null);
+                icon.save(database, context);
+                if (! account.hasIcon()) {
+                    account.setIcon(icon);
+                    account.save(database, context);
+                }
+            }
+        }
+    }
 }
+

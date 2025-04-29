@@ -4,10 +4,11 @@ import android.content.Context;
 import android.util.Log;
 
 import com.twofauth.android.API;
+import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
+import com.twofauth.android.R;
 import com.twofauth.android.database.TwoFactorAccount;
-import com.twofauth.android.database.TwoFactorIcon;
-import com.twofauth.android.utils.Strings;
+import com.twofauth.android.utils.Preferences;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
 
@@ -35,6 +36,26 @@ public class SaveAccountData {
             mListener = listener;
         }
 
+        private void downloadAccountIconFromExternalSources(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorAccount account) {
+            if (Preferences.getDefaultSharedPreferences(mContext).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, mContext.getResources().getBoolean(R.bool.download_icons_from_external_sources)) && ((! account.hasIcon()) || (! account.getIcon().hasBitmaps(mContext)))) {
+                try {
+                    API.setIconFromExternalSource(database, mContext, account);
+                }
+                catch (Exception e) {
+                    Log.e(Main.LOG_TAG_NAME, "Exception while trying to download an icon", e);
+                }
+            }
+        }
+
+        private boolean synchronizeAccount(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorAccount account) throws Exception {
+            downloadAccountIconFromExternalSources(database, account);
+            if (account.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, account, true)) {
+                downloadAccountIconFromExternalSources(database, account);
+                return true;
+            }
+            return false;
+        }
+
         @Override
         public @Nullable Object onBackgroundTaskStarted(@Nullable final Object data) {
             try {
@@ -53,12 +74,10 @@ public class SaveAccountData {
                                 }
                                 mAccount.save(database, mContext);
                                 mSuccess = true;
-                                if (mAccount.getServerIdentity().isSyncingImmediately()) {
-                                    boolean synced = true;
-                                    if ((stored_account != null) && (stored_account.getRowId() != mAccount.getRowId())) { synced &= API.synchronizeAccount(database, mContext, stored_account, true); }
-                                    synced &= API.synchronizeAccount(database, mContext, mAccount, true);
-                                    mSynced = synced;
-                                }
+                                boolean synced = true;
+                                if ((stored_account != null) && (stored_account.getRowId() != mAccount.getRowId())) { synced &= synchronizeAccount(database, stored_account); }
+                                synced &= synchronizeAccount(database, mAccount);
+                                mSynced = synced;
                             }
                             finally {
                                 Main.getInstance().getDatabaseHelper().endTransaction(database, mSuccess);
