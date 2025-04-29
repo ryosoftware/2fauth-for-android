@@ -132,6 +132,10 @@ public class TwoFactorIcon extends TableRow {
         setBitmap((Bitmap) null, BitmapTheme.LIGHT);
     }
 
+    public void setBitmaps(@NotNull final Context context, @Nullable final TwoFactorIcon icon) {
+        setBitmaps(icon == null ? null : icon.getBitmap(context, null), icon == null ? null : icon.getBitmap(context, BitmapTheme.DARK), icon == null ? null : icon.getBitmap(context, BitmapTheme.LIGHT));
+    }
+
     private @Nullable File getBitmapFile(@NotNull final Context context, @Nullable final BitmapTheme theme) {
         String filename = (_id < 0) ? null : String.valueOf(_id);
         if ((filename != null) && (theme != null)) {
