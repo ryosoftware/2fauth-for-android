@@ -82,8 +82,8 @@ public class API {
 
     private static void raiseNetworkErrorException(@NotNull final HttpURLConnection connection) throws Exception {
         if (connection.getResponseCode() == 422) {
-            final String explained_error = HTTP.getErrorString(connection);
-            if (! Strings.isEmptyOrNull(explained_error)) { throw new Exception(explained_error); }
+            final String detailed_errors = HTTP.getErrorString(connection);
+            if (! Strings.isEmptyOrNull(detailed_errors)) { throw new Exception(detailed_errors); }
         }
         throw new Exception(connection.getResponseMessage());
     }
@@ -200,11 +200,6 @@ public class API {
         return getQR(account.getServerIdentity(), account.getRemoteId(), raise_exception_on_network_error);
     }
 
-    private static @NotNull JSONObject standarizeAccountJsonObject(@NotNull final JSONObject object) throws Exception {
-        object.put(Constants.ACCOUNT_DATA_SECRET_KEY, object.optString(Constants.ACCOUNT_DATA_SECRET_KEY, "").replace(" ", ""));
-        return object;
-    }
-
     public static boolean synchronizeAccount(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account, boolean raise_exception_on_network_error) throws Exception {
         final URL url = new URL(account.isRemote() ? ACCOUNT_LOCATION.replace("%SERVER%", account.getServerIdentity().getServer()).replace("%ID%", String.valueOf(account.getRemoteId())) : ACCOUNTS_LOCATION.replace("%SERVER%", account.getServerIdentity().getServer()));
         final String authorization = AUTH_TOKEN.replace("%TOKEN%", account.getServerIdentity().getToken());
@@ -240,41 +235,25 @@ public class API {
             synchronizeIcon(account.getServerIdentity(), database, context, account.getIcon(), raise_exception_on_network_error);
             // After synchronize icon we try to synchronize account, but before we synchronize or create group data, if account belongs to a group
             if (! account.hasGroup() || synchronizeGroup(database, context, account.getGroup(), raise_exception_on_network_error)) {
-                if (account.isRemote()) {
-                    // Is an account that already exists at server, we try to update
-                    final HttpURLConnection connection = HTTP.put(url, authorization, JSON.toString(standarizeAccountJsonObject(account.toJSONObject())));
-                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        // Account has been updated
-                        account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                        account.save(database, context);
-                        return true;
-                    }
-                    else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                        // Account is not found at server we delete locally
-                        account.delete(database, context);
-                        return true;
-                    }
-                    else if (raise_exception_on_network_error) {
-                        raiseNetworkErrorException(connection);
-                    }
+                // We sent the account data (if is not a new account we use put, in other case we use post)
+                final HttpURLConnection connection = account.isRemote() ? HTTP.put(url, authorization, JSON.toString(account.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(account.toJSONObject()));
+                if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
+                    // Account has been updated or created we update values from the ones at server and set status to default
+                    account.fromJSONObject(database, JSON.toJSONObject(HTTP.getContentString(connection)));
+                    account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
+                    account.save(database, context);
+                    return true;
                 }
-                else {
-                    // Account doesn't exists at remote, we try to add
-                    final HttpURLConnection connection = HTTP.post(url, authorization, JSON.toString(standarizeAccountJsonObject(account.toJSONObject())));
-                    if (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED) {
-                        // Account has been added
-                        final JSONObject object = JSON.toJSONObject(HTTP.getContentString(connection));
-                        account.setRemoteId(object.getInt(Constants.ACCOUNT_DATA_ID_KEY));
-                        account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                        account.save(database, context);
-                        return true;
-                    }
-                    else if (raise_exception_on_network_error) {
-                        raiseNetworkErrorException(connection);
-                    }
+                else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                    // Is an update but account is not found at server: we delete locally
+                    account.delete(database, context);
+                    return true;
                 }
+                else if (raise_exception_on_network_error) {
+                    raiseNetworkErrorException(connection);
+                }
+                return false;
             }
-            return false;
         }
         return true;
     }
@@ -309,39 +288,22 @@ public class API {
             return false;
         }
         else if (! group.isSynced()) {
-            // Group is out of sync
-            if (group.isRemote()) {
-                // Is an group that already exists at server, we try to update
-                final HttpURLConnection connection = HTTP.put(url, authorization, JSON.toString(group.toJSONObject()));
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    // Group has been updated
-                    group.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                    group.save(database, context);
-                    return true;
-                }
-                else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                    // Group is not found at server we delete locally
-                    group.delete(database, context);
-                    return true;
-                }
-                else if (raise_exception_on_network_error) {
-                    raiseNetworkErrorException(connection);
-                }
+            // Group is out of sync (we use a put if group already exists and post in other case)
+            final HttpURLConnection connection = group.isRemote() ? HTTP.put(url, authorization, JSON.toString(group.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(group.toJSONObject()));
+            if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
+                // Group has been updated or created
+                group.fromJSONObject(JSON.toJSONObject(HTTP.getContentString(connection)));
+                group.setStatus(TwoFactorAccount.STATUS_DEFAULT);
+                group.save(database, context);
+                return true;
             }
-            else {
-                // Group doesn't exists at remote, we try to add
-                final HttpURLConnection connection = HTTP.post(url, authorization, JSON.toString(group.toJSONObject()));
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED) {
-                    // Group has been added
-                    final JSONObject object = JSON.toJSONObject(HTTP.getContentString(connection));
-                    group.setRemoteId(object.getInt(Constants.GROUP_DATA_ID_KEY));
-                    group.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                    group.save(database, context);
-                    return true;
-                }
-                else if (raise_exception_on_network_error) {
-                    raiseNetworkErrorException(connection);
-                }
+            else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                // Group is not found at server we delete locally
+                group.delete(database, context);
+                return true;
+            }
+            else if (raise_exception_on_network_error) {
+                raiseNetworkErrorException(connection);
             }
             return false;
         }
