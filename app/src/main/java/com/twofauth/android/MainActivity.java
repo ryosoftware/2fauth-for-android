@@ -483,6 +483,11 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         super.startActivityForResult(activity_class, bundle);
     }
 
+    @Override
+    protected void startActivityForResult(@NotNull final Class<?> activity_class) {
+        startActivityForResult(activity_class, null);
+    }
+
     // Entry point for the related activities end
     // When the settings activity ends, if changed settings includes server-identities, we try to start synchronization process or, if not possible, we reload accounts data
     // If the activity that ends isn't the settings activity, we reload accounts data
