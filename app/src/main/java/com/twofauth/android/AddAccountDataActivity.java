@@ -147,6 +147,7 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
         if (! isFinishedOrFinishing()) {
             if (account == null) {
                 UI.showToast(this, R.string.cannot_decode_selected_image);
+                findViewById(R.id.qr_layout).setVisibility(View.GONE);
             }
             else {
                 try {
