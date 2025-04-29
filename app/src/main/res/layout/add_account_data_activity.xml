@@ -22,7 +22,7 @@
             android:text="@string/how_do_you_want_to_add_account_data" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
@@ -30,21 +30,25 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/use_qr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:layout_marginEnd="5dp"
                 app:icon="@drawable/ic_actionbar_qr"
+                app:iconGravity="top"
                 android:text="@string/add_account_data_from_a_qr_code"
-                android:maxLines="1" />
+                android:maxLines="2" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/use_form"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:layout_marginStart="5dp"
                 app:icon="@drawable/ic_actionbar_edit"
+                app:iconGravity="top"
                 android:text="@string/add_account_data_from_a_form"
-                android:maxLines="1" />
+                android:maxLines="2" />
 
         </LinearLayout>
 
