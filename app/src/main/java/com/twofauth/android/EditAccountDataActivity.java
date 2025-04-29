@@ -348,7 +348,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         if (! mCurrentAccountData.hasServerIdentity()) { return false; }
         if (Strings.isEmptyOrNull(mCurrentAccountData.getService())) { return false; }
         if (Strings.isEmptyOrNull(mCurrentAccountData.getAccount())) { return false; }
-        if (Strings.isEmptyOrNull(mCurrentAccountData.getSecret())) { return false; }
+        if (mCurrentAccountData.getValidatedSecret() == null) { return false; }
         if (Strings.isEmptyOrNull(mCurrentAccountData.getOtpType())) { return false; }
         if (! mCurrentAccountData.isSteam()) {
             if (mCurrentAccountData.getOtpLength() == 0) { return false; }
