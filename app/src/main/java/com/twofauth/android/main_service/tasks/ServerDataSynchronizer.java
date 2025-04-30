@@ -160,14 +160,9 @@ public class ServerDataSynchronizer
 
         private void setAccountGroup(@Nullable final List<JSONObject> account_objects, @Nullable final List<TwoFactorGroup> groups) throws Exception {
             if ((account_objects != null) && (groups != null)) {
-                final Map<Integer, TwoFactorGroup> groups_map = new HashMap<Integer, TwoFactorGroup>();
-                for (final TwoFactorGroup group : groups) {
-                    groups_map.put(group.getRemoteId(), group);
-                }
+                final Map<Integer, TwoFactorGroup> groups_map = TwoFactorGroupUtils.toMap(groups);
                 for (final JSONObject account_object : account_objects) {
-                    if (account_object.has(Constants.ACCOUNT_DATA_GROUP_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_GROUP_KEY))) {
-                        account_object.put(Constants.ACCOUNT_DATA_GROUP_KEY, groups_map.get(account_object.getInt(Constants.ACCOUNT_DATA_GROUP_KEY)));
-                    }
+                    if (account_object.has(Constants.ACCOUNT_DATA_GROUP_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_GROUP_KEY))) { account_object.put(Constants.ACCOUNT_DATA_GROUP_KEY, groups_map.get(account_object.getInt(Constants.ACCOUNT_DATA_GROUP_KEY))); }
                 }
             }
         }
