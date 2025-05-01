@@ -181,9 +181,9 @@ public class API {
         if (accounts_objects != null) {
             final Map<String, TwoFactorIcon> icons_map_by_icon_file = new HashMap<String, TwoFactorIcon>(), icons_map_by_service = new HashMap<String, TwoFactorIcon>();
             for (final JSONObject account_object : accounts_objects) {
-                account_object.remove(Constants.ACCOUNT_DATA_ICON_KEY);
                 TwoFactorIcon icon = getIcon(server_identity, (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, (account_object.has(Constants.ACCOUNT_DATA_SERVICE_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_SERVICE_KEY))) ? DashBoardIconsUtils.standardizeServiceName(account_object.getString(Constants.ACCOUNT_DATA_SERVICE_KEY)) : null, icons_map_by_icon_file, icons_map_by_service, Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources)), raise_exception_on_network_error);
-                if (icon != null) { account_object.put(Constants.ACCOUNT_DATA_ICON_KEY, icon); }
+                if (icon == null) { account_object.remove(Constants.ACCOUNT_DATA_ICON_KEY); }
+                else { account_object.put(Constants.ACCOUNT_DATA_ICON_KEY, icon); }
             }
         }
     }
