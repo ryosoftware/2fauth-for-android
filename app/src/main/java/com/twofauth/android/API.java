@@ -3,7 +3,6 @@ package com.twofauth.android;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.util.Log;
 
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
@@ -200,7 +199,34 @@ public class API {
         return getQR(account.getServerIdentity(), account.getRemoteId(), raise_exception_on_network_error);
     }
 
-    public static boolean synchronizeAccount(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account, boolean raise_exception_on_network_error) throws Exception {
+    private static void onAccountDataUpdated(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account, @NotNull final JSONObject object, final boolean reload_icon, final boolean raise_exception_on_network_error) throws Exception {
+        account.fromJSONObject(database, account.getServerIdentity(), object);
+        if (reload_icon) {
+            final String server_icon_file = (object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, service = DashBoardIconsUtils.standardizeServiceName(account.getService());
+            final TwoFactorIcon icon = getIcon(account.getServerIdentity(), server_icon_file, service, null, null, Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources)), raise_exception_on_network_error);
+            if (account.hasIcon()) { account.getIcon().setBitmaps(context, icon); }
+            else { account.setIcon(icon); }
+        }
+        account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
+        account.save(database, context);
+    }
+
+    private static void onAccountDataRemoved(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account, final boolean physical_remove, final boolean raise_exception_on_network_error) throws Exception {
+        final TwoFactorIcon icon = account.getIcon();
+        if (icon != null) {
+            if (API.ICON_SOURCE_DEFAULT.equals(icon.getSource())) {
+                final String source_id = icon.getSourceId();
+                if (! Strings.isEmptyOrNull(source_id)) { deleteIcon(account.getServerIdentity(), source_id, raise_exception_on_network_error); }
+                icon.setSourceData(null, null);
+            }
+            if (physical_remove) { icon.setBitmaps((Bitmap) null, (Bitmap) null, (Bitmap) null); }
+        }
+        account.setRemoteId(0);
+        if (physical_remove) { account.delete(database, context); }
+        else { account.setStatus(TwoFactorAccount.STATUS_DELETED); account.save(database, context); }
+    }
+
+    public static boolean synchronizeAccount(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account, final boolean reload_data_after_synchronization, final boolean raise_exception_on_network_error) throws Exception {
         final URL url = new URL(account.isRemote() ? ACCOUNT_LOCATION.replace("%SERVER%", account.getServerIdentity().getServer()).replace("%ID%", String.valueOf(account.getRemoteId())) : ACCOUNTS_LOCATION.replace("%SERVER%", account.getServerIdentity().getServer()));
         final String authorization = AUTH_TOKEN.replace("%TOKEN%", account.getServerIdentity().getToken());
         if (account.isDeleted()) {
@@ -209,13 +235,7 @@ public class API {
                 final HttpURLConnection connection = HTTP.delete(url, authorization);
                 if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) || (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND)) {
                     // Account is remote deleted then we delete locally (we try to delete the icon, if any)
-                    if (account.hasIcon() && API.ICON_SOURCE_DEFAULT.equals(account.getIcon().getSource())) {
-                        final TwoFactorIcon icon = account.getIcon();
-                        icon.setSource(null);
-                        icon.setBitmaps((Bitmap) null, (Bitmap) null, (Bitmap) null);
-                        synchronizeIcon(account.getServerIdentity(), database, context, icon, raise_exception_on_network_error);
-                    }
-                    account.delete(database, context);
+                    onAccountDataRemoved(database, context, account, true, raise_exception_on_network_error);
                     return true;
                 }
                 else if (raise_exception_on_network_error) {
@@ -224,7 +244,7 @@ public class API {
             }
             else {
                 // Is a local account and has been deleted
-                account.delete(database, context);
+                onAccountDataRemoved(database, context, account, true, raise_exception_on_network_error);
                 return true;
             }
             return false;
@@ -234,31 +254,17 @@ public class API {
             // First, synchronize icon, if account has icon
             synchronizeIcon(account.getServerIdentity(), database, context, account.getIcon(), raise_exception_on_network_error);
             // After synchronize icon we try to synchronize account, but before we synchronize or create group data, if account belongs to a group
-            if (! account.hasGroup() || synchronizeGroup(database, context, account.getGroup(), raise_exception_on_network_error)) {
+            if (! account.hasGroup() || synchronizeGroup(database, context, account.getGroup(), reload_data_after_synchronization, raise_exception_on_network_error)) {
                 // We sent the account data (if is not a new account we use put, in other case we use post)
                 final HttpURLConnection connection = account.isRemote() ? HTTP.put(url, authorization, JSON.toString(account.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(account.toJSONObject()));
                 if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                    final JSONObject account_object = JSON.toJSONObject(HTTP.getContentString(connection));
-                    // Account has been updated or created we update values from the ones at server and set status to default
-                    account.fromJSONObject(database, account_object);
-
-
-// Download icon
-final TwoFactorIcon icon = getIcon(account.getServerIdentity(), (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, DashBoardIconsUtils.standardizeServiceName(account.getService()), null, null, Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources)), raise_exception_on_network_error);
-if (icon != null) {
-    if (account.hasIcon()) { account.getIcon().setBitmaps(context, icon); }
-    else { account.setIcon(icon); }
-}
-////
-
-
-                    account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                    account.save(database, context);
+                    // Account has been updated or created. We update values to the ones sent by the server, reload icon (if param) then set status to default then save data
+                    onAccountDataUpdated(database, context, account, JSON.toJSONObject(HTTP.getContentString(connection)), reload_data_after_synchronization, raise_exception_on_network_error);
                     return true;
                 }
                 else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                    // Is an update but account is not found at server: we delete locally
-                    account.delete(database, context);
+                    // Is an update but account is not found at server: we set has been deleted
+                    onAccountDataRemoved(database, context, account, false, raise_exception_on_network_error);
                     return true;
                 }
                 else if (raise_exception_on_network_error) {
@@ -267,51 +273,17 @@ if (icon != null) {
                 return false;
             }
         }
-        return true;
-    }
-
-    // This function looks similar to synchronizing accounts but we have to take into account the case where a group cannot be deleted locally because it still has references
-
-    public static boolean synchronizeGroup(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorGroup group, boolean raise_exception_on_network_error) throws Exception {
-        final URL url = new URL(group.isRemote() ? GROUP_LOCATION.replace("%SERVER%", group.getServerIdentity().getServer()).replace("%ID%", String.valueOf(group.getRemoteId())) : GROUPS_LOCATION.replace("%SERVER%", group.getServerIdentity().getServer()));
-        final String authorization = AUTH_TOKEN.replace("%TOKEN%", group.getServerIdentity().getToken());
-        if (group.isDeleted()) {
-            if (group.isRemote()) {
-                // Is a server group that was locally deleted we try to remote delete
-                final HttpURLConnection connection = HTTP.delete(url, authorization);
-                if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) || (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND)) {
-                    // First we update the group instead of delete it, to prevent a recurrent deletion if group cannot be locally deleted (due to it's FK restrictions)
-                    group.setRemoteId(0);
-                    group.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                    group.save(database, context);
-                    // Now we try to delete the group
-                    if (! group.isReferenced(database)) { group.delete(database, context); }
-                    return true;
-                }
-                else if (raise_exception_on_network_error) {
-                    raiseNetworkErrorException(connection);
-                }
-            }
-            else {
-                // We only can delete a group if it's not referenced (by any account)
-                if (! group.isReferenced(database)) { group.delete(database, context); }
-                return true;
-            }
-            return false;
-        }
-        else if (! group.isSynced()) {
-            // Group is out of sync (we use a put if group already exists and post in other case)
-            final HttpURLConnection connection = group.isRemote() ? HTTP.put(url, authorization, JSON.toString(group.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(group.toJSONObject()));
-            if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
-                // Group has been updated or created
-                group.fromJSONObject(JSON.toJSONObject(HTTP.getContentString(connection)));
-                group.setStatus(TwoFactorAccount.STATUS_DEFAULT);
-                group.save(database, context);
+        else if (reload_data_after_synchronization && account.isRemote()) {
+            // We try to download account data
+            final HttpURLConnection connection = HTTP.get(url, authorization);
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                // Account data exists and their data has been downloaded
+                onAccountDataUpdated(database, context, account, JSON.toJSONObject(HTTP.getContentString(connection)), reload_data_after_synchronization, raise_exception_on_network_error);
                 return true;
             }
             else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                // Group is not found at server we delete locally
-                group.delete(database, context);
+                // Account is not found at server: we set has been deleted
+                onAccountDataRemoved(database, context, account, false, raise_exception_on_network_error);
                 return true;
             }
             else if (raise_exception_on_network_error) {
@@ -322,7 +294,102 @@ if (icon != null) {
         return true;
     }
 
+    public static boolean synchronizeAccount(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account, final boolean raise_exception_on_network_error) throws Exception {
+        return synchronizeAccount(database, context, account, false, raise_exception_on_network_error);
+    }
+
+    // This function looks similar to synchronizing accounts but we have to take into account the case where a group cannot be deleted locally because it still has references
+
+    private static void onGroupDataUpdated(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorGroup group, @NotNull final JSONObject object) throws Exception {
+        group.fromJSONObject(object);
+        group.setStatus(TwoFactorAccount.STATUS_DEFAULT);
+        group.save(database, context);
+    }
+
+    private static void onGroupDataRemoved(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorGroup group) throws Exception {
+        group.setRemoteId(0);
+        group.setStatus(TwoFactorGroup.STATUS_DELETED);
+        group.save(database, context);
+        if (! group.isReferenced(database)) { group.delete(database, context); }
+    }
+
+    public static boolean synchronizeGroup(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorGroup group, final boolean reload_data_if_synchronized, final boolean raise_exception_on_network_error) throws Exception {
+        final URL url = new URL(group.isRemote() ? GROUP_LOCATION.replace("%SERVER%", group.getServerIdentity().getServer()).replace("%ID%", String.valueOf(group.getRemoteId())) : GROUPS_LOCATION.replace("%SERVER%", group.getServerIdentity().getServer()));
+        final String authorization = AUTH_TOKEN.replace("%TOKEN%", group.getServerIdentity().getToken());
+        if (group.isDeleted()) {
+            if (group.isRemote()) {
+                // Is a server group that was locally deleted we try to remote delete
+                final HttpURLConnection connection = HTTP.delete(url, authorization);
+                if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) || (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND)) {
+                    // Group has been deleted
+                    onGroupDataRemoved(database, context, group);
+                    return true;
+                }
+                else if (raise_exception_on_network_error) {
+                    raiseNetworkErrorException(connection);
+                }
+            }
+            else {
+                onGroupDataRemoved(database, context, group);
+                return true;
+            }
+            return false;
+        }
+        else if (! group.isSynced()) {
+            // Group is out of sync (we use a put if group already exists and post in other case)
+            final HttpURLConnection connection = group.isRemote() ? HTTP.put(url, authorization, JSON.toString(group.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(group.toJSONObject()));
+            if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
+                // Group has been updated or created
+                onGroupDataUpdated(database, context, group, JSON.toJSONObject(HTTP.getContentString(connection)));
+                return true;
+            }
+            else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                // Group is not found at server we delete locally
+                onGroupDataRemoved(database, context, group);
+                return true;
+            }
+            else if (raise_exception_on_network_error) {
+                raiseNetworkErrorException(connection);
+            }
+            return false;
+        }
+        else if (reload_data_if_synchronized && group.isRemote()) {
+            // We try to download group data
+            final HttpURLConnection connection = HTTP.get(url, authorization);
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                // Group data exists and their data has been downloaded
+                onGroupDataUpdated(database, context, group, JSON.toJSONObject(HTTP.getContentString(connection)));
+                return true;
+            }
+            else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                // Group is not found at server we delete locally
+                onGroupDataRemoved(database, context, group);
+                return true;
+            }
+            else if (raise_exception_on_network_error) {
+                raiseNetworkErrorException(connection);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean synchronizeGroup(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorGroup group, final boolean raise_exception_on_network_error) throws Exception {
+        return synchronizeGroup(database, context, group, false, raise_exception_on_network_error);
+    }
+
     // Synchronizes a icon source
+
+    private static boolean deleteIcon(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String source_id, final boolean raise_exception_on_network_error) throws Exception {
+        final HttpURLConnection connection = HTTP.delete(new URL(ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", source_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
+        if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) || (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND)) {
+            return true;
+        }
+        else if (raise_exception_on_network_error) {
+            raiseNetworkErrorException(connection);
+        }
+        return false;
+    }
 
     public static boolean synchronizeIcon(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final SQLiteDatabase database, @NotNull final Context context, @Nullable final TwoFactorIcon icon, final boolean raise_exception_on_network_error) throws Exception {
         boolean success = true;
@@ -332,15 +399,11 @@ if (icon != null) {
             final String authorization = AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), source_id = icon.getSourceId();
             // If source-id has a value this is a 2FA icon that has been deleted/updated by the user at local and is still not synchronized
             if (! Strings.isEmptyOrNull(source_id)) {
-                final HttpURLConnection connection = HTTP.delete(new URL(ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", source_id)), authorization);
-                if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) || (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND)) {
+                if (deleteIcon(server_identity, source_id, raise_exception_on_network_error)) {
                     icon.setSourceData(null, null);
                     // If icon has no bitmap and is not referenced by an account, we delete from database, in other case we save data
                     if ((bitmap == null) && (! icon.isReferenced(database))) { icon.delete(database, context); }
                     else { icon.save(database, context); }
-                }
-                else if (raise_exception_on_network_error) {
-                    raiseNetworkErrorException(connection);
                 }
                 else {
                     success = false;
@@ -365,50 +428,33 @@ if (icon != null) {
         return success;
     }
 
-    public static @Nullable TwoFactorAccount decodeQR(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Bitmap qr) throws Exception {
+    public static @Nullable JSONObject decodeQR(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Bitmap qr) throws Exception {
         final URL url = new URL(QR_DECODER_LOCATION.replace("%SERVER%", server_identity.getServer()));
         final String authorization = AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken());
         final HttpURLConnection connection = HTTP.post(url, authorization, Bitmaps.bytes(qr), QR_DATA_NAME, HTTP.CONTENT_TYPE_MULTIPART_FORM_DATA);
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             final Uri uri = Uri.parse(JSON.toJSONObject(HTTP.getContentString(connection)).getString("data"));
             if (Strings.equals(uri.getScheme(), "otpauth")) {
-                final TwoFactorAccount account = new TwoFactorAccount();
-                account.setOtpType(uri.getHost());
+                final JSONObject object = new JSONObject();
+                object.put(Constants.ACCOUNT_DATA_OTP_TYPE_KEY, uri.getHost());
                 final String[] label_parts = uri.getPath().substring(1).split(":");
-                account.setService(label_parts[0]);
-                account.setAccount(label_parts.length > 1 ? label_parts[1] : "");
+                object.put(Constants.ACCOUNT_DATA_SERVICE_KEY, label_parts[0]);
+                object.put(Constants.ACCOUNT_DATA_USER_KEY, label_parts.length > 1 ? label_parts[1] : "");
                 for (String param : uri.getQuery().split("&")) {
                     final String[] key_value = param.split("=");
                     if (key_value.length == 2) {
-                        if (Constants.ACCOUNT_DATA_SECRET_KEY.equals(key_value[0])) { account.setSecret(key_value[1]); }
-                        else if (Constants.ACCOUNT_DATA_ALGORITHM_KEY.equals(key_value[0])) { account.setAlgorithm(key_value[1]); }
-                        else if (Constants.ACCOUNT_DATA_OTP_LENGTH_KEY.equals(key_value[0])) { account.setOtpLength(Strings.parseInt(key_value[1], Constants.DEFAULT_OTP_LENGTH)); }
-                        else if (Constants.ACCOUNT_DATA_PERIOD_KEY.equals(key_value[0])) { account.setPeriod(Strings.parseInt(key_value[1], Constants.DEFAULT_PERIOD)); }
-                        else if (Constants.ACCOUNT_DATA_COUNTER_KEY.equals(key_value[0])) { account.setPeriod(Strings.parseInt(key_value[1], Constants.DEFAULT_COUNTER)); }
-                        else if (Constants.QR_DATA_ISSUER_KEY.equals(key_value[0]) && Strings.isEmptyOrNull(account.getAccount()) && (! Strings.isEmptyOrNull(key_value[1]))) { account.setAccount(key_value[1]); }
+                        if (Constants.ACCOUNT_DATA_SECRET_KEY.equals(key_value[0])) { object.put(Constants.ACCOUNT_DATA_SECRET_KEY, key_value[1]); }
+                        else if (Constants.ACCOUNT_DATA_ALGORITHM_KEY.equals(key_value[0])) { object.put(Constants.ACCOUNT_DATA_ALGORITHM_KEY, key_value[1]); }
+                        else if (Constants.ACCOUNT_DATA_OTP_LENGTH_KEY.equals(key_value[0])) { object.put(Constants.ACCOUNT_DATA_OTP_LENGTH_KEY, Strings.parseInt(key_value[1], Constants.DEFAULT_OTP_LENGTH)); }
+                        else if (Constants.ACCOUNT_DATA_PERIOD_KEY.equals(key_value[0])) { object.put(Constants.ACCOUNT_DATA_PERIOD_KEY, Strings.parseInt(key_value[1], Constants.DEFAULT_PERIOD)); }
+                        else if (Constants.ACCOUNT_DATA_COUNTER_KEY.equals(key_value[0])) { object.put(Constants.ACCOUNT_DATA_COUNTER_KEY, Strings.parseInt(key_value[1], Constants.DEFAULT_COUNTER)); }
+                        else if (Constants.QR_DATA_ISSUER_KEY.equals(key_value[0]) && Strings.isEmptyOrNull(object.getString(Constants.ACCOUNT_DATA_USER_KEY)) && (! Strings.isEmptyOrNull(key_value[1]))) { object.put(Constants.ACCOUNT_DATA_USER_KEY, key_value[1]); }
                     }
                 }
-                return account;
+                return object;
             }
         }
         return null;
-    }
-
-    public static void setIconFromExternalSource(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account) throws Exception {
-        if ((! account.hasIcon()) || (account.getIcon().getBitmap(context, null) == null)) {
-            final String service = DashBoardIconsUtils.standardizeServiceName(account.getService());
-            final Bitmap bitmap = DashBoardIconsUtils.getIcon(service, DashBoardIconsUtils.NO_THEMED_ICON);
-            if (bitmap != null) {
-                final TwoFactorIcon icon = account.hasIcon() ? account.getIcon() : new TwoFactorIcon();
-                icon.setSourceData(ICON_SOURCE_DASHBOARD, service);
-                icon.setBitmaps(bitmap, null, null);
-                icon.save(database, context);
-                if (! account.hasIcon()) {
-                    account.setIcon(icon);
-                    account.save(database, context);
-                }
-            }
-        }
     }
 }
 

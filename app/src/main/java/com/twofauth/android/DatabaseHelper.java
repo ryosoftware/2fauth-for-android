@@ -14,7 +14,6 @@ import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.database.TwoFactorGroupsHelper;
 import com.twofauth.android.database.TwoFactorIcon;
 import com.twofauth.android.database.TwoFactorIconsHelper;
-import com.twofauth.android.database.DatabaseAtomicOperationsHelper;
 import com.twofauth.android.utils.KeyStore;
 import com.twofauth.android.utils.Preferences;
 import com.twofauth.android.utils.Threads;
@@ -40,7 +39,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private final TwoFactorGroupsHelper mTwoFactorGroupsHelper;
     private final TwoFactorIconsHelper mTwoFactorIconsHelper;
     private final TwoFactorAccountsHelper mTwoFactorAccountsHelper;
-    private final DatabaseAtomicOperationsHelper mDatabaseAtomicOperationsHelper;
 
     private SQLiteDatabase mReadableDatabase = null;
 
@@ -55,7 +53,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         mTwoFactorGroupsHelper = new TwoFactorGroupsHelper(this);
         mTwoFactorIconsHelper = new TwoFactorIconsHelper(this);
         mTwoFactorAccountsHelper = new TwoFactorAccountsHelper(this);
-        mDatabaseAtomicOperationsHelper = new DatabaseAtomicOperationsHelper(this, mTwoFactorAccountsHelper, mTwoFactorGroupsHelper, mTwoFactorIconsHelper);
         context.getDatabasePath(DatabaseHelper.DATABASE_NAME).getParentFile().mkdirs();
     }
 
@@ -171,7 +168,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public @NotNull TwoFactorAccountsHelper getTwoFactorAccountsHelper() { return mTwoFactorAccountsHelper; }
-
-    public @NotNull DatabaseAtomicOperationsHelper getDatabaseAtomicOperationsHelper() { return mDatabaseAtomicOperationsHelper; }
 }
 

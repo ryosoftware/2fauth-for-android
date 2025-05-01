@@ -29,7 +29,7 @@ public abstract class SynceableTableRow extends TableRow {
     }
 
     public boolean isRemote() {
-        return mRemoteId != 0;
+        return mRemoteId > 0;
     }
 
     public int getRemoteId() {

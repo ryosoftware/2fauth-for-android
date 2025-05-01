@@ -39,6 +39,7 @@ public class LoadAccountEditionNeededData {
 
         private final long mId;
         private final String mData;
+        private final long mServerIdentityId;
 
         private final OnAccountEditionNeededDataLoadedListener mListener;
 
@@ -49,13 +50,24 @@ public class LoadAccountEditionNeededData {
         LoadAccountEditionNeededDataImplementation(final long id, @NotNull final OnAccountEditionNeededDataLoadedListener listener) {
             mId = id;
             mData = null;
+            mServerIdentityId = -1;
             mListener = listener;
         }
 
-        LoadAccountEditionNeededDataImplementation(@Nullable final String data, @NotNull final OnAccountEditionNeededDataLoadedListener listener) {
+        LoadAccountEditionNeededDataImplementation(@Nullable final String data, final long server_identity_id, @NotNull final OnAccountEditionNeededDataLoadedListener listener) {
             mId = -1;
             mData = data;
+            mServerIdentityId = server_identity_id;
             mListener = listener;
+        }
+
+        private @Nullable TwoFactorServerIdentity get(@Nullable final List<TwoFactorServerIdentity> server_identities, final long server_identity_id) {
+            if ((server_identities != null) && (server_identity_id >= 0)) {
+                for (final TwoFactorServerIdentity server_identity : server_identities) {
+                    if (server_identity.getRowId() == server_identity_id) { return server_identity; }
+                }
+            }
+            return null;
         }
 
         @Override
@@ -67,7 +79,7 @@ public class LoadAccountEditionNeededData {
                         mServerIdentities = Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(database);
                         final List<TwoFactorGroup> groups = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database);
                         mGroups = (groups == null) ? null : TwoFactorGroupUtils.toMap(groups);
-                        mAccount = (mId < 0) ? mData == null ? new TwoFactorAccount() : new TwoFactorAccount(database, JSON.toJSONObject(mData)) : Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().get(database, mId);
+                        mAccount = (mId < 0) ? mData == null ? new TwoFactorAccount() : new TwoFactorAccount(database, get(mServerIdentities, mServerIdentityId), JSON.toJSONObject(mData)) : Main.getInstance().getDatabaseHelper().getTwoFactorAccountsHelper().get(database, mId);
                     }
                     finally {
                         Main.getInstance().getDatabaseHelper().close(database);
@@ -90,7 +102,11 @@ public class LoadAccountEditionNeededData {
         return Main.getInstance().getBackgroundTask(new LoadAccountEditionNeededDataImplementation(id, listener));
     }
 
-    public static @NotNull Thread getBackgroundTask(@Nullable final String data, @NotNull OnAccountEditionNeededDataLoadedListener listener) {
-        return Main.getInstance().getBackgroundTask(new LoadAccountEditionNeededDataImplementation(data, listener));
+    public static @NotNull Thread getBackgroundTask(@NotNull OnAccountEditionNeededDataLoadedListener listener) {
+        return getBackgroundTask(-1, listener);
+    }
+
+    public static @NotNull Thread getBackgroundTask(@Nullable final String data, final long server_identity_id, @NotNull OnAccountEditionNeededDataLoadedListener listener) {
+        return Main.getInstance().getBackgroundTask(new LoadAccountEditionNeededDataImplementation(data, server_identity_id, listener));
     }
 }

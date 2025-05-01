@@ -55,6 +55,13 @@ public class TwoFactorGroupsHelper extends TableHelper<TwoFactorGroup> {
         return super.get(id);
     }
 
+    public @Nullable TwoFactorGroup get(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorServerIdentity server_identity, final int remote_id) throws Exception {
+        try (final Cursor cursor = database.query(TABLE_NAME, TwoFactorGroup.PROJECTION, String.format("%s=? AND %s=?", TwoFactorGroup.SERVER_IDENTITY, TwoFactorGroup.REMOTE_ID), new String[] { String.valueOf(server_identity.getRowId()), String.valueOf(remote_id) }, null, null, null, null)) {
+            if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) { return instance(database, cursor); }
+        }
+        return null;
+    }
+
     public @Nullable List<TwoFactorGroup> get(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, final boolean only_not_synced_groups) throws Exception {
         return super.get(database, new QueryOptions(server_identity, only_not_synced_groups));
     }

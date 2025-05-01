@@ -96,7 +96,7 @@ public class ServerDataSynchronizer
         private void synchronizeGroupsData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorGroup> local_loaded_groups, final boolean raise_exception_on_network_error) throws Exception {
             if (local_loaded_groups != null) {
                 for (final TwoFactorGroup group : local_loaded_groups) {
-                    API.synchronizeGroup(database, mService, group, raise_exception_on_network_error);
+                    API.synchronizeGroup(database, mService, group, false, raise_exception_on_network_error);
                 }
             }
         }
@@ -127,7 +127,7 @@ public class ServerDataSynchronizer
                     }
                     if (will_be_synchronized) {
                         if (account.isSynced()) { account.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED); }
-                        API.synchronizeAccount(database, mService, account, raise_exception_on_network_error);
+                        API.synchronizeAccount(database, mService, account, false, raise_exception_on_network_error);
                     }
                 }
             }
@@ -160,14 +160,9 @@ public class ServerDataSynchronizer
 
         private void setAccountGroup(@Nullable final List<JSONObject> account_objects, @Nullable final List<TwoFactorGroup> groups) throws Exception {
             if ((account_objects != null) && (groups != null)) {
-                final Map<Integer, TwoFactorGroup> groups_map = new HashMap<Integer, TwoFactorGroup>();
-                for (final TwoFactorGroup group : groups) {
-                    groups_map.put(group.getRemoteId(), group);
-                }
+                final Map<Integer, TwoFactorGroup> groups_map = TwoFactorGroupUtils.toMap(groups);
                 for (final JSONObject account_object : account_objects) {
-                    if (account_object.has(Constants.ACCOUNT_DATA_GROUP_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_GROUP_KEY))) {
-                        account_object.put(Constants.ACCOUNT_DATA_GROUP_KEY, groups_map.get(account_object.getInt(Constants.ACCOUNT_DATA_GROUP_KEY)));
-                    }
+                    if (account_object.has(Constants.ACCOUNT_DATA_GROUP_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_GROUP_KEY))) { account_object.put(Constants.ACCOUNT_DATA_GROUP_KEY, groups_map.get(account_object.getInt(Constants.ACCOUNT_DATA_GROUP_KEY))); }
                 }
             }
         }

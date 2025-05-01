@@ -78,6 +78,13 @@ public class TwoFactorIconsHelper extends TableHelper<TwoFactorIcon> {
         return get(database, server_identity, false);
     }
 
+    public @Nullable TwoFactorIcon get(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorServerIdentity server_identity, final String source, final String source_id) throws Exception {
+        try (final Cursor cursor = database.query(TABLE_NAME, TwoFactorIcon.PROJECTION, String.format("%s=? AND %s=? AND %s=?", TwoFactorGroup.SERVER_IDENTITY, TwoFactorIcon.SOURCE, TwoFactorIcon.SOURCE_ID), new String[] { String.valueOf(server_identity.getRowId()), source, source_id }, null, null, null, null)) {
+            if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) { return instance(database, cursor); }
+        }
+        return null;
+    }
+
     private void deleteFiles(@NotNull final Context context) {
         final File base_folder = getBaseFolder(context);
         if (base_folder.exists()) {

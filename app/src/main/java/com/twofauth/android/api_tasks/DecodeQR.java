@@ -10,10 +10,11 @@ import com.twofauth.android.database.TwoFactorServerIdentity;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
 public class DecodeQR {
     public interface OnQRDecodedListener {
-        public abstract void onQRDecoded(TwoFactorAccount account);
+        public abstract void onQRDecoded(JSONObject object);
     }
 
     private static class DecodeQRImplementation implements Main.OnBackgroundTaskExecutionListener {
@@ -23,7 +24,7 @@ public class DecodeQR {
 
         private final OnQRDecodedListener mListener;
 
-        private TwoFactorAccount mAccount = null;
+        private JSONObject mObject = null;
 
         DecodeQRImplementation(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Bitmap qr, @NotNull final OnQRDecodedListener listener) {
             mmServerIdentity = server_identity;
@@ -34,7 +35,7 @@ public class DecodeQR {
         @Override
         public @Nullable Object onBackgroundTaskStarted(@Nullable final Object data) {
             try {
-                mAccount = API.decodeQR(mmServerIdentity, mQR);
+                mObject = API.decodeQR(mmServerIdentity, mQR);
             }
             catch (Exception e) {
                 Log.e(Main.LOG_TAG_NAME, "Exception while trying to decode a QR code", e);
@@ -44,7 +45,7 @@ public class DecodeQR {
 
         @Override
         public void onBackgroundTaskFinished(@Nullable final Object data) {
-            mListener.onQRDecoded(mAccount);
+            mListener.onQRDecoded(mObject);
         }
     }
 

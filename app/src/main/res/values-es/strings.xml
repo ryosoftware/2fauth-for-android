@@ -225,9 +225,17 @@
     <string name="groups">Grupos</string>
     <string name="groups_summary">Mantenimiento de grupos</string>
     <string name="no_defined_groups">No hay grupos</string>
-    <string name="pending_of_sync">Pendiente de sincronización en el servidor</string>
-    <string name="pending_of_deletion">Pendiente de borrado en el servidor</string>
+    <string name="pending_of_sync">Pendiente de sincronización</string>
+    <string name="pending_of_deletion">Pendiente de eliminación</string>
     <string name="deleted_group">%1$s [borrado]</string>
+    <string name="group_data_has_been_remotely_deleted">El grupo ha sido borrado en el servidor.\n\nHaga clic en el botón \"crear de nuevo\" si quiere volver a crearla o en el botón \"salir\" en otro caso</string>
+
+    <string name="no_account_references">Sin cuentas</string>
+    <plurals name="account_references">
+        <item quantity="one">Una cuenta</item>
+        <item quantity="other">%1$d cuentas</item>
+        <item quantity="many">%1$d cuentas</item>
+    </plurals>
 
     <string name="icon_source_bubka">Icono descargado de su servidor 2FA</string>
     <string name="icon_source_dashboard_icons">Icono descargado de \"Dashboard Icons\"</string>
@@ -248,6 +256,7 @@
     <string name="account_data_has_been_saved_and_synced">Los datos de la cuenta se han guardado y sincronizado</string>
     <string name="account_data_has_been_saved_but_not_synced">Los datos de la cuenta se han guardado pero no sincronizado</string>
     <string name="error_while_saving_account_data">No se han podido guardar los datos de la cuenta</string>
+    <string name="account_data_has_been_remotely_deleted">La cuenta ha sido borrado en el servidor.\n\nHaga clic en el botón \"crear de nuevo\" si quiere volver a crearla o en el botón \"salir\" en otro caso</string>
     <string name="account_data_has_been_deleted_and_synced">Los datos de la cuenta se han eliminado local y remotamente</string>
     <string name="account_data_has_been_deleted_but_not_synced">Los datos de la cuenta se han eliminado localmente</string>
     <string name="error_while_deleting_account_data">No se ha podido eliminar la cuenta</string>
@@ -273,6 +282,7 @@
     <string name="yes">Sí</string>
     <string name="no">No</string>
     <string name="install_now">Instalar ahora</string>
+    <string name="recreate">Crear de nuevo</string>
     <string name="exit">Salir</string>
     <string name="continue_editing">Continuar editando</string>
     <string name="get_qr_now">Obtener QR</string>

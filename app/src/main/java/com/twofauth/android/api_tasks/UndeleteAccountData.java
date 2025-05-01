@@ -5,31 +5,31 @@ import android.util.Log;
 
 import com.twofauth.android.API;
 import com.twofauth.android.Main;
-import com.twofauth.android.database.TwoFactorGroup;
+import com.twofauth.android.database.TwoFactorAccount;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SaveGroupData {
-    public interface OnDataSavedListener {
-        public abstract void onDataSaved(TwoFactorGroup group, boolean success, boolean synced);
+public class UndeleteAccountData {
+    public interface OnDataUndeletedListener {
+        public abstract void onDataUndeleted(TwoFactorAccount account, boolean success, boolean synced);
     }
 
-    private static class SaveGroupDataImplementation implements Main.OnBackgroundTaskExecutionListener {
+    private static class UndeleteAccountDataImplementation implements Main.OnBackgroundTaskExecutionListener {
         private final Context mContext;
 
-        private final TwoFactorGroup mGroup;
+        private final TwoFactorAccount mAccount;
 
-        private final OnDataSavedListener mListener;
+        private final OnDataUndeletedListener mListener;
 
         private boolean mSuccess = false;
         private boolean mSynced = false;
 
-        SaveGroupDataImplementation(@NotNull final Context context, @NotNull final TwoFactorGroup group, @Nullable final OnDataSavedListener listener) {
+        UndeleteAccountDataImplementation(@NotNull final Context context, @NotNull final TwoFactorAccount account, @Nullable final OnDataUndeletedListener listener) {
             mContext = context;
-            mGroup = group;
+            mAccount = account;
             mListener = listener;
         }
 
@@ -41,9 +41,10 @@ public class SaveGroupData {
                     try {
                         if (Main.getInstance().getDatabaseHelper().beginTransaction(database)) {
                             try {
-                                mGroup.save(database, mContext);
+                                mAccount.setStatus(TwoFactorAccount.STATUS_DEFAULT);
+                                mAccount.save(database, mContext);
                                 mSuccess = true;
-                                if (mGroup.getServerIdentity().isSyncingImmediately()) { mSynced = API.synchronizeGroup(database, mContext, mGroup, true, true); }
+                                mSynced = (mAccount.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, mAccount, true, true));
                             }
                             finally {
                                 Main.getInstance().getDatabaseHelper().endTransaction(database, mSuccess);
@@ -56,18 +57,20 @@ public class SaveGroupData {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to store/synchronize a group", e);
+                Log.e(Main.LOG_TAG_NAME, "Exception while trying to delete/undelete an account", e);
             }
             return null;
         }
 
         @Override
         public void onBackgroundTaskFinished(@Nullable final Object data) {
-            if (mListener != null) { mListener.onDataSaved(mGroup, mSuccess, mSynced); }
+            if (mListener != null) {
+                mListener.onDataUndeleted(mAccount, mSuccess, mSynced);
+            }
         }
     }
 
-    public static @NotNull Thread getBackgroundTask(@NotNull final Context context, @NotNull final TwoFactorGroup group, @Nullable OnDataSavedListener listener) {
-        return Main.getInstance().getBackgroundTask(new SaveGroupDataImplementation(context, group, listener));
+    public static @NotNull Thread getBackgroundTask(@NotNull final Context context, @NotNull final TwoFactorAccount account, @Nullable OnDataUndeletedListener listener) {
+        return Main.getInstance().getBackgroundTask(new UndeleteAccountDataImplementation(context, account, listener));
     }
 }
