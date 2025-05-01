@@ -33,14 +33,16 @@ import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.twofauth.android.Authenticator.OnAuthenticatorFinishListener;
+import com.twofauth.android.api_tasks.DeleteAccountData;
+import com.twofauth.android.api_tasks.DeleteAccountData.OnDataDeletedListener;
 import com.twofauth.android.api_tasks.LoadAccountQR;
 import com.twofauth.android.api_tasks.LoadAccountQR.OnQRLoadedListener;
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.database.TwoFactorIcon;
 import com.twofauth.android.database.TwoFactorServerIdentity;
-import com.twofauth.android.api_tasks.ToggleAccountDataDeletionState;
-import com.twofauth.android.api_tasks.ToggleAccountDataDeletionState.OnDataDeletedOrUndeletedListener;
+import com.twofauth.android.api_tasks.UndeleteAccountData;
+import com.twofauth.android.api_tasks.UndeleteAccountData.OnDataUndeletedListener;
 import com.twofauth.android.edit_account_data_activity.tasks.LoadAccountEditionNeededData;
 import com.twofauth.android.edit_account_data_activity.tasks.LoadAccountEditionNeededData.OnAccountEditionNeededDataLoadedListener;
 import com.twofauth.android.api_tasks.SaveAccountData;
@@ -61,8 +63,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class EditAccountDataActivity extends BaseActivityWithTextController implements OnAccountEditionNeededDataLoadedListener, OnDataSavedListener, OnDataDeletedOrUndeletedListener, OnQRLoadedListener, OnAuthenticatorFinishListener, OnClickListener, OnItemSelectedListener {
+public class EditAccountDataActivity extends BaseActivityWithTextController implements OnAccountEditionNeededDataLoadedListener, OnDataSavedListener, OnDataDeletedListener, OnDataUndeletedListener, OnQRLoadedListener, OnAuthenticatorFinishListener, OnClickListener, OnItemSelectedListener {
     public static final String EXTRA_ACCOUNT_ID = "account-id";
+
+    public static final String EXTRA_ACCOUNT_SERVER_IDENTITY = "server-identity";
     public static final String EXTRA_ACCOUNT_DATA = "account-data";
 
     private static enum AuthenticatedActions { SHOW_ADVANCED_DATA, COPY_SECRET_CODE_TO_CLIPBOARD, DELETE_ACCOUNT, ENABLE_ACCOUNT_EDITION, SHOW_QR };
@@ -205,7 +209,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
 
     private boolean mEditing = false;
 
-    private boolean mAddingIconFromQrCode;
+    private boolean mAddingAccountFromQrCode;
+    private boolean mAddingAccountFromFirstTime = true;
+    private boolean mFinishingActivity = false;
 
     @Override
     protected void onCreate(@Nullable final Bundle saved_instance_state) {
@@ -266,9 +272,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mWorking = findViewById(R.id.working);
         mContents = findViewById(R.id.contents);
         final Intent intent = getIntent();
-        mAddingIconFromQrCode = intent.hasExtra(EXTRA_ACCOUNT_DATA);
-        if (mAddingIconFromQrCode) { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getStringExtra(EXTRA_ACCOUNT_DATA), this); }
-        else { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getLongExtra(EXTRA_ACCOUNT_ID, -1), this); }
+        mAddingAccountFromQrCode = ((intent != null) && intent.hasExtra(EXTRA_ACCOUNT_DATA));
+        if (mAddingAccountFromQrCode) { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getStringExtra(EXTRA_ACCOUNT_DATA), intent.hasExtra(EXTRA_ACCOUNT_SERVER_IDENTITY) ? intent.getLongExtra(EXTRA_ACCOUNT_SERVER_IDENTITY, -1) : -1, this); }
+        else if ((intent != null) && intent.hasExtra(EXTRA_ACCOUNT_ID)) { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(intent.getLongExtra(EXTRA_ACCOUNT_ID, -1), this); }
+        else { mDataLoader = LoadAccountEditionNeededData.getBackgroundTask(this); }
         mDataLoader.start();;
     }
 
@@ -383,8 +390,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     // Set buttons state
 
     private void setButtonsAvailability() {
-        final boolean buttons_available = (mDataLoader == null);
-        mEditOrSaveAccountDataButton.setEnabled(buttons_available && (! mCurrentAccountData.isDeleted()) && ((! mEditing) || (isValid() && (isChanged() || (! mCurrentAccountData.inDatabase())))));
+        final boolean buttons_available = (mDataLoader == null), is_account_deleted = ((mAddingAccountFromFirstTime) && (mCurrentAccountData.isDeleted())), in_database = mAddingAccountFromFirstTime ? mCurrentAccountData.inDatabase() : mCurrentAccountData.isRemote();
+        mEditOrSaveAccountDataButton.setEnabled(buttons_available && (! is_account_deleted) && ((! mEditing) || (isValid() && (isChanged() || (! in_database)))));
         mToggleSubmenuVisibilityButton.setEnabled(buttons_available);
         mDeleteOrUndeleteAccountDataButton.setEnabled(buttons_available);
         mCloneAccountDataButton.setEnabled(buttons_available && mCurrentAccountData.inDatabase() && (! mCurrentAccountData.isDeleted()));
@@ -552,11 +559,11 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             mServerIdentities = server_identities;
             mGroups = (groups == null) ? new HashMap<Long, List<TwoFactorGroup>>() : groups;
             mInitialAccountData = account;
-            mInitialAccountData.setOtpType(account.inDatabase() || mAddingIconFromQrCode ? account.getOtpType() : null);
+            mInitialAccountData.setOtpType((! mAddingAccountFromFirstTime) || account.inDatabase() || mAddingAccountFromQrCode ? account.getOtpType() : null);
             if (! mInitialAccountData.hasServerIdentity()) { mInitialAccountData.setServerIdentity(mServerIdentities.get(0)); }
             mDeleteOrUndeleteAccountDataButton.setImageResource(mInitialAccountData.isDeleted() ? R.drawable.ic_actionbar_undelete : R.drawable.ic_actionbar_delete);
             mCurrentAccountData = new TwoFactorAccount(mInitialAccountData);
-            mEditing = ! mCurrentAccountData.inDatabase();
+            mEditing = ((! mCurrentAccountData.inDatabase()) || ((! mAddingAccountFromFirstTime) && (! mCurrentAccountData.isRemote())));
             mEditOrSaveAccountDataButton.setImageResource(mEditing ? R.drawable.ic_actionbar_accept : R.drawable.ic_actionbar_edit);
             mToggleSubmenuVisibilityButton.setVisibility(mEditing ? View.GONE : View.VISIBLE);
             if (mEditing) { for (final FloatingActionButton button : mSubmenuButtons) { button.setVisibility(View.GONE); } }
@@ -564,6 +571,15 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             setViewsAvailability(mEditing);
             setButtonsAvailability();
         }
+    }
+
+    private void onAccountEditionNeededDataLoaded(@NotNull final TwoFactorAccount account) {
+        mAddingAccountFromFirstTime = false;
+        onAccountEditionNeededDataLoaded(mServerIdentities, mGroups, account);
+    }
+
+    private void onAccountEditionNeededDataLoaded() {
+        onAccountEditionNeededDataLoaded(mCurrentAccountData);
     }
 
     // Disables (or reenables) the form inputs when data is trying to be updated or already updated
@@ -651,7 +667,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             account.setIcon(new_icon);
         }
         account.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
-        onAccountEditionNeededDataLoaded(mServerIdentities, mGroups, account);
+        onAccountEditionNeededDataLoaded(account);
         mCurrentAccountData.setOtpType(otp_type);
         ViewUtils.setSelected(this, mOtpTypeContainer, otp_type);
         setOtpTypeDependencies(otp_type);
@@ -679,13 +695,11 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     @Override
     public void onDataSaved(@NotNull final TwoFactorAccount account, final boolean success, final boolean synced) {
         if (! isFinishedOrFinishing()) {
-            UI.showToast(this, success ? synced ? R.string.account_data_has_been_saved_and_synced : R.string.account_data_has_been_saved_but_not_synced : R.string.error_while_saving_account_data);
             if (success) { setResult(Activity.RESULT_OK); }
-            mInitialAccountData = new TwoFactorAccount(mCurrentAccountData);
-            disableEdition();
+            if (success && synced && (! account.isRemote())) { onAccountDeletedAtServerSide(); return; }
+            UI.showToast(this, success ? synced ? R.string.account_data_has_been_saved_and_synced : R.string.account_data_has_been_saved_but_not_synced : R.string.error_while_saving_account_data);
             onSyncingDataFinished();
-            setButtonsAvailability();
-            showAccountIcon();
+            onAccountEditionNeededDataLoaded();
         }
     }
 
@@ -708,58 +722,67 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         }
     }
 
-    // Functions related with the delete (and undelete) process
+    // This function is triggered when save or undelete process detects the account was deleted at the server side (this only occurs if immediately synchronization is enabled)
 
-    @Override
-    public void onDataDeleted(final boolean success, final boolean synced) {
-        if (! isFinishedOrFinishing()) {
-            UI.showToast(this, success ? synced ? R.string.account_data_has_been_deleted_and_synced : R.string.account_data_has_been_deleted_but_not_synced : R.string.error_while_deleting_account_data);
-            if (success) {
-                if (synced) {
-                    setResult(Activity.RESULT_OK);
-                    finish();
-                }
-                else {
-                    UI.animateIconChange(mDeleteOrUndeleteAccountDataButton, R.drawable.ic_actionbar_undelete, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
-                    onSyncingDataFinished();
-                    setButtonsAvailability();
-                }
+    private void onAccountDeletedAtServerSide() {
+        UI.showConfirmDialog(this, R.string.account_data_has_been_remotely_deleted, R.string.recreate, R.string.exit, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mCurrentAccountData.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
+                saveData();
             }
-            else {
-                onSyncingDataFinished();
+        }, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mFinishingActivity = true;
+                DeleteAccountData.getBackgroundTask(getActivity(), mCurrentAccountData, EditAccountDataActivity.this).start();
             }
-        }
+        });
     }
 
+    // Functions related to the delete (and undelete) process
+
     @Override
-    public void onDataUndeleted(final boolean success) {
+    public void onDataDeleted(@NotNull final TwoFactorAccount account, final boolean success, final boolean synced) {
         if (! isFinishedOrFinishing()) {
-            UI.showToast(this, success ? R.string.account_data_has_been_undeleted : R.string.error_while_undeleting_account_data);
-            if (success) {
-                setResult(Activity.RESULT_OK);
-                UI.animateIconChange(mDeleteOrUndeleteAccountDataButton, R.drawable.ic_actionbar_delete, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
-            }
+            if (success) { setResult(Activity.RESULT_OK); }
+            if (! mFinishingActivity) { UI.showToast(this, success ? synced ? R.string.account_data_has_been_deleted_and_synced : R.string.account_data_has_been_deleted_but_not_synced : R.string.error_while_deleting_account_data); }
+            if (mFinishingActivity || (success && synced)) { finish(); return; }
+            if (success) { UI.animateIconChange(mDeleteOrUndeleteAccountDataButton, R.drawable.ic_actionbar_undelete, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
             onSyncingDataFinished();
             setButtonsAvailability();
         }
     }
 
+    @Override
+    public void onDataUndeleted(@NotNull final TwoFactorAccount account, final boolean success, final boolean synced) {
+        if (! isFinishedOrFinishing()) {
+            if (success) { setResult(Activity.RESULT_OK); }
+            if (success && synced && (! account.isRemote())) { onAccountDeletedAtServerSide(); return; }
+            UI.showToast(this, success ? R.string.account_data_has_been_undeleted : R.string.error_while_undeleting_account_data);
+            if (success) { UI.animateIconChange(mDeleteOrUndeleteAccountDataButton, R.drawable.ic_actionbar_delete, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
+            onSyncingDataFinished();
+            onAccountEditionNeededDataLoaded();
+        }
+    }
+
     private void onDeleteOrUndeleteDataConfirmed() {
         onSyncingDataStarted();
-        ToggleAccountDataDeletionState.getBackgroundTask(getActivity(), mCurrentAccountData, EditAccountDataActivity.this).start();
+        if (mCurrentAccountData.isDeleted()) { UndeleteAccountData.getBackgroundTask(this, mCurrentAccountData, this).start(); }
+        else { DeleteAccountData.getBackgroundTask(this, mCurrentAccountData, this).start(); }
     }
 
     private void deleteOrUnDeleteData() {
-        if (! mCurrentAccountData.isDeleted()) {
+        if (mCurrentAccountData.isDeleted()) {
+            onDeleteOrUndeleteDataConfirmed();
+        }
+        else {
             UI.showConfirmDialog(this, R.string.delete_account_data_message, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     mAuthenticator.authenticate(EditAccountDataActivity.this, AuthenticatedActions.DELETE_ACCOUNT);
                 }
             });
-        }
-        else {
-            onDeleteOrUndeleteDataConfirmed();
         }
     }
 

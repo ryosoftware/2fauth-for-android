@@ -35,6 +35,7 @@ import com.twofauth.android.utils.Vibrator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -140,29 +141,35 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
     }
 
     @Override
-    public void onQRDecoded(@Nullable final TwoFactorAccount account) {
+    public void onQRDecoded(@Nullable final JSONObject object) {
         if (! isFinishedOrFinishing()) {
-            if (account == null) {
+            if (object == null) {
                 UI.showToast(this, R.string.cannot_decode_selected_image);
                 findViewById(R.id.qr_layout).setVisibility(View.GONE);
             }
             else {
                 try {
-                    final Bundle bundle = new Bundle();
-                    account.setServerIdentity(mServerIdentities.get(mServerIdentitySpinner.getSelectedItemPosition()));
-                    bundle.putString(EditAccountDataActivity.EXTRA_ACCOUNT_DATA, JSON.toString(account.toJSONObject()));
                     mChoosingImage = false;
-                    addAccountFromQR(bundle);
+                    addAccountFromQR(object);
                 }
                 catch (JSONException e) {
                     UI.showToast(this, R.string.cannot_process_request_due_to_an_internal_error);
-                    Log.e(Main.LOG_TAG_NAME, "Exception while trying to convert an account JSON to String", e);
+                    Log.e(Main.LOG_TAG_NAME, "Exception while trying to manipulate a JSON Object", e);
                 }
             }
         }
     }
 
-    private void addAccountFromQR(@NotNull final Bundle bundle) {
+    private void addAccountFromQR(@NotNull final JSONObject object) throws JSONException {
+        final Bundle bundle = new Bundle();
+        bundle.putLong(EditAccountDataActivity.EXTRA_ACCOUNT_SERVER_IDENTITY, mServerIdentities.get(mServerIdentitySpinner.getSelectedItemPosition()).getRowId());
+        bundle.putString(EditAccountDataActivity.EXTRA_ACCOUNT_DATA, JSON.toString(object));
+        startActivityForResult(EditAccountDataActivity.class, bundle);
+    }
+
+    private void addAccountFromForm() {
+        final Bundle bundle = new Bundle();
+        bundle.putLong(EditAccountDataActivity.EXTRA_ACCOUNT_SERVER_IDENTITY, mServerIdentities.get(mServerIdentitySpinner.getSelectedItemPosition()).getRowId());
         startActivityForResult(EditAccountDataActivity.class, bundle);
     }
 
@@ -173,7 +180,7 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
         Vibrator.vibrate(this, Constants.NORMAL_HAPTIC_FEEDBACK);
         mChoosingImage = (view.getId() == R.id.use_qr);
         if (mChoosingImage) { openImagePicker(true); }
-        else { startActivityForResult(EditAccountDataActivity.class); }
+        else { addAccountFromForm(); }
     }
 
     private void openImagePicker(final boolean check_for_camera_permission) {

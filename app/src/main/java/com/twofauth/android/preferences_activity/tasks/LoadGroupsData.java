@@ -24,11 +24,13 @@ public class LoadGroupsData {
     public static class TwoFactorGroupWithReferencesInformation {
         public final TwoFactorGroup storedData;
 
+        public final int references;
         public final boolean isReferenced;
 
         TwoFactorGroupWithReferencesInformation(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorGroup group) {
             storedData = group;
-            isReferenced = ((group.getRowId() >= 0) && group.isReferenced(database));
+            references = (group.getRowId() >= 0) ? group.references(database) : 0;
+            isReferenced = (references != 0);
         }
     }
 

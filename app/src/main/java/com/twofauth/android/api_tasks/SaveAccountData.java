@@ -37,7 +37,7 @@ public class SaveAccountData {
         }
 
         private boolean synchronizeAccount(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorAccount account) throws Exception {
-            return (account.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, account, true));
+            return (account.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, account, true, true));
         }
 
         @Override

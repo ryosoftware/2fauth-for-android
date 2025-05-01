@@ -288,10 +288,9 @@ public class TwoFactorAccount extends SynceableTableRow {
         setStatus(account.getStatus());
     }
 
-    public TwoFactorAccount(@NotNull final SQLiteDatabase database, @NotNull final JSONObject object) throws Exception {
+    public TwoFactorAccount(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, @NotNull final JSONObject object) throws Exception {
         this();
-        setServerIdentity(object.optInt(SERVER_IDENTITY, -1) == -1 ? null : Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(database, object.getInt(SERVER_IDENTITY)));
-        fromJSONObject(database, object);
+        fromJSONObject(database, server_identity, object);
     }
 
     private @NotNull Object getOtpGenerator() {
@@ -322,12 +321,28 @@ public class TwoFactorAccount extends SynceableTableRow {
         return mPasswordGenerator;
     }
 
-    public void fromJSONObject(@NotNull final SQLiteDatabase database, @NotNull final JSONObject object) throws Exception {
+    private @Nullable TwoFactorGroup getGroupOrNull(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, final int remote_id) {
+        if ((server_identity != null) && (remote_id > 0)) {
+            try { return Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database, server_identity, remote_id); }
+            catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    private @Nullable TwoFactorIcon getIconOrNull(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, final String filename) {
+        if ((server_identity != null) && (! Strings.isEmptyOrNull(filename))) {
+            try { return Main.getInstance().getDatabaseHelper().getTwoFactorIconsHelper().get(database, server_identity, API.ICON_SOURCE_DEFAULT, filename); }
+            catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    public void fromJSONObject(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, @NotNull final JSONObject object) throws Exception {
         setRemoteId(object.optInt(Constants.ACCOUNT_DATA_ID_KEY, mRemoteId));
         setService(object.optString(Constants.ACCOUNT_DATA_SERVICE_KEY, mService));
         setAccount(object.optString(Constants.ACCOUNT_DATA_USER_KEY, mService));
-        setGroup(object.optInt(Constants.ACCOUNT_DATA_GROUP_KEY, 0) == 0 ? null : Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().instance(database, object.getInt(Constants.ACCOUNT_DATA_GROUP_KEY)));
-        setIcon(object.optInt(Constants.ACCOUNT_DATA_ICON_KEY, 0) == 0  ? null : Main.getInstance().getDatabaseHelper().getTwoFactorIconsHelper().instance(database, object.getInt(Constants.ACCOUNT_DATA_ICON_KEY)));
+        setGroup(getGroupOrNull(database, server_identity, object.optInt(Constants.ACCOUNT_DATA_GROUP_KEY, 0)));
+        setIcon(getIconOrNull(database, server_identity, object.optString(Constants.ACCOUNT_DATA_ICON_KEY, "")));
         setOtpType(object.optString(Constants.ACCOUNT_DATA_OTP_TYPE_KEY, mOtpType));
         setSecret(object.optString(Constants.ACCOUNT_DATA_SECRET_KEY, mSecret));
         setOtpLength(object.optInt(Constants.ACCOUNT_DATA_OTP_LENGTH_KEY, mOtpLength));
@@ -715,7 +730,6 @@ public class TwoFactorAccount extends SynceableTableRow {
             }
         }
         finally {
-            mServerIdentity = null;
             mGroup = null;
             mIcon = null;
         }

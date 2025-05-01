@@ -224,9 +224,17 @@
     <string name="groups">Groups</string>
     <string name="groups_summary">Manage groups</string>
     <string name="no_defined_groups">No defined groups</string>
-    <string name="pending_of_sync">Pending of server synchronization</string>
-    <string name="pending_of_deletion">Pending of deletion at server side</string>
+    <string name="pending_of_sync">Pending of synchronization</string>
+    <string name="pending_of_deletion">Pending of deletion</string>
     <string name="deleted_group">%1$s [deleted]</string>
+    <string name="group_data_has_been_remotely_deleted">Group has been deleted at the server side.\n\nClick the \"recreate\" button if you want to create it again or \"exit\" otherwise</string>
+
+    <string name="no_account_references">No accounts</string>
+    <plurals name="account_references">
+        <item quantity="one">1 account</item>
+        <item quantity="other">%1$d accounts</item>
+        <item quantity="many">%1$d accounts</item>
+    </plurals>
 
     <string name="icon_source_bubka">Icon downloaded from your 2FA server</string>
     <string name="icon_source_dashboard_icons">Icon downloaded  from \"Dashboard icons\"</string>
@@ -247,6 +255,7 @@
     <string name="account_data_has_been_saved_and_synced">Account data has been saved and synced</string>
     <string name="account_data_has_been_saved_but_not_synced">Account data has been saved but not synced</string>
     <string name="error_while_saving_account_data">Error trying to save account data</string>
+    <string name="account_data_has_been_remotely_deleted">Account data has been deleted at the server side.\n\nClick the \"recreate\" button if you want to create it again or \"exit\" otherwise</string>
     <string name="account_data_has_been_deleted_and_synced">Account data has been deleted locally and remotely</string>
     <string name="account_data_has_been_deleted_but_not_synced">Account data has been deleted locally but not remotely</string>
     <string name="error_while_deleting_account_data">Error trying to delete account data</string>
@@ -272,6 +281,7 @@
     <string name="yes">Yeah!</string>
     <string name="no">No</string>
     <string name="install_now">Install now</string>
+    <string name="recreate">Recreate</string>
     <string name="exit">Exit</string>
     <string name="continue_editing">Continue editing</string>
     <string name="get_qr_now">Get QR</string>

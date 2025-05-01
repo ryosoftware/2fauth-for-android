@@ -102,9 +102,10 @@ public abstract class TableRow {
     }
 
     public synchronized void save(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {
-        if ((_id < 0) || (isDirty())) {
+        if ((_id < 0) || isDirty()) {
             final ContentValues values = getContentValues();
             if (onSavingData(database, context, values)) {
+                if (_id < 0) { values.clear(); }
                 setDatabaseValues(values);
                 save(database, values);
                 setDirty(false);
@@ -118,7 +119,7 @@ public abstract class TableRow {
     protected void onDataDeleted(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {}
 
     public synchronized void delete(@NotNull final SQLiteDatabase database, @NotNull final Context context) throws Exception {
-        if (onDeletingData(context)) {
+        if ((_id >= 0) && onDeletingData(context)) {
             if ((_id >= 0) && (database.delete(mTableName, String.format("%s=?", ROW_ID), new String[] { String.valueOf(_id) }) != 1)) { throw new Exception(String.format("Error deleting data from '%s' table", mTableName)); }
             onDataDeleted(database, context);
             _id = -1;

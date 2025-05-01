@@ -84,14 +84,16 @@ public class TwoFactorGroup extends SynceableTableRow {
         setDirty(SERVER_IDENTITY, true);
     }
 
-    public boolean isReferenced(@NotNull final SQLiteDatabase database) {
+    public int references(@NotNull final SQLiteDatabase database) {
         try (final Cursor cursor = database.query(true, TwoFactorAccountsHelper.TABLE_NAME, new String[] { "COUNT(*)" }, String.format("%s=?", TwoFactorAccount.GROUP), new String[] { String.valueOf(_id) }, null, null, null, null, null)) {
             if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) {
-                return cursor.getInt(0) > 0;
+                return cursor.getInt(0);
             }
         }
-        return false;
+        return -1;
     }
+
+    public boolean isReferenced(@NotNull final SQLiteDatabase database) { return references(database) != 0; }
 
     public boolean hasName() { return ! Strings.isEmptyOrNull(getName()); }
 

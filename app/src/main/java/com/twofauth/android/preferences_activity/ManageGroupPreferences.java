@@ -1,6 +1,7 @@
 package com.twofauth.android.preferences_activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,10 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.twofauth.android.Constants;
+import com.twofauth.android.EditAccountDataActivity;
 import com.twofauth.android.R;
+import com.twofauth.android.api_tasks.DeleteAccountData;
+import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.preferences_activity.ManageGroupsPreferences.TwoFactorGroupsUtils;
 import com.twofauth.android.preferences_activity.tasks.LoadGroupsData.TwoFactorGroupWithReferencesInformation;
@@ -39,6 +43,7 @@ public class ManageGroupPreferences extends PreferenceFragmentCompat implements 
     private final List<TwoFactorGroupWithReferencesInformation> mGroups;
 
     private EditGroupTask mRunningTasks = null;
+    private boolean mFinishingFragment = false;
 
     private View mWorkingView;
     private FloatingActionButton mEditGroupName;
@@ -113,14 +118,16 @@ public class ManageGroupPreferences extends PreferenceFragmentCompat implements 
         UI.showEditTextDialog(getActivity(), R.string.edit_group_name_dialog_title, R.string.edit_group_name_dialog_message, mGroup.storedData.getName(), 0, Constants.GROUP_NAME_VALID_REGEXP, R.string.accept, R.string.cancel, new UI.OnTextEnteredListener() {
             @Override
             public void onTextEntered(@NotNull final String name) {
-                if (TwoFactorGroupsUtils.indexOf(mGroups, name) < 0) {
-                    mGroup.storedData.setName(name);
-                    mRunningTasks = EditGroupTask.CHANGE_NAME;
-                    setButtonsAvailability();
-                    SaveGroupData.getBackgroundTask(getContext(), mGroup.storedData, ManageGroupPreferences.this).start();
-                }
+                if (TwoFactorGroupsUtils.indexOf(mGroups, name) < 0) { onNameChanged(name); }
             }
         });
+    }
+
+    private void onNameChanged(@NotNull final String name) {
+        mGroup.storedData.setName(name);
+        mRunningTasks = EditGroupTask.CHANGE_NAME;
+        setButtonsAvailability();
+        SaveGroupData.getBackgroundTask(getContext(), mGroup.storedData, ManageGroupPreferences.this).start();
     }
 
     private void deleteOrUndeleteGroup() {
@@ -134,13 +141,34 @@ public class ManageGroupPreferences extends PreferenceFragmentCompat implements 
     @Override
     public void onDataSaved(@NotNull final TwoFactorGroupWithReferencesInformation group, final boolean success, final boolean synced) {
         if (isAdded()) {
+            if (mFinishingFragment) { finish(); return; }
+            mRunningTasks = null;
+            setButtonsAvailability();
             if (! success) { UI.showToast(getContext(), R.string.cannot_process_request_due_to_an_internal_error); return; }
+            if (success && synced && (! group.storedData.isRemote())) { onGroupDeletedAtServerSide(); return; }
+            if (mGroup.storedData.getRowId() < 0) { finish(); }
             findPreference(NAME_KEY).setTitle(mGroup.storedData.getName());
             if (mRunningTasks == EditGroupTask.DELETE_OR_UNDELETE) { UI.animateIconChange(mDeleteOrUndeleteGroup, mGroup.storedData.isDeleted() ? R.drawable.ic_actionbar_undelete : R.drawable.ic_actionbar_delete, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
             setFragmentResult(mGroup.storedData.getRowId() < 0 ? EditGroupResultType.DELETED : EditGroupResultType.UPDATED);
             mRunningTasks = null;
-            if (mGroup.storedData.getRowId() < 0) { finish(); }
-            else { setButtonsAvailability(); }
         }
+    }
+
+    // This function is triggered when save or undelete process detects the account was deleted at the server side (this only occurs if immediately synchronization is enabled)
+
+    private void onGroupDeletedAtServerSide() {
+        UI.showConfirmDialog(getActivity(), R.string.group_data_has_been_remotely_deleted, R.string.recreate, R.string.exit, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mGroup.storedData.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
+                onNameChanged(mGroup.storedData.getName());
+            }
+        }, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (mGroup.isReferenced || (mGroup.storedData.getRowId() < 0)) { finish(); }
+                else { mFinishingFragment = true; SaveGroupData.getBackgroundTask(getContext(), mGroup.storedData, ManageGroupPreferences.this).start(); }
+            }
+        });
     }
 }

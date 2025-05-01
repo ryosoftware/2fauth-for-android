@@ -126,6 +126,16 @@ public class ManageGroupsPreferences extends PreferenceFragmentCompat implements
         if (mEmptyView != null) { mEmptyView.setVisibility(mGroups.isEmpty() ? View.VISIBLE : View.GONE); }
     }
 
+    private @NotNull String getSummary(@NotNull final Context context, @NotNull final TwoFactorGroupWithReferencesInformation group) {
+        final StringBuilder summary = new StringBuilder();
+        if (group.references >= 0) { summary.append(group.references > 0 ? context.getResources().getQuantityString(R.plurals.account_references, group.references, group.references) : context.getString(R.string.no_account_references)); }
+        if (group.storedData.isDeleted() || (! group.storedData.isSynced())) {
+            if (summary.length() > 0) { summary.append("\n"); }
+            summary.append(group.storedData.isDeleted() ? getString(R.string.pending_of_deletion) : getString(R.string.pending_of_sync));
+        }
+        return summary.toString();
+    }
+
     private void initializePreferences() {
         final Context context = getPreferenceManager().getContext();
         final PreferenceScreen root_preference = getPreferenceScreen();
@@ -135,7 +145,7 @@ public class ManageGroupsPreferences extends PreferenceFragmentCompat implements
             final TwoFactorGroupWithReferencesInformation group = mGroups.get(i);
             final Preference preference = new Preference(context);
             preference.setTitle(group.storedData.getName());
-            preference.setSummary(group.storedData.isDeleted() ? getString(R.string.pending_of_deletion) : group.storedData.isSynced() ? null : getString(R.string.pending_of_sync));
+            preference.setSummary(getSummary(context, group));
             preference.setKey(String.valueOf(i));
             preference.setOnPreferenceClickListener(this);
             root_preference.addPreference(preference);

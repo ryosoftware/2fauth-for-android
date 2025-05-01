@@ -96,7 +96,7 @@ public class ServerDataSynchronizer
         private void synchronizeGroupsData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorGroup> local_loaded_groups, final boolean raise_exception_on_network_error) throws Exception {
             if (local_loaded_groups != null) {
                 for (final TwoFactorGroup group : local_loaded_groups) {
-                    API.synchronizeGroup(database, mService, group, raise_exception_on_network_error);
+                    API.synchronizeGroup(database, mService, group, false, raise_exception_on_network_error);
                 }
             }
         }
@@ -127,7 +127,7 @@ public class ServerDataSynchronizer
                     }
                     if (will_be_synchronized) {
                         if (account.isSynced()) { account.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED); }
-                        API.synchronizeAccount(database, mService, account, raise_exception_on_network_error);
+                        API.synchronizeAccount(database, mService, account, false, raise_exception_on_network_error);
                     }
                 }
             }
