@@ -565,7 +565,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             mCurrentAccountData = new TwoFactorAccount(mInitialAccountData);
             mEditing = ((! mCurrentAccountData.inDatabase()) || ((! mAddingAccountFromFirstTime) && (! mCurrentAccountData.isRemote())));
             mEditOrSaveAccountDataButton.setImageResource(mEditing ? R.drawable.ic_actionbar_accept : R.drawable.ic_actionbar_edit);
-            mToggleSubmenuVisibilityButton.setVisibility(mEditing ? View.GONE : View.VISIBLE);
+            UI.animateShowOrHide(mToggleSubmenuVisibilityButton, ! mEditing, mAddingAccountFromFirstTime ? 0 : Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
             if (mEditing) { for (final FloatingActionButton button : mSubmenuButtons) { button.setVisibility(View.GONE); } }
             setEditableAccountData();
             setViewsAvailability(mEditing);
