@@ -19,7 +19,7 @@
 
     <string name="no_2fa_codes">No hay cuentas 2FA</string>
 
-    <string name="server_identities">Identidades en servidores</string>
+    <string name="server_identities">Identidades</string>
     <string name="server_identities_summary">Haga clic para administrar sus identidades</string>
     <string name="no_server_identities">No se han definido identidades</string>
     <string name="select_a_server_identity_to_filter">Seleccione la identidad cuyas cuentas quiere ver</string>
@@ -230,9 +230,9 @@
     <string name="deleted_group">%1$s [borrado]</string>
     <string name="group_data_has_been_remotely_deleted">El grupo ha sido borrado en el servidor.\n\nHaga clic en el botón \"crear de nuevo\" si quiere volver a crearla o en el botón \"salir\" en otro caso</string>
 
-    <string name="no_account_references">Sin cuentas</string>
+    <string name="no_account_references">No hay cuentas</string>
     <plurals name="account_references">
-        <item quantity="one">Una cuenta</item>
+        <item quantity="one">1 cuenta</item>
         <item quantity="other">%1$d cuentas</item>
         <item quantity="many">%1$d cuentas</item>
     </plurals>
