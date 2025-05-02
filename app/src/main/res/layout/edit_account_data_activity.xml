@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_submenu" />
+            app:srcCompat="@drawable/ic_actionbar_closed" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/edit_or_save_account_data"
