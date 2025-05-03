@@ -1,6 +1,8 @@
 package com.twofauth.android;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
@@ -136,14 +138,18 @@ public class API {
         return null;
     }
 
-    private static @Nullable Bitmap getIconFromServer(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, final boolean raise_exception_on_network_error) throws Exception {
+    private static @Nullable Bitmap getBitmapFromServer(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, final boolean raise_exception_on_network_error) throws Exception {
         final HttpURLConnection connection = HTTP.get(new URL(GET_ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", icon_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return Bitmaps.get(connection); }
         else if (raise_exception_on_network_error) { raiseNetworkErrorException(connection); }
         return null;
     }
 
-    public static TwoFactorIcon getIcon(@NotNull final TwoFactorServerIdentity server_identity, @Nullable final String server_icon_file, @Nullable final String service, @Nullable final Map<String, TwoFactorIcon> icons_map_by_icon_file, @Nullable final Map<String, TwoFactorIcon> icons_map_by_service, final boolean download_icons_from_external_sources, final boolean raise_exception_on_network_error) throws Exception {
+    private static @Nullable Bitmap getBitmapFromExternalSource(@NotNull final String service, @Nullable final String theme) throws Exception {
+        return DashBoardIconsUtils.getIcon(service, theme == null ? DashBoardIconsUtils.NO_THEMED_ICON : theme);
+    }
+
+    private static TwoFactorIcon getIcon(@NotNull final TwoFactorServerIdentity server_identity, @Nullable final String server_icon_file, @Nullable final String service, @Nullable final Map<String, TwoFactorIcon> icons_map_by_icon_file, @Nullable final Map<String, TwoFactorIcon> icons_map_by_service, final boolean download_icons_from_external_sources, final boolean raise_exception_on_network_error) throws Exception {
         TwoFactorIcon icon = null;
         final boolean server_icon_supported = ((! Strings.isEmptyOrNull(server_icon_file)) && (! server_icon_file.toLowerCase().endsWith(".svg")));
         for (final String theme : new String[] { null, DashBoardIconsUtils.DARK_THEMED_ICON, DashBoardIconsUtils.LIGHT_THEMED_ICON }) {
@@ -153,14 +159,14 @@ public class API {
                     icon = icons_map_by_icon_file.get(server_icon_file);
                     break;
                 }
-                bitmap = getIconFromServer(server_identity, server_icon_file, raise_exception_on_network_error);
+                bitmap = getBitmapFromServer(server_identity, server_icon_file, raise_exception_on_network_error);
             }
             else if ((! server_icon_supported) && (download_icons_from_external_sources) && (! Strings.isEmptyOrNull(service))) {
                 if ((icons_map_by_service != null) && icons_map_by_service.containsKey(service)) {
                     icon = icons_map_by_service.get(service);
                     break;
                 }
-                bitmap = DashBoardIconsUtils.getIcon(service, theme == null ? DashBoardIconsUtils.NO_THEMED_ICON : theme);
+                bitmap = getBitmapFromExternalSource(service, theme);
             }
             if (bitmap != null) {
                 if (icon == null) {
@@ -177,11 +183,25 @@ public class API {
         return icon;
     }
 
+    private static TwoFactorIcon getIcon(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context, @Nullable final String server_icon_file, @Nullable final String service, @Nullable final Map<String, TwoFactorIcon> icons_map_by_icon_file, @Nullable final Map<String, TwoFactorIcon> icons_map_by_service, final boolean raise_exception_on_network_error) throws Exception {
+        final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(context);
+        final Resources resources = context.getResources();
+        final boolean download_icons_from_external_sources = preferences.getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, resources.getBoolean(R.bool.download_icons_from_external_sources));
+        return getIcon(server_identity, server_icon_file, service, icons_map_by_icon_file, icons_map_by_service, download_icons_from_external_sources, raise_exception_on_network_error);
+    }
+
+    private static TwoFactorIcon getIcon(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context, @Nullable final String server_icon_file, @Nullable final String service, final boolean raise_exception_on_network_error) throws Exception {
+        return getIcon(server_identity, context, server_icon_file, service, null, null, raise_exception_on_network_error);
+    }
+
     public static void getIcons(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context, @Nullable final Collection<JSONObject> accounts_objects, final boolean raise_exception_on_network_error) throws Exception {
         if (accounts_objects != null) {
             final Map<String, TwoFactorIcon> icons_map_by_icon_file = new HashMap<String, TwoFactorIcon>(), icons_map_by_service = new HashMap<String, TwoFactorIcon>();
+            final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(context);
+            final Resources resources = context.getResources();
+            final boolean download_icons_from_external_sources = preferences.getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, resources.getBoolean(R.bool.download_icons_from_external_sources));
             for (final JSONObject account_object : accounts_objects) {
-                TwoFactorIcon icon = getIcon(server_identity, (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, (account_object.has(Constants.ACCOUNT_DATA_SERVICE_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_SERVICE_KEY))) ? DashBoardIconsUtils.standardizeServiceName(account_object.getString(Constants.ACCOUNT_DATA_SERVICE_KEY)) : null, icons_map_by_icon_file, icons_map_by_service, Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources)), raise_exception_on_network_error);
+                TwoFactorIcon icon = getIcon(server_identity, (account_object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? account_object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, (account_object.has(Constants.ACCOUNT_DATA_SERVICE_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_SERVICE_KEY))) ? DashBoardIconsUtils.standardizeServiceName(account_object.getString(Constants.ACCOUNT_DATA_SERVICE_KEY)) : null, icons_map_by_icon_file, icons_map_by_service, download_icons_from_external_sources, raise_exception_on_network_error);
                 if (icon == null) { account_object.remove(Constants.ACCOUNT_DATA_ICON_KEY); }
                 else { account_object.put(Constants.ACCOUNT_DATA_ICON_KEY, icon); }
             }
@@ -203,7 +223,7 @@ public class API {
         account.fromJSONObject(database, account.getServerIdentity(), object);
         if (reload_icon) {
             final String server_icon_file = (object.has(Constants.ACCOUNT_DATA_ICON_KEY) && (! object.isNull(Constants.ACCOUNT_DATA_ICON_KEY))) ? object.getString(Constants.ACCOUNT_DATA_ICON_KEY) : null, service = DashBoardIconsUtils.standardizeServiceName(account.getService());
-            final TwoFactorIcon icon = getIcon(account.getServerIdentity(), server_icon_file, service, null, null, Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY, context.getResources().getBoolean(R.bool.download_icons_from_external_sources)), raise_exception_on_network_error);
+            final TwoFactorIcon icon = getIcon(account.getServerIdentity(), context, server_icon_file, service, raise_exception_on_network_error);
             if (account.hasIcon()) { account.getIcon().setBitmaps(context, icon); }
             else { account.setIcon(icon); }
         }
