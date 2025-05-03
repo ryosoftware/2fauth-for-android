@@ -78,8 +78,8 @@ public class TwoFactorIconsHelper extends TableHelper<TwoFactorIcon> {
         return get(database, server_identity, false);
     }
 
-    public @Nullable TwoFactorIcon get(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorServerIdentity server_identity, final String source, final String source_id) throws Exception {
-        try (final Cursor cursor = database.query(TABLE_NAME, TwoFactorIcon.PROJECTION, String.format("%s=? AND %s=? AND %s=?", TwoFactorGroup.SERVER_IDENTITY, TwoFactorIcon.SOURCE, TwoFactorIcon.SOURCE_ID), new String[] { String.valueOf(server_identity.getRowId()), source, source_id }, null, null, null, null)) {
+    public @Nullable TwoFactorIcon get(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, final String source, final String source_id) throws Exception {
+        try (final Cursor cursor = database.query(TABLE_NAME, TwoFactorIcon.PROJECTION, server_identity == null ? String.format("%s=? AND %s=?", TwoFactorIcon.SOURCE, TwoFactorIcon.SOURCE_ID) : String.format("%s=? AND %s=? AND %s=?", TwoFactorGroup.SERVER_IDENTITY, TwoFactorIcon.SOURCE, TwoFactorIcon.SOURCE_ID), server_identity == null ? new String[] { source, source_id } : new String[] { String.valueOf(server_identity.getRowId()), source, source_id }, null, null, null, null)) {
             if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) { return instance(database, cursor); }
         }
         return null;
