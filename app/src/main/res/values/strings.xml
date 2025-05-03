@@ -96,8 +96,10 @@
     <string name="accounts_list_columns_portrait">Columns in portrait mode</string>
     <string name="accounts_list_columns_landscape">Columns in landscape mode</string>
 
-    <string name="ungroup_otp_codes">Ungroup 2FA codes</string>
-    <string name="ungroup_otp_codes_summary">Ungroup 2FA codes for easier reading</string>
+    <string name="ungrouped_otp_code_part_size">Ungroup 2FA codes</string>
+    <string name="ungrouped_otp_code_part_size_none">No ungroup</string>
+    <string name="ungrouped_otp_code_part_size_half">Divide in half</string>
+    <string name="ungrouped_otp_code_part_size_number">Divide into blocks of %1$d</string>
 
     <string name="display_account_server_identity">Display identity label</string>
     <string name="display_account_server_identity_summary">If you have added more than one identities, the label of the server identity to which the account belongs will be displayed</string>

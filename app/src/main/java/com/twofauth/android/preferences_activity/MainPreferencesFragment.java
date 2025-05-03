@@ -33,6 +33,7 @@ import com.twofauth.android.main_activity.tasks.CheckForAppUpdates;
 import com.twofauth.android.main_activity.tasks.CheckForAppUpdates.OnCheckForUpdatesListener;
 import com.twofauth.android.utils.Preferences;
 import com.twofauth.android.utils.UI;
+import com.twofauth.android.utils.UI.OnSelectionDialogItemSelected;
 import com.twofauth.android.utils.Vibrator;
 import com.twofauth.android.authenticator.AuthenticateWithBiometrics;
 import com.twofauth.android.authenticator.AuthenticateWithBiometrics.OnBiometricAuthenticationFinishedListener;
@@ -133,6 +134,14 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         }
     }
 
+    private @NotNull String getUngroupedOtpCodePartSizeSummary() {
+        final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(getContext());
+        final Resources resources = getResources();
+        if (! preferences.getBoolean(Constants.UNGROUP_OTP_CODE_KEY, resources.getBoolean(R.bool.ungroup_otp_code))) { return getString(R.string.ungrouped_otp_code_part_size_none); }
+        final int size = preferences.getInt(Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY, resources.getInteger(R.integer.ungrouped_otp_code_part_size));
+        return getString(size > 0 ? R.string.ungrouped_otp_code_part_size_number : R.string.ungrouped_otp_code_part_size_half, size);
+    }
+
     private void initializePreferencesListeners() {
         final Context context = getPreferenceManager().getContext();
         final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(context);
@@ -148,7 +157,8 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         ((SeekBarPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY)).setMin(min_columns);
         ((SeekBarPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY)).setMax(max_columns);
         findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY).setOnPreferenceChangeListener(this);
-        findPreference(Constants.UNGROUP_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
+        findPreference(Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY).setSummary(getUngroupedOtpCodePartSizeSummary());
+        findPreference(Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.DISPLAY_ACCOUNT_SERVER_IDENTITY_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISPLAY_ACCOUNT_GROUP_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY).setOnPreferenceChangeListener(this);
@@ -209,6 +219,24 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             onSettingValueChanged(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY);
             preference.setEnabled(false);
             ResetAccountsLastUsage.getBackgroundTask(this).start();
+        }
+        else if (Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY.equals(preference.getKey())) {
+            final String[] strings = { getString(R.string.ungrouped_otp_code_part_size_none), getString(R.string.ungrouped_otp_code_part_size_half), getString(R.string.ungrouped_otp_code_part_size_number, 2), getString(R.string.ungrouped_otp_code_part_size_number, 3) };
+            final int[] values = { -1, 0, 2, 3 };
+            UI.showSelectItemFromListDialog(getActivity(), R.string.ungrouped_otp_code_part_size, 0, Arrays.asList(strings), getUngroupedOtpCodePartSizeSummary(), 0, 0, new OnSelectionDialogItemSelected() {
+                @Override
+                public void onItemSelected(int position) {
+                    if (position >= 0) {
+                        final int value = values[position];
+                        SharedPreferences.Editor editor = Preferences.getDefaultSharedPreferences(context).edit();
+                        if (value < 0) { editor.putBoolean(Constants.UNGROUP_OTP_CODE_KEY, false); }
+                        else { editor.putBoolean(Constants.UNGROUP_OTP_CODE_KEY, true).putInt(Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY, value); }
+                        editor.apply();
+                        onSettingValueChanged(new String[] { Constants.UNGROUP_OTP_CODE_KEY, Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY });
+                        if (isAdded()) { preference.setSummary(getUngroupedOtpCodePartSizeSummary()); }
+                    }
+                }
+            });
         }
         else if (Constants.APP_THEME_KEY.equals(preference.getKey())) {
             final String[] theme_names = new String[] { getString(R.string.dark_theme), getString(R.string.light_theme), getString(R.string.follow_system_theme) };

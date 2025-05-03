@@ -17,6 +17,7 @@ public class Constants {
     public static final String ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY = "accounts-list-columns-portrait";
     public static final String ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY = "accounts-list-columns-portrait";
     public static final String UNGROUP_OTP_CODE_KEY = "ungroup-otp-code";
+    public static final String UNGROUPED_OTP_CODE_PART_SIZE_KEY = "ungrouped-otp-code-part-size";
     public static final String DISPLAY_ACCOUNT_SERVER_IDENTITY_KEY = "display-account-server-identity";
     public static final String DISPLAY_ACCOUNT_GROUP_KEY = "display-account-group";
     public static final String DISABLE_SCREENSHOTS_KEY = "disable-screenshots";

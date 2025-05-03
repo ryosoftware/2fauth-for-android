@@ -97,8 +97,10 @@
     <string name="accounts_list_columns_portrait">Columnas en modo vertical</string>
     <string name="accounts_list_columns_landscape">Columnas en modo apaisado</string>
 
-    <string name="ungroup_otp_codes">Desagrupar código 2FA</string>
-    <string name="ungroup_otp_codes_summary">Desagrupa los códigos para facilitar la lectura</string>
+    <string name="ungrouped_otp_code_part_size">Desagrupar códigos 2FA</string>
+    <string name="ungrouped_otp_code_part_size_none">No desagrupar</string>
+    <string name="ungrouped_otp_code_part_size_half">Dividir por la mitad</string>
+    <string name="ungrouped_otp_code_part_size_number">Dividir en bloques de %1$d</string>
 
     <string name="display_account_server_identity">Mostrar la etiqueta de la identidad</string>
     <string name="display_account_server_identity_summary">Si está usando más de una identidad, se mostrará la etiqueta de la identidad a la que pertenece la cuenta</string>

@@ -13,6 +13,7 @@
     <integer name="accounts_list_columns_landscape">2</integer>
 
     <bool name="ungroup_otp_code">true</bool>
+    <integer name="ungrouped_otp_code_part_size">0</integer>
 
     <bool name="disable_screenshots">true</bool>
 
