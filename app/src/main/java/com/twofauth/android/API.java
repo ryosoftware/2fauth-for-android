@@ -77,8 +77,8 @@ public class API {
             return standarized_service_name;
         }
 
-        public static @Nullable Bitmap getIcon(@NotNull final String service, @Nullable final String theme) throws Exception {
-            final HttpURLConnection connection = HTTP.get(new URL(BASE_LOCATION.replace("%SERVICE%", standardizeServiceName(service, theme))));
+        public static @Nullable Bitmap getIcon(@NotNull final String service, @Nullable final BitmapTheme theme) throws Exception {
+            final HttpURLConnection connection = HTTP.get(new URL(BASE_LOCATION.replace("%SERVICE%", standardizeServiceName(service, theme == null ? NO_THEMED_ICON : theme == BitmapTheme.DARK ? DARK_THEMED_ICON : LIGHT_THEMED_ICON))));
             return (connection.getResponseCode() == HttpURLConnection.HTTP_OK) ? Bitmaps.get(connection) : null;
         }
     }
@@ -144,9 +144,9 @@ public class API {
         return (icon == null) ? null : icon.getBitmap(context, null);
     }
 
-    private static @Nullable Bitmap getBitmapFromDatabase(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final String service, @Nullable final String theme) throws Exception {
+    private static @Nullable Bitmap getBitmapFromDatabase(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final String service, @Nullable final BitmapTheme theme) throws Exception {
         final TwoFactorIcon icon = Main.getInstance().getDatabaseHelper().getTwoFactorIconsHelper().get(database, null, ICON_SOURCE_DASHBOARD, service);
-        return (icon == null) ? null : icon.getBitmap(context, ((theme == null) || DashBoardIconsUtils.NO_THEMED_ICON.equals(theme)) ? null : DashBoardIconsUtils.DARK_THEMED_ICON.equals(theme) ? BitmapTheme.DARK : BitmapTheme.LIGHT);
+        return (icon == null) ? null : icon.getBitmap(context, theme);
     }
 
     private static @Nullable Bitmap getBitmapFromServer(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, final boolean raise_exception_on_network_error) throws Exception {
@@ -156,15 +156,15 @@ public class API {
         return null;
     }
 
-    private static @Nullable Bitmap getBitmapFromExternalSource(@NotNull final String service, @Nullable final String theme) throws Exception {
-        return DashBoardIconsUtils.getIcon(service, theme == null ? DashBoardIconsUtils.NO_THEMED_ICON : theme);
+    private static @Nullable Bitmap getBitmapFromExternalSource(@NotNull final String service, @Nullable final BitmapTheme theme) throws Exception {
+        return DashBoardIconsUtils.getIcon(service, theme);
     }
 
     private static TwoFactorIcon getIcon(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorServerIdentity server_identity, @Nullable final String server_icon_file, @Nullable final String service, @Nullable final Map<String, TwoFactorIcon> icons_map_by_icon_file, @Nullable final Map<String, TwoFactorIcon> icons_map_by_service, final boolean download_icons_from_external_sources, final boolean download_icons_from_external_sources_only_one_time, final boolean raise_exception_on_network_error) throws Exception {
         TwoFactorIcon icon = null;
         final boolean server_icon_supported = ((! Strings.isEmptyOrNull(server_icon_file)) && (! server_icon_file.toLowerCase().endsWith(".svg")));
         boolean not_themed_icon_exists = false;
-        for (final String theme : new String[] { null, DashBoardIconsUtils.DARK_THEMED_ICON, DashBoardIconsUtils.LIGHT_THEMED_ICON }) {
+        for (final BitmapTheme theme : new BitmapTheme[] { null, BitmapTheme.DARK, BitmapTheme.LIGHT }) {
             Bitmap bitmap = null;
             if (server_icon_supported && (theme == null)) {
                 if ((icons_map_by_icon_file != null) && icons_map_by_icon_file.containsKey(server_icon_file)) { icon = icons_map_by_icon_file.get(server_icon_file); break; }
@@ -179,7 +179,7 @@ public class API {
             }
             if (bitmap != null) {
                 if (icon == null) { icon = new TwoFactorIcon(); icon.setSourceData(server_icon_supported ? ICON_SOURCE_DEFAULT : ICON_SOURCE_DASHBOARD, server_icon_supported ? server_icon_file : service); }
-                icon.setBitmap(bitmap, DashBoardIconsUtils.DARK_THEMED_ICON.equals(theme) ? TwoFactorIcon.BitmapTheme.DARK.DARK : DashBoardIconsUtils.LIGHT_THEMED_ICON.equals(theme) ? TwoFactorIcon.BitmapTheme.LIGHT : null);
+                icon.setBitmap(bitmap, theme);
             }
         }
         if (icon != null) {
