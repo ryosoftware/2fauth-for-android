@@ -73,7 +73,7 @@ public class API {
 
         private static @NotNull String standardizeServiceName(@NotNull final String service, @Nullable final String theme) {
             String standarized_service_name = standardizeServiceName(service);
-            if ((theme != null) && (! NO_THEMED_ICON.equals(theme))) { standarized_service_name += theme; }
+            if (! Strings.isEmptyOrNull(theme)) { standarized_service_name += theme; }
             return standarized_service_name;
         }
 
@@ -173,8 +173,8 @@ public class API {
             }
             else if ((! server_icon_supported) && (download_icons_from_external_sources || download_icons_from_external_sources_only_one_time) && (! Strings.isEmptyOrNull(service))) {
                 if ((icons_map_by_service != null) && icons_map_by_service.containsKey(service)) { icon = icons_map_by_service.get(service); break; }
-                if ((! download_icons_from_external_sources) || download_icons_from_external_sources_only_one_time) { bitmap = getBitmapFromDatabase(database, context, service, theme); }
-                if ((bitmap == null) && download_icons_from_external_sources && ((theme == null) || (! not_themed_icon_exists))) { bitmap = getBitmapFromExternalSource(service, theme); }
+                bitmap = getBitmapFromDatabase(database, context, service, theme);
+                if (download_icons_from_external_sources && ((bitmap == null) || (! download_icons_from_external_sources_only_one_time)) && ((theme == null) || (! download_icons_from_external_sources_only_one_time) || (! not_themed_icon_exists))) { final Bitmap downloaded_bitmap = getBitmapFromExternalSource(service, theme); bitmap = (downloaded_bitmap == null) ? bitmap : downloaded_bitmap; }
                 else if ((theme == null) && (bitmap != null)) { not_themed_icon_exists = true; }
             }
             if (bitmap != null) {
