@@ -156,9 +156,7 @@ public class API {
         return null;
     }
 
-    private static @Nullable Bitmap getBitmapFromExternalSource(@NotNull final String service, @Nullable final BitmapTheme theme) throws Exception {
-        return DashBoardIconsUtils.getIcon(service, theme);
-    }
+    private static @Nullable Bitmap getBitmapFromExternalSource(@NotNull final String service, @Nullable final BitmapTheme theme) throws Exception { return DashBoardIconsUtils.getIcon(service, theme); }
 
     private static TwoFactorIcon getIcon(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorServerIdentity server_identity, @Nullable final String server_icon_file, @Nullable final String service, @Nullable final Map<String, TwoFactorIcon> icons_map_by_icon_file, @Nullable final Map<String, TwoFactorIcon> icons_map_by_service, final boolean download_icons_from_external_sources, final boolean download_icons_from_external_sources_only_one_time, final boolean raise_exception_on_network_error) throws Exception {
         TwoFactorIcon icon = null;
