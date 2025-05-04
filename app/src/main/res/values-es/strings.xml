@@ -158,8 +158,11 @@
 
     <string name="privacy">Privacidad</string>
 
-    <string name="download_icons_from_external_sources">Descargar iconos de fuentes externas</string>
+    <string name="download_icons_from_external_sources">Descargar de fuentes externas</string>
     <string name="download_icons_from_external_sources_summary">Intentaremos descargar los iconos que no se encontraron en su servidor, o que tenían un formato incompatible, desde repositorios de código abierto utilizando el nombre del servicio, lo que puede filtrar algunos datos privados, como los servicios 2FA que utiliza o su dirección IP</string>
+
+    <string name="download_icons_from_external_sources_only_one_time">Descargar solo una vez</string>
+    <string name="download_icons_from_external_sources_only_one_time_summary">Los iconos que ya se hayan descargado no se volverán a descargar.\n\nComo los iconos de las apps no suelen actualizarse, no es necesario descargarlos de nuevo en cada sincronización</string>
 
     <string name="others">Otros</string>
 

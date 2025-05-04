@@ -157,8 +157,11 @@
 
     <string name="privacy">Privacy</string>
   
-    <string name="download_icons_from_external_sources">Download icons from external sources</string>
+    <string name="download_icons_from_external_sources">Download from external sources</string>
     <string name="download_icons_from_external_sources_summary">We will attempt to download icons that was not found on your server, or was an incompatible format, from open source repositories using the service name, which may leak some private data, such as the 2FA services you use or your IP address</string>
+
+    <string name="download_icons_from_external_sources_only_one_time">Download only one time</string>
+    <string name="download_icons_from_external_sources_only_one_time_summary">Icons that have already been downloaded, either from your server or from other open source repositories, will not be downloaded again.\n\nSince app icons don\'t usually be updated, there\'s no need to check for new icons every time sync is made</string>
 
     <string name="others">Others</string>
 

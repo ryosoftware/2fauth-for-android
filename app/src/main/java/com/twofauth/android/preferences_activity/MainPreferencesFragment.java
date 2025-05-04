@@ -176,6 +176,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY).setVisible(AuthenticateWithBiometrics.canUseBiometrics(context));
         findPreference(Constants.ALLOW_COPY_SERVER_ACCESS_TOKEN_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY).setOnPreferenceChangeListener(this);
+        findPreference(Constants.DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_ONLY_ONE_TIME_KEY).setOnPreferenceChangeListener(this);
         findPreference(GITHUB_REPO_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.AUTO_UPDATE_APP_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.AUTO_UPDATE_APP_INCLUDE_PRERELEASES_KEY).setOnPreferenceChangeListener(this);

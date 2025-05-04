@@ -50,6 +50,8 @@
 
         <CheckBoxPreference android:key="download-icons-from-external-sources" android:title="@string/download_icons_from_external_sources" android:summary="@string/download_icons_from_external_sources_summary" android:defaultValue="@bool/download_icons_from_external_sources" />
 
+        <CheckBoxPreference android:key="download-icons-from-external-sources-only-one-time" android:title="@string/download_icons_from_external_sources_only_one_time" android:summary="@string/download_icons_from_external_sources_only_one_time_summary" android:defaultValue="@bool/download_icons_from_external_sources_only_one_time" android:dependency="download-icons-from-external-sources" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/others">
