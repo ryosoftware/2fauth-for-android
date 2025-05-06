@@ -29,9 +29,7 @@ public class Strings {
     }
 
     public static boolean equals(@Nullable final String string_1, @Nullable final String string_2, final boolean ignore_case) {
-        if (string_1 == null) {
-            return string_2 == null;
-        }
+        if (string_1 == null) { return string_2 == null; }
         return ignore_case ? string_1.equalsIgnoreCase(string_2) : string_1.equals(string_2);
     }
 

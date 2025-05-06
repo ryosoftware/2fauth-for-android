@@ -267,6 +267,8 @@
     <string name="error_while_deleting_account_data">No se ha podido eliminar la cuenta</string>
     <string name="account_data_has_been_undeleted">Los datos de la cuenta se han recuperado</string>
     <string name="error_while_undeleting_account_data">No se ha podido recuperar la cuenta</string>
+    <string name="account_has_been_pinned">La cuenta se ha fijado al principio de la lista de cuentas</string>
+    <string name="account_has_been_unpinned">La cuenta se ha desfijado del principio de la lista de cuentas</string>
     <string name="you_need_to_be_connected_to_server_to_download_qr_code_message">Los códigos QR se descargan del servidor \"sobre la marcha\" utilizando los datos almacenados en éste, por lo que necesitamos conectarnos para poder descargarlo.\n\n¿Desea descargar el código QR ahora?</string>
     <string name="you_need_to_be_connected_to_server_to_download_qr_code_but_account_updated_message">Los códigos QR se descargan del servidor \"sobre la marcha\" utilizando los datos almacenados en éste, por lo que necesitamos conectarnos para poder descargarlo.\n\nComo ha actualizado algunos de los datos de la cuenta, los datos incluídos en el código QR podrían no ser los que está viendo en la pantalla.\n\n¿Qué desea hacer?</string>
     <string name="error_retrieving_qr_code">No se ha podido cargar el código QR</string>

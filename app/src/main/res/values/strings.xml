@@ -266,6 +266,8 @@
     <string name="error_while_deleting_account_data">Error trying to delete account data</string>
     <string name="account_data_has_been_undeleted">Account data has been undeleted</string>
     <string name="error_while_undeleting_account_data">Error trying to undelete account data</string>
+    <string name="account_has_been_pinned">Account has been pinned to the begin of the accounts list</string>
+    <string name="account_has_been_unpinned">Account has been unpinned from the begin of the accounts list</string>
     <string name="you_need_to_be_connected_to_server_to_download_qr_code_message">QR codes are downloaded from the server \"on the fly\" using the data stored there, so we need to connect to download it.\n\nDo you want to download the QR code now?</string>
     <string name="you_need_to_be_connected_to_server_to_download_qr_code_but_account_updated_message">QR codes are downloaded from the server \"on the fly\" using the data stored there, so we need to connect to download it.\n\nBecause you\'ve updated some of the account details, the data included in the QR code might not be what you see on the screen.\n\nWhat do you want to do?</string>
     <string name="error_retrieving_qr_code">Error retrieving QR code</string>

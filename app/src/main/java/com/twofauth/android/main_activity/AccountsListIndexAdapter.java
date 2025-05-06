@@ -19,10 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AccountsListIndexAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder> implements OnViewHolderClickListener {
+    public static final Character PIN_LETTER = ' ';
+    public static final Character NOT_LETTER = '#';
+
     private static final int LETTER = 1;
 
     public interface OnIndexEntryClickListener {
-        public abstract void onClick(char letter);
+        public abstract void onClick(Character letter);
     }
 
     private final List<Character> mItems = new ArrayList<Character>();
@@ -55,7 +58,10 @@ public class AccountsListIndexAdapter extends androidx.recyclerview.widget.Recyc
 
     @Override
     public synchronized void onBindViewHolder(@NotNull final androidx.recyclerview.widget.RecyclerView.ViewHolder view_holder, final int position) {
-        if (getItemViewType(position) == LETTER) { ((IndexEntryViewHolder) view_holder).draw(mRecyclerView.getContext(), getItem(position), position == mActiveIndexPosition); }
+        if (getItemViewType(position) == LETTER) {
+            final Character letter = getItem(position);
+            ((IndexEntryViewHolder) view_holder).draw(mRecyclerView.getContext(), PIN_LETTER.equals(letter) ? null : letter, position == mActiveIndexPosition);
+        }
     }
 
     public synchronized void setItems(@Nullable final List<Character> items) {
@@ -79,9 +85,7 @@ public class AccountsListIndexAdapter extends androidx.recyclerview.widget.Recyc
 
     @Override
     public synchronized void onClick(final int position) {
-        if ((setActiveIndexEntry(position)) && (mActiveIndexPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION) && (mOnIndexEntryClickListener != null)) {
-            mOnIndexEntryClickListener.onClick(getItem(mActiveIndexPosition));
-        }
+        if ((setActiveIndexEntry(position)) && (mActiveIndexPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION) && (mOnIndexEntryClickListener != null)) { mOnIndexEntryClickListener.onClick(getItem(mActiveIndexPosition)); }
     }
 
     private synchronized boolean setActiveIndexEntry(final int position) {
@@ -95,9 +99,7 @@ public class AccountsListIndexAdapter extends androidx.recyclerview.widget.Recyc
     }
 
     public synchronized void setActiveIndexEntry(final char letter) {
-        if (setActiveIndexEntry(mItems.indexOf(letter))) {
-            mRecyclerView.smoothScrollToPosition(mActiveIndexPosition);
-        }
+        if (setActiveIndexEntry(mItems.indexOf(letter))) { mRecyclerView.smoothScrollToPosition(mActiveIndexPosition); }
     }
 
     public synchronized void setOnIndexClickListener(@Nullable final OnIndexEntryClickListener listener) {

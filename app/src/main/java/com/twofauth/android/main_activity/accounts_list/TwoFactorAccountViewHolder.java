@@ -8,6 +8,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.Build;
 import android.os.PersistableBundle;
 import android.text.format.DateUtils;
@@ -75,6 +76,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private final TextView mOtp;
     private final TextView mOtpNext;
     private final TextView mOtpCounter;
+    private final View mAccountPinned;
     private final View mAccountDataNotSynced;
     private final View mAccountDataDeleted;
     private final TextView mOtpError;
@@ -95,6 +97,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mOtp = (TextView) parent.findViewById(R.id.otp);
         mOtpNext = (TextView) parent.findViewById(R.id.otp_next);
         mOtpCounter = (TextView) parent.findViewById(R.id.otp_counter);
+        mAccountPinned = (ImageView) parent.findViewById(R.id.account_pinned);
         mAccountDataNotSynced = parent.findViewById(R.id.account_data_not_synced);
         mAccountDataDeleted = parent.findViewById(R.id.account_data_deleted);
         mOtpError = (TextView) parent.findViewById(R.id.otp_error);
@@ -141,6 +144,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         if (millis_until_next_otp == Long.MAX_VALUE) { mOtpCounter.setText(context.getString(R.string.hotp_counter, account.getCounter())); }
         else { setOtpAnimationByState(millis_until_next_otp); }
         mOtpCounter.setVisibility(millis_until_next_otp == Long.MAX_VALUE ? View.VISIBLE : View.GONE);
+        mAccountPinned.setVisibility(account.isPinned() ? View.VISIBLE : View.GONE);
         mAccountDataNotSynced.setVisibility(account.isSynced() && ((! account.hasGroup()) || account.getGroup().isSynced()) && ((! account.hasIcon()) || account.getIcon().isSynced()) ? View.GONE : View.VISIBLE);
         mAccountDataDeleted.setVisibility(account.isDeleted() ? View.VISIBLE : View.GONE);
         final boolean error = ((! is_otp_type_supported) || (otp == null));

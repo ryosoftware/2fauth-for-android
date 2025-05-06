@@ -36,8 +36,6 @@ import java.util.Map;
 public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder> implements OnViewHolderClickListener, OnIndexEntryClickListener, OnTickListener {
     private static final int TYPE_2FA_AUTH_ACCOUNT = 1;
 
-    private static final Character NOT_LETTER_ITEMS_ENTRY_VALUE = '#';
-
     public interface OnAccountNeedsToBeSynchronizedListener {
         public abstract void onAccountSynchronizationNeeded(TwoFactorAccount account);
     }
@@ -145,9 +143,10 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
         }
     }
 
-    private @NotNull Character getItemIndexCharacter(@NotNull final TwoFactorAccount account) {
-        final char index_entry = account.hasService() ? account.getService().charAt(0) : NOT_LETTER_ITEMS_ENTRY_VALUE;
-        return Character.isLetter(index_entry) ? Character.toUpperCase(index_entry) : NOT_LETTER_ITEMS_ENTRY_VALUE;
+    private @Nullable Character getItemIndexCharacter(@NotNull final TwoFactorAccount account) {
+        if (account.isPinned()) { return AccountsListIndexAdapter.PIN_LETTER; }
+        final char index_entry = account.hasService() ? account.getService().charAt(0) : AccountsListIndexAdapter.NOT_LETTER;
+        return Character.isLetter(index_entry) ? Character.toUpperCase(index_entry) : AccountsListIndexAdapter.NOT_LETTER;
     }
 
     private synchronized void setIndexItems(@Nullable final List<TwoFactorAccount> items) {
@@ -262,10 +261,10 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
     }
 
     @Override
-    public synchronized void onClick(final char letter) {
+    public synchronized void onClick(@NotNull final Character letter) {
         for (int i = 0; i < mItems.size(); i ++) {
             final TwoFactorAccount account = mItems.get(i);
-            if (getItemIndexCharacter(account) == letter) {
+            if (letter.equals(getItemIndexCharacter(account))) {
                 mRecyclerView.getLayoutManager().startSmoothScroll(new AccountsListAdapterScroller(mRecyclerView.getContext(), i));
                 break;
             }
@@ -312,9 +311,7 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
     }
 
     public synchronized void onPause() {
-        if (mActiveAccountPosition != RecyclerView.NO_POSITION) {
-            onOtpCodeHidden();
-        }
+        if (mActiveAccountPosition != RecyclerView.NO_POSITION) { onOtpCodeHidden(); }
         mResumed = false;
         updateViewsVisibility();
     }

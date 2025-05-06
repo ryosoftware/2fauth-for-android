@@ -40,6 +40,13 @@
             app:srcCompat="@drawable/ic_actionbar_qr" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/pin_or_unpin_account_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/fab_margin"
+            app:srcCompat="@drawable/ic_actionbar_pin" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/clone_account_data"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
