@@ -311,7 +311,7 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
     }
 
     public synchronized void onPause() {
-        if (mActiveAccountPosition != RecyclerView.NO_POSITION) { onOtpCodeHidden(); }
+        if (mActiveAccountPosition != RecyclerView.NO_POSITION) { onClick(-1); }
         mResumed = false;
         updateViewsVisibility();
     }
