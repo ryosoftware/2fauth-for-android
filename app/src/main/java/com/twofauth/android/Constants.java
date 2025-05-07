@@ -107,6 +107,7 @@ public class Constants {
 
     public static final int BUTTON_CLICK_ANIMATION_BEFORE_START_ACTION_DEGREES = 180;
 
+    public static final long EXTRA_SHORT_HAPTIC_FEEDBACK = 5;
     public static final long SHORT_HAPTIC_FEEDBACK = 15;
     public static final long NORMAL_HAPTIC_FEEDBACK = 30;
     public static final long LONG_HAPTIC_FEEDBACK = 60;

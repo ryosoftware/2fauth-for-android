@@ -174,6 +174,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         preferences.edit().remove(Constants.FILTERING_BY_SERVER_IDENTITY_KEY).remove(Constants.FILTERING_BY_GROUP_KEY).apply();
         MainService.startService(this, true);
         if (preferences.getLong(Constants.LAST_CHECK_FOR_UPDATES_TIME_KEY, 0) + AUTO_CHECK_FOR_UPDATES_MIN_INTERVAL < System.currentTimeMillis()) { checkForAppUpdates(); }
+        Vibrator.vibrate(this, Constants.EXTRA_SHORT_HAPTIC_FEEDBACK);
     }
 
     @Override
