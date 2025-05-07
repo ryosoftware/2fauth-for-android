@@ -1,6 +1,7 @@
 package com.twofauth.android;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -167,6 +169,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         }
     }
 
+    private static Bitmap mClipboardedBitmap = null;
+
     private TwoFactorAccount mInitialAccountData = null;
     private TwoFactorAccount mCurrentAccountData = null;
 
@@ -180,6 +184,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private Button mSelectIconButton;
     private Button mDeleteIconButton;
     private Button mCopyIconToServerButton;
+    private Button mCopyIconToClipboardButton;
+    private Button mPasteIconFromClipboardButton;
     private View mServerIdentityContainer;
     private Spinner mServerIdentitySpinner;
     private EditText mServiceEditText;
@@ -230,6 +236,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mDeleteIconButton.setOnClickListener(this);
         mCopyIconToServerButton = (Button) findViewById(R.id.copy_icon_to_server);
         mCopyIconToServerButton.setOnClickListener(this);
+        mCopyIconToClipboardButton = (Button) findViewById(R.id.copy_icon_to_clipboard);
+        mCopyIconToClipboardButton.setOnClickListener(this);
+        mPasteIconFromClipboardButton = (Button) findViewById(R.id.paste_icon_from_clipboard);
+        mPasteIconFromClipboardButton.setOnClickListener(this);
         mServerIdentityContainer = findViewById(R.id.server_identity_layout);
         mServerIdentitySpinner = (Spinner) findViewById(R.id.server_identity_selector);
         mServerIdentitySpinner.setOnItemSelectedListener(this);
@@ -414,6 +424,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         if (view_id == R.id.select_icon) { startActivityFromIntent(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)); }
         else if (view_id == R.id.delete_icon) { deleteIcon(); }
         else if (view_id == R.id.copy_icon_to_server) { copyIconToServer(); }
+        else if (view_id == R.id.copy_icon_to_clipboard) { copyIconToClipboard(); }
+        else if (view_id == R.id.paste_icon_from_clipboard) { pasteIconFromClipboard(); }
         else if (view_id == R.id.toggle_otp_generation_attributes_visualization) { toggleOtpAttributesVisibility(); }
         else if (view_id == R.id.otp_type) { setOtpTypeDependencies((String) view.getTag()); mCurrentAccountData.setOtpType(ViewUtils.setSelected(this, view)); setButtonsAvailability(); }
         else if (view_id == R.id.digit) { mCurrentAccountData.setOtpLength(Integer.parseInt(ViewUtils.setSelected(this, view))); setButtonsAvailability(); }
@@ -489,6 +501,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mIconImageView.setImageBitmap(bitmap);
         for (final View view : new View[] { mIconSourceTextView, mDeleteIconButton, mIconImageView }) { view.setVisibility(View.VISIBLE); }
         mDeleteIconButton.setEnabled(true);
+        mCopyIconToClipboardButton.setEnabled(true);
         mCopyIconToServerButton.setVisibility(View.GONE);
         mCurrentAccountData.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
         setButtonsAvailability();
@@ -499,6 +512,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         icon.setSource(null);
         icon.setBitmaps((Bitmap) null, (Bitmap) null, (Bitmap) null);
         for (final View view : new View[] { mIconSourceTextView, mDeleteIconButton, mCopyIconToServerButton, mIconImageView }) { view.setVisibility(View.GONE); }
+        mCopyIconToClipboardButton.setEnabled(false);
         mCurrentAccountData.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
         setButtonsAvailability();
     }
@@ -530,6 +544,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             view.setVisibility(has_icon ? View.VISIBLE : View.GONE);
         }
         mCopyIconToServerButton.setVisibility(has_icon && API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? View.VISIBLE : View.GONE);
+        mCopyIconToClipboardButton.setEnabled(has_icon);
     }
 
     private void setEditableAccountData() {
@@ -602,6 +617,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mSelectIconButton.setEnabled(enable && mEditing);
         mDeleteIconButton.setEnabled(false);
         mCopyIconToServerButton.setEnabled(false);
+        mPasteIconFromClipboardButton.setEnabled(enable && mEditing && (mClipboardedBitmap != null));
         if (enable && mEditing && mCurrentAccountData.hasIcon() && mCurrentAccountData.getIcon().hasBitmaps(this)) {
             mDeleteIconButton.setEnabled(true);
             mCopyIconToServerButton.setEnabled(API.ICON_SOURCE_DASHBOARD.equals(mCurrentAccountData.getIcon().getSource()));
@@ -828,5 +844,17 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private void showQR() {
         onSyncingDataStarted();
         LoadAccountQR.getBackgroundTask(mCurrentAccountData, EditAccountDataActivity.this).start();
+    }
+
+    // Listener for "clipboard" contents
+
+    private void copyIconToClipboard() {
+        mClipboardedBitmap = mCurrentAccountData.getIcon().getBitmap(this);
+        mPasteIconFromClipboardButton.setEnabled(mEditing && (mClipboardedBitmap != null) && (mWorking.getVisibility() == View.GONE));
+        UI.showToast(this, R.string.copied_to_the_internal_clipboard);
+    }
+
+    private void pasteIconFromClipboard() {
+        setIcon(mClipboardedBitmap);
     }
 }

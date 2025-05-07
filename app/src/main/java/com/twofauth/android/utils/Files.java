@@ -32,6 +32,20 @@ public class Files {
         }
     }
 
+    public static @Nullable File createFile(@NotNull final Context context, @NotNull final String filename, @Nullable final File folder) {
+        try {
+            final File file = new File(folder == null ? context.getExternalFilesDir("cache") : folder, filename);
+            file.createNewFile();
+            return file;
+        }
+        catch (Exception e) {
+            Log.e(Main.LOG_TAG_NAME, "Exception while trying to create a file", e);
+        }
+        return null;
+    }
+
+    public static @Nullable File createFile(@NotNull final Context context, @NotNull final String filename) { return createFile(context, filename, null); }
+
     public static @Nullable File createTempFile(@NotNull final Context context, @NotNull final String prefix, @Nullable final String suffix, @Nullable final File folder) {
         try {
             return File.createTempFile(prefix, suffix, folder == null ? context.getExternalFilesDir("cache") : folder);
@@ -42,15 +56,9 @@ public class Files {
         return null;
     }
 
-    public static @Nullable File createTempFile(@NotNull final Context context, @NotNull final String prefix, @Nullable final String suffix) {
-        return createTempFile(context, prefix, suffix, null);
-    }
+    public static @Nullable File createTempFile(@NotNull final Context context, @NotNull final String prefix, @Nullable final String suffix) { return createTempFile(context, prefix, suffix, null); }
 
-    public static @Nullable File createTempFile(@NotNull final Context context, @NotNull final String prefix) {
-        return createTempFile(context, prefix, null);
-    }
+    public static @Nullable File createTempFile(@NotNull final Context context, @NotNull final String prefix) { return createTempFile(context, prefix, null); }
 
-    public static boolean exists(@Nullable File file) {
-        return ((file != null) && file.exists());
-    }
+    public static boolean exists(@Nullable File file) { return ((file != null) && file.exists()); }
 }
