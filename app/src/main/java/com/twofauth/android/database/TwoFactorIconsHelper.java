@@ -78,9 +78,23 @@ public class TwoFactorIconsHelper extends TableHelper<TwoFactorIcon> {
         return get(database, server_identity, false);
     }
 
-    public @Nullable TwoFactorIcon get(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorServerIdentity server_identity, final String source, final String source_id) throws Exception {
-        try (final Cursor cursor = database.query(TABLE_NAME, TwoFactorIcon.PROJECTION, String.format("%s=? AND %s=? AND %s=?", TwoFactorGroup.SERVER_IDENTITY, TwoFactorIcon.SOURCE, TwoFactorIcon.SOURCE_ID), new String[] { String.valueOf(server_identity.getRowId()), source, source_id }, null, null, null, null)) {
-            if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) { return instance(database, cursor); }
+    public @Nullable TwoFactorIcon get(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, final String source, final String source_id) throws Exception {
+        if (server_identity == null) {
+            try (final Cursor cursor = database.query(TABLE_NAME, TwoFactorIcon.PROJECTION, String.format("%s=? AND %s=?", TwoFactorIcon.SOURCE, TwoFactorIcon.SOURCE_ID), new String[] { source, source_id }, null, null, null, null)) {
+                if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) { return instance(database, cursor); }
+            }
+        }
+        else {
+            final StringBuilder query = new StringBuilder();
+            query.append("SELECT ");
+            for (int i = 0; i < TwoFactorIcon.PROJECTION.length; i ++) {
+                if (i > 0) { query.append(", "); }
+                query.append(String.format("%s.%s", TABLE_NAME, TwoFactorIcon.PROJECTION[i]));
+            }
+            query.append(String.format(" FROM %s JOIN %s ON %s.%s=%s.%s WHERE %s.%s=? AND %s.%s=? AND %s.%s=?", TwoFactorAccountsHelper.TABLE_NAME, TABLE_NAME, TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.ICON, TABLE_NAME, TwoFactorIcon.ROW_ID, TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.SERVER_IDENTITY, TABLE_NAME, TwoFactorIcon.SOURCE, TABLE_NAME, TwoFactorIcon.SOURCE_ID));
+            try (final Cursor cursor = database.rawQuery(query.toString(), new String[] { String.valueOf(server_identity.getRowId()), source, source_id })) {
+                if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) { return instance(database, cursor); }
+            }
         }
         return null;
     }

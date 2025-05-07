@@ -24,20 +24,22 @@ public class SaveAccountData {
         private final Context mContext;
 
         private final TwoFactorAccount mAccount;
+        private final boolean mAllowRemoteSynchronization;
 
         private final OnDataSavedListener mListener;
 
         private boolean mSuccess = false;
         private boolean mSynced = false;
 
-        SaveAccountDataImplementation(@NotNull final Context context, @NotNull final TwoFactorAccount account, @Nullable final OnDataSavedListener listener) {
+        SaveAccountDataImplementation(@NotNull final Context context, @NotNull final TwoFactorAccount account, final boolean allow_remote_synchronization, @Nullable final OnDataSavedListener listener) {
             mContext = context;
             mAccount = account;
+            mAllowRemoteSynchronization = allow_remote_synchronization;
             mListener = listener;
         }
 
         private boolean synchronizeAccount(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorAccount account) throws Exception {
-            return (account.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, account, true, true));
+            return (mAllowRemoteSynchronization && account.getServerIdentity().isSyncingImmediately() && API.synchronizeAccount(database, mContext, account, true, true));
         }
 
         @Override
@@ -85,7 +87,11 @@ public class SaveAccountData {
         }
     }
 
+    public static @NotNull Thread getBackgroundTask(@NotNull final Context context, @NotNull final TwoFactorAccount account, final boolean allow_remote_synchronization, @Nullable OnDataSavedListener listener) {
+        return Main.getInstance().getBackgroundTask(new SaveAccountDataImplementation(context, account, allow_remote_synchronization, listener));
+    }
+
     public static @NotNull Thread getBackgroundTask(@NotNull final Context context, @NotNull final TwoFactorAccount account, @Nullable OnDataSavedListener listener) {
-        return Main.getInstance().getBackgroundTask(new SaveAccountDataImplementation(context, account, listener));
+        return getBackgroundTask(context, account, true, listener);
     }
 }

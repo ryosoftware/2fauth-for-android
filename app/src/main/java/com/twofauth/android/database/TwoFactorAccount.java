@@ -45,6 +45,7 @@ public class TwoFactorAccount extends SynceableTableRow {
     public static final String PERIOD = "period";
     public static final String COUNTER = "counter";
     public static final String LAST_USE = "last_use";
+    public static final String PIN_TIME = "pin_time";
 
     protected static final String[] PROJECTION = new String[] {
         ROW_ID,
@@ -62,6 +63,7 @@ public class TwoFactorAccount extends SynceableTableRow {
         COUNTER,
         LAST_USE,
         STATUS,
+        PIN_TIME,
     };
 
     private static final int SERVER_IDENTITY_ORDER = ROW_ID_ORDER + 1;
@@ -78,6 +80,7 @@ public class TwoFactorAccount extends SynceableTableRow {
     private static final int COUNTER_ORDER = PERIOD_ORDER + 1;
     private static final int LAST_USE_ORDER = COUNTER_ORDER + 1;
     private static final int STATUS_ORDER = LAST_USE_ORDER + 1;
+    private static final int PIN_TIME_ORDER = STATUS_ORDER + 1;
 
     private static class Base32Utils {
         private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -234,6 +237,7 @@ public class TwoFactorAccount extends SynceableTableRow {
     private int mPeriod;
     private int mCounter;
     private long mLastUse;
+    private long mPinTime;
 
     private Object mPasswordGenerator = null;
 
@@ -251,6 +255,7 @@ public class TwoFactorAccount extends SynceableTableRow {
         mPeriod = cursor.getInt(PERIOD_ORDER);
         mCounter = cursor.getInt(COUNTER_ORDER);
         mLastUse = cursor.getLong(LAST_USE_ORDER);
+        mPinTime = cursor.getLong(PIN_TIME_ORDER);
     }
 
     public TwoFactorAccount() {
@@ -267,6 +272,7 @@ public class TwoFactorAccount extends SynceableTableRow {
         mPeriod = Constants.DEFAULT_PERIOD;
         mCounter = Constants.DEFAULT_COUNTER;
         mLastUse = 0;
+        mPinTime = 0;
     }
 
     public TwoFactorAccount(@NotNull final TwoFactorAccount account) {
@@ -286,6 +292,7 @@ public class TwoFactorAccount extends SynceableTableRow {
         setCounter(account.getCounter());
         setLastUse(account.getLastUse());
         setStatus(account.getStatus());
+        setPinTime(account.getPinTime());
     }
 
     public TwoFactorAccount(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, @NotNull final JSONObject object) throws Exception {
@@ -672,6 +679,20 @@ public class TwoFactorAccount extends SynceableTableRow {
         }
     }
 
+    private long getPinTime() {
+        return mPinTime;
+    }
+
+    private void setPinTime(final long pin_time) {
+        if (mPinTime != pin_time) {
+            setDirty(PIN_TIME, mPinTime = pin_time);
+        }
+    }
+
+    public boolean isPinned() { return mPinTime != 0; }
+
+    public void setPinned(final boolean pinned) { setPinTime(pinned ? System.currentTimeMillis() : 0); }
+
     @Override
     public boolean isDirty() {
         return ((hasIcon() && getIcon().isDirty()) || (hasGroup() && getGroup().isDirty()) || super.isDirty());
@@ -700,6 +721,7 @@ public class TwoFactorAccount extends SynceableTableRow {
             values.put(PERIOD, mPeriod);
             values.put(COUNTER, mCounter);
             values.put(LAST_USE, mLastUse);
+            values.put(PIN_TIME, mPinTime);
         }
         else {
             if (values.containsKey(SERVER_IDENTITY)) {

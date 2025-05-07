@@ -14,7 +14,7 @@
 
         <SeekBarPreference android:key="accounts-list-columns-landscape" android:title="@string/accounts_list_columns_landscape" android:max="@integer/accounts_list_max_columns" android:defaultValue="@integer/accounts_list_columns_landscape" />
 
-        <CheckBoxPreference android:key="ungroup-otp-code" android:title="@string/ungroup_otp_codes" android:summary="@string/ungroup_otp_codes_summary" android:defaultValue="@bool/ungroup_otp_code" />
+        <Preference android:key="ungrouped-otp-code-part-size" android:title="@string/ungrouped_otp_code_part_size" />
 
         <CheckBoxPreference android:key="display-account-server-identity" android:title="@string/display_account_server_identity" android:summary="@string/display_account_server_identity_summary" android:defaultValue="@bool/display_account_server_identity" />
 
@@ -49,6 +49,8 @@
     <PreferenceCategory android:title="@string/privacy">
 
         <CheckBoxPreference android:key="download-icons-from-external-sources" android:title="@string/download_icons_from_external_sources" android:summary="@string/download_icons_from_external_sources_summary" android:defaultValue="@bool/download_icons_from_external_sources" />
+
+        <CheckBoxPreference android:key="download-icons-from-external-sources-only-one-time" android:title="@string/download_icons_from_external_sources_only_one_time" android:summary="@string/download_icons_from_external_sources_only_one_time_summary" android:defaultValue="@bool/download_icons_from_external_sources_only_one_time" android:dependency="download-icons-from-external-sources" />
 
     </PreferenceCategory>
 

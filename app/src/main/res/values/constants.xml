@@ -13,6 +13,7 @@
     <integer name="accounts_list_columns_landscape">2</integer>
 
     <bool name="ungroup_otp_code">true</bool>
+    <integer name="ungrouped_otp_code_part_size">0</integer>
 
     <bool name="disable_screenshots">true</bool>
 
@@ -32,6 +33,7 @@
     <bool name="allow_copy_server_access_tokens">false</bool>
 
     <bool name="download_icons_from_external_sources">true</bool>
+    <bool name="download_icons_from_external_sources_only_one_time">true</bool>
 
     <bool name="auto_update_app">true</bool>
     <bool name="auto_update_app_include_prereleases">false</bool>

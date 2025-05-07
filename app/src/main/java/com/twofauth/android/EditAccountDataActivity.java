@@ -1,6 +1,7 @@
 package com.twofauth.android;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -47,6 +49,8 @@ import com.twofauth.android.edit_account_data_activity.tasks.LoadAccountEditionN
 import com.twofauth.android.edit_account_data_activity.tasks.LoadAccountEditionNeededData.OnAccountEditionNeededDataLoadedListener;
 import com.twofauth.android.api_tasks.SaveAccountData;
 import com.twofauth.android.api_tasks.SaveAccountData.OnDataSavedListener;
+import com.twofauth.android.edit_account_data_activity.tasks.PinOrUnPinAccount;
+import com.twofauth.android.edit_account_data_activity.tasks.PinOrUnPinAccount.OnAccountPinStatusChangedListener;
 import com.twofauth.android.utils.Bitmaps;
 import com.twofauth.android.utils.Clipboard;
 import com.twofauth.android.utils.Lists;
@@ -63,7 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class EditAccountDataActivity extends BaseActivityWithTextController implements OnAccountEditionNeededDataLoadedListener, OnDataSavedListener, OnDataDeletedListener, OnDataUndeletedListener, OnQRLoadedListener, OnAuthenticatorFinishListener, OnClickListener, OnItemSelectedListener {
+public class EditAccountDataActivity extends BaseActivityWithTextController implements OnAccountEditionNeededDataLoadedListener, OnDataSavedListener, OnDataDeletedListener, OnDataUndeletedListener, OnAccountPinStatusChangedListener, OnQRLoadedListener, OnAuthenticatorFinishListener, OnClickListener, OnItemSelectedListener {
     public static final String EXTRA_ACCOUNT_ID = "account-id";
 
     public static final String EXTRA_ACCOUNT_SERVER_IDENTITY = "server-identity";
@@ -165,6 +169,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         }
     }
 
+    private static Bitmap mClipboardedBitmap = null;
+
     private TwoFactorAccount mInitialAccountData = null;
     private TwoFactorAccount mCurrentAccountData = null;
 
@@ -178,6 +184,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private Button mSelectIconButton;
     private Button mDeleteIconButton;
     private Button mCopyIconToServerButton;
+    private Button mCopyIconToClipboardButton;
+    private Button mPasteIconFromClipboardButton;
     private View mServerIdentityContainer;
     private Spinner mServerIdentitySpinner;
     private EditText mServiceEditText;
@@ -197,6 +205,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private FloatingActionButton mEditOrSaveAccountDataButton;
     private FloatingActionButton mDeleteOrUndeleteAccountDataButton;
     private FloatingActionButton mCloneAccountDataButton;
+    private FloatingActionButton mPinOrUnPinAccountDataButton;
     private FloatingActionButton mShowQRCodeButton;
     private FloatingActionButton mToggleSubmenuVisibilityButton;
     private FloatingActionButton[] mSubmenuButtons;
@@ -227,6 +236,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mDeleteIconButton.setOnClickListener(this);
         mCopyIconToServerButton = (Button) findViewById(R.id.copy_icon_to_server);
         mCopyIconToServerButton.setOnClickListener(this);
+        mCopyIconToClipboardButton = (Button) findViewById(R.id.copy_icon_to_clipboard);
+        mCopyIconToClipboardButton.setOnClickListener(this);
+        mPasteIconFromClipboardButton = (Button) findViewById(R.id.paste_icon_from_clipboard);
+        mPasteIconFromClipboardButton.setOnClickListener(this);
         mServerIdentityContainer = findViewById(R.id.server_identity_layout);
         mServerIdentitySpinner = (Spinner) findViewById(R.id.server_identity_selector);
         mServerIdentitySpinner.setOnItemSelectedListener(this);
@@ -263,12 +276,15 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mCloneAccountDataButton = (FloatingActionButton) findViewById(R.id.clone_account_data);
         mCloneAccountDataButton.setOnClickListener(this);
         mCloneAccountDataButton.setVisibility(View.GONE);
+        mPinOrUnPinAccountDataButton = (FloatingActionButton) findViewById(R.id.pin_or_unpin_account_data);
+        mPinOrUnPinAccountDataButton.setOnClickListener(this);
+        mPinOrUnPinAccountDataButton.setVisibility(View.GONE);
         mShowQRCodeButton = (FloatingActionButton) findViewById(R.id.show_qr_code);
         mShowQRCodeButton.setOnClickListener(this);
         mShowQRCodeButton.setVisibility(View.GONE);
         mToggleSubmenuVisibilityButton = (FloatingActionButton) findViewById(R.id.toggle_submenu);
         mToggleSubmenuVisibilityButton.setOnClickListener(this);
-        mSubmenuButtons = new FloatingActionButton[] { mDeleteOrUndeleteAccountDataButton, mCloneAccountDataButton, mShowQRCodeButton };
+        mSubmenuButtons = new FloatingActionButton[] { mDeleteOrUndeleteAccountDataButton, mCloneAccountDataButton, mPinOrUnPinAccountDataButton, mShowQRCodeButton };
         mWorking = findViewById(R.id.working);
         mContents = findViewById(R.id.contents);
         final Intent intent = getIntent();
@@ -395,6 +411,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mToggleSubmenuVisibilityButton.setEnabled(buttons_available);
         mDeleteOrUndeleteAccountDataButton.setEnabled(buttons_available);
         mCloneAccountDataButton.setEnabled(buttons_available && mCurrentAccountData.inDatabase() && (! mCurrentAccountData.isDeleted()));
+        mPinOrUnPinAccountDataButton.setEnabled(buttons_available);
         mShowQRCodeButton.setEnabled(buttons_available && (mCurrentAccountData.getRemoteId() != 0) && (! isChanged()));
     }
 
@@ -407,6 +424,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         if (view_id == R.id.select_icon) { startActivityFromIntent(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)); }
         else if (view_id == R.id.delete_icon) { deleteIcon(); }
         else if (view_id == R.id.copy_icon_to_server) { copyIconToServer(); }
+        else if (view_id == R.id.copy_icon_to_clipboard) { copyIconToClipboard(); }
+        else if (view_id == R.id.paste_icon_from_clipboard) { pasteIconFromClipboard(); }
         else if (view_id == R.id.toggle_otp_generation_attributes_visualization) { toggleOtpAttributesVisibility(); }
         else if (view_id == R.id.otp_type) { setOtpTypeDependencies((String) view.getTag()); mCurrentAccountData.setOtpType(ViewUtils.setSelected(this, view)); setButtonsAvailability(); }
         else if (view_id == R.id.digit) { mCurrentAccountData.setOtpLength(Integer.parseInt(ViewUtils.setSelected(this, view))); setButtonsAvailability(); }
@@ -416,6 +435,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         else if (view_id == R.id.toggle_submenu) { UI.animateSubmenuOpenOrClose(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, mSubmenuButtons); }
         else if (view_id == R.id.delete_or_undelete_account_data) { deleteOrUnDeleteData(); }
         else if (view_id == R.id.clone_account_data) { cloneAccountData(); }
+        else if (view_id == R.id.pin_or_unpin_account_data) { toggleAccountPinned(); }
         else if (view_id == R.id.show_qr_code) { showQR(); }
     }
 
@@ -481,7 +501,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mIconImageView.setImageBitmap(bitmap);
         for (final View view : new View[] { mIconSourceTextView, mDeleteIconButton, mIconImageView }) { view.setVisibility(View.VISIBLE); }
         mDeleteIconButton.setEnabled(true);
+        mCopyIconToClipboardButton.setEnabled(true);
         mCopyIconToServerButton.setVisibility(View.GONE);
+        mCurrentAccountData.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
         setButtonsAvailability();
     }
 
@@ -490,6 +512,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         icon.setSource(null);
         icon.setBitmaps((Bitmap) null, (Bitmap) null, (Bitmap) null);
         for (final View view : new View[] { mIconSourceTextView, mDeleteIconButton, mCopyIconToServerButton, mIconImageView }) { view.setVisibility(View.GONE); }
+        mCopyIconToClipboardButton.setEnabled(false);
+        mCurrentAccountData.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
         setButtonsAvailability();
     }
 
@@ -520,6 +544,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             view.setVisibility(has_icon ? View.VISIBLE : View.GONE);
         }
         mCopyIconToServerButton.setVisibility(has_icon && API.ICON_SOURCE_DASHBOARD.equals(icon_source) ? View.VISIBLE : View.GONE);
+        mCopyIconToClipboardButton.setEnabled(has_icon);
     }
 
     private void setEditableAccountData() {
@@ -562,6 +587,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             mInitialAccountData.setOtpType((! mAddingAccountFromFirstTime) || account.inDatabase() || mAddingAccountFromQrCode ? account.getOtpType() : null);
             if (! mInitialAccountData.hasServerIdentity()) { mInitialAccountData.setServerIdentity(mServerIdentities.get(0)); }
             mDeleteOrUndeleteAccountDataButton.setImageResource(mInitialAccountData.isDeleted() ? R.drawable.ic_actionbar_undelete : R.drawable.ic_actionbar_delete);
+            mPinOrUnPinAccountDataButton.setImageResource(mInitialAccountData.isPinned() ? R.drawable.ic_actionbar_unpin : R.drawable.ic_actionbar_pin);
             mCurrentAccountData = new TwoFactorAccount(mInitialAccountData);
             mEditing = ((! mCurrentAccountData.inDatabase()) || ((! mAddingAccountFromFirstTime) && (! mCurrentAccountData.isRemote())));
             mEditOrSaveAccountDataButton.setImageResource(mEditing ? R.drawable.ic_actionbar_accept : R.drawable.ic_actionbar_edit);
@@ -578,10 +604,6 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         onAccountEditionNeededDataLoaded(mServerIdentities, mGroups, account);
     }
 
-    private void onAccountEditionNeededDataLoaded() {
-        onAccountEditionNeededDataLoaded(mCurrentAccountData);
-    }
-
     // Disables (or reenables) the form inputs when data is trying to be updated or already updated
 
     private void setViewsAvailability(final boolean enable) {
@@ -595,6 +617,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mSelectIconButton.setEnabled(enable && mEditing);
         mDeleteIconButton.setEnabled(false);
         mCopyIconToServerButton.setEnabled(false);
+        mPasteIconFromClipboardButton.setEnabled(enable && mEditing && (mClipboardedBitmap != null));
         if (enable && mEditing && mCurrentAccountData.hasIcon() && mCurrentAccountData.getIcon().hasBitmaps(this)) {
             mDeleteIconButton.setEnabled(true);
             mCopyIconToServerButton.setEnabled(API.ICON_SOURCE_DASHBOARD.equals(mCurrentAccountData.getIcon().getSource()));
@@ -692,16 +715,18 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
 
     // Functions related with the save process
 
-    @Override
-    public void onDataSaved(@NotNull final TwoFactorAccount account, final boolean success, final boolean synced) {
+    public void onDataSaved(@NotNull final TwoFactorAccount account, final boolean success, final boolean synced, final boolean notify) {
         if (! isFinishedOrFinishing()) {
             if (success) { setResult(Activity.RESULT_OK); }
             if (success && synced && (! account.isRemote())) { onAccountDeletedAtServerSide(); return; }
-            UI.showToast(this, success ? synced ? R.string.account_data_has_been_saved_and_synced : R.string.account_data_has_been_saved_but_not_synced : R.string.error_while_saving_account_data);
+            if (notify) { UI.showToast(this, success ? synced ? R.string.account_data_has_been_saved_and_synced : R.string.account_data_has_been_saved_but_not_synced : R.string.error_while_saving_account_data); }
             onSyncingDataFinished();
-            onAccountEditionNeededDataLoaded();
+            onAccountEditionNeededDataLoaded(account);
         }
     }
+
+    @Override
+    public void onDataSaved(@NotNull final TwoFactorAccount account, final boolean success, final boolean synced) { onDataSaved(account, success, synced, true); }
 
     private void onSaveDataConfirmed() {
         onSyncingDataStarted();
@@ -760,9 +785,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             if (success) { setResult(Activity.RESULT_OK); }
             if (success && synced && (! account.isRemote())) { onAccountDeletedAtServerSide(); return; }
             UI.showToast(this, success ? R.string.account_data_has_been_undeleted : R.string.error_while_undeleting_account_data);
-            if (success) { UI.animateIconChange(mDeleteOrUndeleteAccountDataButton, R.drawable.ic_actionbar_delete, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
+            if (success && UI.isSubmenuOpened(mToggleSubmenuVisibilityButton)) { UI.animateIconChange(mDeleteOrUndeleteAccountDataButton, R.drawable.ic_actionbar_delete, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
             onSyncingDataFinished();
-            onAccountEditionNeededDataLoaded();
+            onAccountEditionNeededDataLoaded(account);
         }
     }
 
@@ -786,6 +811,23 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         }
     }
 
+    // Functions related to the Pin or UnPin data
+
+    public void onAccountPinStatusChanged(@NotNull final TwoFactorAccount account, final boolean success) {
+        if (! isFinishedOrFinishing()) {
+            final boolean account_data_pinned = mCurrentAccountData.isPinned();
+            UI.showToast(this, success ? account_data_pinned ? R.string.account_has_been_pinned : R.string.account_has_been_unpinned : R.string.cannot_process_request_due_to_an_internal_error);
+            if (success && UI.isSubmenuOpened(mToggleSubmenuVisibilityButton)) { UI.animateIconChange(mPinOrUnPinAccountDataButton, account_data_pinned ? R.drawable.ic_actionbar_unpin : R.drawable.ic_actionbar_pin, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
+            onDataSaved(account, success, false, false);
+        }
+    }
+
+    private void toggleAccountPinned() {
+        onSyncingDataStarted();
+        mCurrentAccountData.setPinned(! mCurrentAccountData.isPinned());
+        PinOrUnPinAccount.getBackgroundTask(this, mCurrentAccountData, this).start();
+    }
+
     // Functions related to the show QR code process
 
     @Override
@@ -802,5 +844,17 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private void showQR() {
         onSyncingDataStarted();
         LoadAccountQR.getBackgroundTask(mCurrentAccountData, EditAccountDataActivity.this).start();
+    }
+
+    // Listener for "clipboard" contents
+
+    private void copyIconToClipboard() {
+        mClipboardedBitmap = mCurrentAccountData.getIcon().getBitmap(this);
+        mPasteIconFromClipboardButton.setEnabled(mEditing && (mClipboardedBitmap != null) && (mWorking.getVisibility() == View.GONE));
+        UI.showToast(this, R.string.copied_to_the_internal_clipboard);
+    }
+
+    private void pasteIconFromClipboard() {
+        setIcon(mClipboardedBitmap);
     }
 }

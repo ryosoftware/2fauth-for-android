@@ -263,7 +263,7 @@ public class ServerDataSynchronizer
                                     final List<TwoFactorGroup> server_loaded_groups = API.getGroups(server_identity, true);
                                     setAccountGroup(server_loaded_accounts_raw, server_loaded_groups);
                                     // Icons are less relevant than other data (we do not raise an exception on network error)
-                                    API.getIcons(server_identity, mService, server_loaded_accounts_raw, false);
+                                    API.getIcons(database, mService, server_identity, server_loaded_accounts_raw, false);
                                     // Now we parse accounts data then start database transition
                                     final List<TwoFactorAccount> server_loaded_accounts = parseAccounts(server_identity, server_loaded_accounts_raw, true);
                                     final int server_loaded_accounts_count = Lists.size(server_loaded_accounts), server_loaded_groups_count = Lists.size(server_loaded_groups);

@@ -10,7 +10,7 @@
 
     <color name="floating_action_buttons_background">#FF4F378B</color>
     <color name="floating_action_buttons_foreground">@color/white</color>
-    <color name="floating_action_buttons_foreground_disabled">#FF767279</color>
+    <color name="floating_action_buttons_foreground_disabled">#FFD0BCFF</color>
 
     <color name="border_frame_border">@android:color/white</color>
 

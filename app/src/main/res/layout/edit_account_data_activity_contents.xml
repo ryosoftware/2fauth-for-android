@@ -62,6 +62,24 @@
                 android:paddingEnd="15dp"
                 app:icon="@drawable/ic_actionbar_clone" />
 
+            <Button
+                android:id="@+id/copy_icon_to_clipboard"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="10dp"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                app:icon="@drawable/ic_actionbar_copy" />
+
+            <Button
+                android:id="@+id/paste_icon_from_clipboard"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="10dp"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                app:icon="@drawable/ic_actionbar_paste" />
+
         </LinearLayout>
 
         <LinearLayout
