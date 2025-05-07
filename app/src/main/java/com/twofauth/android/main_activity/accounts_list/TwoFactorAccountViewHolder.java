@@ -120,13 +120,13 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return mAnimation;
     }
 
-    private void setOtpAnimationByState(long millis_until_next_otp) {
+    private void setOtpAnimationByState(final long millis_until_next_otp) {
         final Animation otp_animation = mOtp.getAnimation();
         if ((otp_animation == null) && (millis_until_next_otp > 0) && (millis_until_next_otp < OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME)) { mOtp.startAnimation(getOtpAnimation()); }
         else if ((otp_animation != null) && ((millis_until_next_otp <= 0) || (millis_until_next_otp > OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME))) { mOtp.clearAnimation(); }
     }
 
-    public void draw(@NotNull final Context context, @NotNull TwoFactorAccount account, final boolean show_otp, final boolean showing_other_otp, final AppearanceOptions options) {
+    public void draw(@NotNull final Context context, @NotNull final TwoFactorAccount account, final boolean show_otp, final boolean showing_other_otp, final AppearanceOptions options) {
         final boolean is_otp_type_supported = account.isOtpTypeSupported();
         final String otp = is_otp_type_supported ? show_otp ? account.getOtp() : getHiddenOtp(account) : null, otp_next = is_otp_type_supported && show_otp && options.isShowNextOtpCodeEnabled() ? account.getOtp(DateTimeUtils.getDateForwardFromNow(account.getPeriodInMillis())) : null;
         final long millis_until_next_otp = (is_otp_type_supported && show_otp) ? account.getMillisUntilNextOtp() : -1;
