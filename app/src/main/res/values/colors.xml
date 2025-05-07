@@ -10,10 +10,13 @@
     <color name="light_yellow">#FFF7DC6F</color>
     <color name="light_red">#FFB06769</color>
 
+    <color name="text_icon_background">#FF1E1B21</color>
+    <color name="text_icon_foreground">@color/white</color>
+
     <color name="ic_launcher_background">#FF530066</color>
 
     <color name="floating_action_buttons_background">#FFEADDFF</color>
-    <color name="floating_action_buttons_foreground">@color/ic_launcher_background</color>
+    <color name="floating_action_buttons_foreground">#FF21005D</color>
     <color name="floating_action_buttons_foreground_disabled">@color/gray</color>
 
     <color name="border_frame_background">@android:color/transparent</color>

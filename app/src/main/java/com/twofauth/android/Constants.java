@@ -13,6 +13,7 @@ public class Constants {
 
     // App options
 
+    public static final String NEW_ACCOUNT_PERIOD_KEY = "new-account-period";
     public static final String SORT_ACCOUNTS_BY_LAST_USE_KEY = "sort-accounts-by-last-use";
     public static final String ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY = "accounts-list-columns-portrait";
     public static final String ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY = "accounts-list-columns-portrait";
