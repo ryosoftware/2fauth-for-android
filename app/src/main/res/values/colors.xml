@@ -14,7 +14,7 @@
 
     <color name="floating_action_buttons_background">#FFEADDFF</color>
     <color name="floating_action_buttons_foreground">@color/ic_launcher_background</color>
-    <color name="floating_action_buttons_foreground_disabled">#FF8E8793</color>
+    <color name="floating_action_buttons_foreground_disabled">@color/gray</color>
 
     <color name="border_frame_background">@android:color/transparent</color>
     <color name="border_frame_border">@color/black</color>
@@ -26,7 +26,7 @@
     <color name="otp_attribute_background">#FFEADDFF</color>
     <color name="otp_attribute_background_disabled">#FFD7CCE9</color>
     <color name="otp_attribute_background_selected">#FF6750A4</color>
-    <color name="otp_attribute_background_disabled_selected">#FF9e96aa</color>
+    <color name="otp_attribute_background_disabled_selected">#FF9E96AA</color>
 
     <color name="otp_attribute_foreground">@color/otp_attribute_background_selected</color>
     <color name="otp_attribute_foreground_disabled">@color/otp_attribute_background_disabled_selected</color>
