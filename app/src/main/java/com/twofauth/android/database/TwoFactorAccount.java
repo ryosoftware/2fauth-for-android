@@ -33,6 +33,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 public class TwoFactorAccount extends SynceableTableRow {
+    public static final String ADD_TIME = "add_time";
     public static final String SERVER_IDENTITY = "server_identity";
     public static final String SERVICE = "service";
     public static final String ACCOUNT = "account";
@@ -49,6 +50,7 @@ public class TwoFactorAccount extends SynceableTableRow {
 
     protected static final String[] PROJECTION = new String[] {
         ROW_ID,
+        ADD_TIME,
         SERVER_IDENTITY,
         REMOTE_ID,
         SERVICE,
@@ -66,7 +68,8 @@ public class TwoFactorAccount extends SynceableTableRow {
         PIN_TIME,
     };
 
-    private static final int SERVER_IDENTITY_ORDER = ROW_ID_ORDER + 1;
+    private static final int ADD_TIME_ORDER = ROW_ID_ORDER + 1;
+    private static final int SERVER_IDENTITY_ORDER = ADD_TIME_ORDER + 1;
     private static final int REMOTE_ID_ORDER = SERVER_IDENTITY_ORDER + 1;
     private static final int SERVICE_ORDER = REMOTE_ID_ORDER + 1;
     private static final int ACCOUNT_ORDER = SERVICE_ORDER + 1;
@@ -225,6 +228,7 @@ public class TwoFactorAccount extends SynceableTableRow {
         }
     }
 
+    private long mAddTime;
     private TwoFactorServerIdentity mServerIdentity;
     private String mService;
     private String mAccount;
@@ -243,6 +247,7 @@ public class TwoFactorAccount extends SynceableTableRow {
 
     public TwoFactorAccount(@NotNull final SQLiteDatabase database, @NotNull final Cursor cursor) throws Exception {
         super(TwoFactorAccountsHelper.TABLE_NAME, cursor, REMOTE_ID_ORDER, STATUS_ORDER);
+        mAddTime = cursor.getLong(ADD_TIME_ORDER);
         mServerIdentity = Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().instance(database, cursor.getLong(SERVER_IDENTITY_ORDER));
         mService = cursor.getString(SERVICE_ORDER);
         mAccount = cursor.getString(ACCOUNT_ORDER);
@@ -260,6 +265,7 @@ public class TwoFactorAccount extends SynceableTableRow {
 
     public TwoFactorAccount() {
         super(TwoFactorAccountsHelper.TABLE_NAME);
+        mAddTime = System.currentTimeMillis();
         mServerIdentity = null;
         mService = "";
         mAccount = "";
@@ -278,6 +284,7 @@ public class TwoFactorAccount extends SynceableTableRow {
     public TwoFactorAccount(@NotNull final TwoFactorAccount account) {
         this();
         setRowId(account.getRowId());
+        setAddTime(account.getAddTime());
         setServerIdentity(account.getServerIdentity());
         setRemoteId(account.getRemoteId());
         setService(account.getService());
@@ -298,6 +305,11 @@ public class TwoFactorAccount extends SynceableTableRow {
     public TwoFactorAccount(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, @NotNull final JSONObject object) throws Exception {
         this();
         fromJSONObject(database, server_identity, object);
+    }
+
+    public void setRowId(final long row_id) {
+        super.setRowId(row_id);
+        if (row_id < 0) { setAddTime(System.currentTimeMillis()); }
     }
 
     private @NotNull Object getOtpGenerator() {
@@ -378,6 +390,14 @@ public class TwoFactorAccount extends SynceableTableRow {
         catch (JSONException e) {
             Log.e(Main.LOG_TAG_NAME, "Exception while trying to convert an account to JSON", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public long getAddTime() { return mAddTime; }
+
+    private void setAddTime(long add_time) {
+        if ((! isDeleted()) && (mAddTime != add_time)) {
+            setDirty(ADD_TIME, mAddTime = add_time);
         }
     }
 
@@ -707,6 +727,7 @@ public class TwoFactorAccount extends SynceableTableRow {
 
     protected void setDatabaseValues(@NotNull final ContentValues values) {
         if (values.size() == 0) {
+            values.put(ADD_TIME, mAddTime);
             if (mServerIdentity == null) { throw new SQLException("Server Identity cannot be NULL"); }
             values.put(SERVER_IDENTITY, mServerIdentity.getRowId());
             super.setDatabaseValues(values);

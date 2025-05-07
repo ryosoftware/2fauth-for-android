@@ -312,5 +312,7 @@
     <string name="number_10">10</string>
     <string name="key_delete">\u232B</string>
 
+    <string name="new_account">nueva</string>
+
     <string name="cannot_process_request_due_to_an_internal_error">No se puede procesar la petición debido a un error interno</string>
 </resources>

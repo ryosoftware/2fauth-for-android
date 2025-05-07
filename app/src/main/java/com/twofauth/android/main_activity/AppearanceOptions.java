@@ -3,6 +3,7 @@ package com.twofauth.android.main_activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.text.format.DateUtils;
 
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class AppearanceOptions {
+    private final long mNewAccountPeriod;
     private final boolean mUngroupOtpCode;
     private final int mUngroupedOtpCodePartSize;
     private final boolean mHideOtpAutomatically;
@@ -25,6 +27,7 @@ public class AppearanceOptions {
     public AppearanceOptions(@NotNull final Context context) {
         final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(context);
         final Resources resources = context.getResources();
+        mNewAccountPeriod = preferences.getLong(Constants.NEW_ACCOUNT_PERIOD_KEY, resources.getInteger(R.integer.new_account_period_in_minutes) * DateUtils.MINUTE_IN_MILLIS);
         mUngroupOtpCode = preferences.getBoolean(Constants.UNGROUP_OTP_CODE_KEY, resources.getBoolean(R.bool.ungroup_otp_code));
         mUngroupedOtpCodePartSize = preferences.getInt(Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY, resources.getInteger(R.integer.ungrouped_otp_code_part_size));
         mHideOtpAutomatically = preferences.getBoolean(Constants.HIDE_OTP_AUTOMATICALLY_KEY, resources.getBoolean(R.bool.hide_otp_codes_automatically));
@@ -74,5 +77,9 @@ public class AppearanceOptions {
 
     public @Nullable String getServerIdentityAndGroupNames(@NotNull final Context context, @NotNull final TwoFactorGroup group) {
         return getServerIdentityAndGroupNames(context, group.getServerIdentity().getTitle(), group.hasName() ? group.getName() : null);
+    }
+
+    public boolean isNewAccount(@NotNull final Context context, @NotNull final TwoFactorAccount account) {
+        return account.getAddTime() + mNewAccountPeriod > System.currentTimeMillis();
     }
 }

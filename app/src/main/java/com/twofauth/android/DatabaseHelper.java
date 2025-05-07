@@ -28,7 +28,7 @@ import java.util.Base64;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "database.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     private static final String DATABASE_PASSWORD_KEY = "database-password";
     private static final int PASSWORD_LENGTH = 128;
@@ -63,17 +63,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @SuppressLint("DefaultLocale")
-    private void onCreateV3(@NotNull final SQLiteDatabase database) {
+    private void onCreateV4(@NotNull final SQLiteDatabase database) {
         final Resources resources = mContext.getResources();
         database.execSQL(String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT NOT NULL, %s TEXT NOT NULL, %s INTEGER, %s TEXT, %s TEXT, %s INTEGER DEFAULT 0, %s INTEGER DEFAULT %d, %s INTEGER DEFAULT %d)", TwoFactorServerIdentitiesHelper.TABLE_NAME, TwoFactorServerIdentity.ROW_ID, TwoFactorServerIdentity.LABEL, TwoFactorServerIdentity.SERVER, TwoFactorServerIdentity.TOKEN, TwoFactorServerIdentity.REMOTE_ID, TwoFactorServerIdentity.NAME, TwoFactorServerIdentity.EMAIL, TwoFactorServerIdentity.IS_ADMIN, TwoFactorServerIdentity.SYNC_ON_STARTUP, resources.getBoolean(R.bool.sync_on_startup) ? 1 : 0, TwoFactorServerIdentity.SYNC_IMMEDIATELY, resources.getBoolean(R.bool.sync_immediately) ? 1 : 0));
         database.execSQL(String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s INTEGER NOT NULL REFERENCES %s(%s) ON DELETE RESTRICT, %s INTEGER DEFAULT %d, %s TEXT DEFAULT '', %s INTEGER DEFAULT %d)", TwoFactorGroupsHelper.TABLE_NAME, TwoFactorGroup.ROW_ID, TwoFactorGroup.SERVER_IDENTITY, TwoFactorServerIdentitiesHelper.TABLE_NAME, TwoFactorServerIdentity.ROW_ID, TwoFactorGroup.REMOTE_ID, 0, TwoFactorGroup.NAME, TwoFactorGroup.STATUS, TwoFactorGroup.STATUS_DEFAULT));
         database.execSQL(String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT)", TwoFactorIconsHelper.TABLE_NAME, TwoFactorIcon.ROW_ID, TwoFactorIcon.SOURCE, TwoFactorIcon.SOURCE_ID));
-        database.execSQL(String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s INTEGER NOT NULL REFERENCES %s(%s) ON DELETE RESTRICT, %s INTEGER DEFAULT %d, %s TEXT DEFAULT '', %s TEXT DEFAULT '', %s INTEGER REFERENCES %s(%s) ON DELETE RESTRICT, %s INTEGER REFERENCES %s(%s) ON DELETE RESTRICT, %s TEXT DEFAULT '%s', %s TEXT DEFAULT '', %s INTEGER DEFAULT %d, %s TEXT DEFAULT '%s', %s INTEGER DEFAULT %d, %s INTEGER DEFAULT %d, %s INTEGER DEFAULT 0, %s INTEGER DEFAULT %d, %s INTEGER DEFAULT 0)", TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.ROW_ID, TwoFactorAccount.SERVER_IDENTITY, TwoFactorServerIdentitiesHelper.TABLE_NAME, TwoFactorServerIdentity.ROW_ID, TwoFactorAccount.REMOTE_ID, 0, TwoFactorAccount.SERVICE, TwoFactorAccount.ACCOUNT, TwoFactorAccount.GROUP, TwoFactorGroupsHelper.TABLE_NAME, TwoFactorGroup.ROW_ID, TwoFactorAccount.ICON, TwoFactorIconsHelper.TABLE_NAME, TwoFactorIcon.ROW_ID, TwoFactorAccount.OTP_TYPE, Constants.DEFAULT_OTP_TYPE, TwoFactorAccount.SECRET, TwoFactorAccount.OTP_LENGTH, Constants.DEFAULT_OTP_LENGTH, TwoFactorAccount.ALGORITHM, Constants.DEFAULT_ALGORITHM, TwoFactorAccount.PERIOD, Constants.DEFAULT_PERIOD, TwoFactorAccount.COUNTER, Constants.DEFAULT_COUNTER, TwoFactorAccount.LAST_USE, TwoFactorAccount.STATUS, TwoFactorAccount.STATUS_DEFAULT, TwoFactorAccount.PIN_TIME));
+        database.execSQL(String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s INTEGER DEFAULT 0, %s INTEGER NOT NULL REFERENCES %s(%s) ON DELETE RESTRICT, %s INTEGER DEFAULT %d, %s TEXT DEFAULT '', %s TEXT DEFAULT '', %s INTEGER REFERENCES %s(%s) ON DELETE RESTRICT, %s INTEGER REFERENCES %s(%s) ON DELETE RESTRICT, %s TEXT DEFAULT '%s', %s TEXT DEFAULT '', %s INTEGER DEFAULT %d, %s TEXT DEFAULT '%s', %s INTEGER DEFAULT %d, %s INTEGER DEFAULT %d, %s INTEGER DEFAULT 0, %s INTEGER DEFAULT %d, %s INTEGER DEFAULT 0)", TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.ROW_ID, TwoFactorAccount.ADD_TIME, TwoFactorAccount.SERVER_IDENTITY, TwoFactorServerIdentitiesHelper.TABLE_NAME, TwoFactorServerIdentity.ROW_ID, TwoFactorAccount.REMOTE_ID, 0, TwoFactorAccount.SERVICE, TwoFactorAccount.ACCOUNT, TwoFactorAccount.GROUP, TwoFactorGroupsHelper.TABLE_NAME, TwoFactorGroup.ROW_ID, TwoFactorAccount.ICON, TwoFactorIconsHelper.TABLE_NAME, TwoFactorIcon.ROW_ID, TwoFactorAccount.OTP_TYPE, Constants.DEFAULT_OTP_TYPE, TwoFactorAccount.SECRET, TwoFactorAccount.OTP_LENGTH, Constants.DEFAULT_OTP_LENGTH, TwoFactorAccount.ALGORITHM, Constants.DEFAULT_ALGORITHM, TwoFactorAccount.PERIOD, Constants.DEFAULT_PERIOD, TwoFactorAccount.COUNTER, Constants.DEFAULT_COUNTER, TwoFactorAccount.LAST_USE, TwoFactorAccount.STATUS, TwoFactorAccount.STATUS_DEFAULT, TwoFactorAccount.PIN_TIME));
     }
 
     @Override
     public void onCreate(@NotNull final SQLiteDatabase database) {
-        onCreateV3(database);
+        onCreateV4(database);
     }
 
     @SuppressLint("DefaultLocale")
@@ -84,6 +84,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         if (old_version < 3) {
             database.execSQL(String.format("ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 0", TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.PIN_TIME));
+        }
+        if (old_version < 4) {
+            database.execSQL(String.format("ALTER TABLE %s RENAME TO %s_old", TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccountsHelper.TABLE_NAME));
+            database.execSQL(String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s INTEGER DEFAULT 0, %s INTEGER NOT NULL REFERENCES %s(%s) ON DELETE RESTRICT, %s INTEGER DEFAULT %d, %s TEXT DEFAULT '', %s TEXT DEFAULT '', %s INTEGER REFERENCES %s(%s) ON DELETE RESTRICT, %s INTEGER REFERENCES %s(%s) ON DELETE RESTRICT, %s TEXT DEFAULT '%s', %s TEXT DEFAULT '', %s INTEGER DEFAULT %d, %s TEXT DEFAULT '%s', %s INTEGER DEFAULT %d, %s INTEGER DEFAULT %d, %s INTEGER DEFAULT 0, %s INTEGER DEFAULT %d, %s INTEGER DEFAULT 0)", TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.ROW_ID, TwoFactorAccount.ADD_TIME, TwoFactorAccount.SERVER_IDENTITY, TwoFactorServerIdentitiesHelper.TABLE_NAME, TwoFactorServerIdentity.ROW_ID, TwoFactorAccount.REMOTE_ID, 0, TwoFactorAccount.SERVICE, TwoFactorAccount.ACCOUNT, TwoFactorAccount.GROUP, TwoFactorGroupsHelper.TABLE_NAME, TwoFactorGroup.ROW_ID, TwoFactorAccount.ICON, TwoFactorIconsHelper.TABLE_NAME, TwoFactorIcon.ROW_ID, TwoFactorAccount.OTP_TYPE, Constants.DEFAULT_OTP_TYPE, TwoFactorAccount.SECRET, TwoFactorAccount.OTP_LENGTH, Constants.DEFAULT_OTP_LENGTH, TwoFactorAccount.ALGORITHM, Constants.DEFAULT_ALGORITHM, TwoFactorAccount.PERIOD, Constants.DEFAULT_PERIOD, TwoFactorAccount.COUNTER, Constants.DEFAULT_COUNTER, TwoFactorAccount.LAST_USE, TwoFactorAccount.STATUS, TwoFactorAccount.STATUS_DEFAULT, TwoFactorAccount.PIN_TIME));
+            database.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s_old ORDER BY %s", TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.ROW_ID, TwoFactorAccount.SERVER_IDENTITY, TwoFactorAccount.REMOTE_ID, TwoFactorAccount.SERVICE, TwoFactorAccount.ACCOUNT, TwoFactorAccount.GROUP, TwoFactorAccount.ICON, TwoFactorAccount.OTP_TYPE, TwoFactorAccount.SECRET, TwoFactorAccount.OTP_LENGTH, TwoFactorAccount.ALGORITHM, TwoFactorAccount.PERIOD, TwoFactorAccount.COUNTER, TwoFactorAccount.LAST_USE, TwoFactorAccount.STATUS, TwoFactorAccount.PIN_TIME, TwoFactorAccount.ROW_ID, TwoFactorAccount.SERVER_IDENTITY, TwoFactorAccount.REMOTE_ID, TwoFactorAccount.SERVICE, TwoFactorAccount.ACCOUNT, TwoFactorAccount.GROUP, TwoFactorAccount.ICON, TwoFactorAccount.OTP_TYPE, TwoFactorAccount.SECRET, TwoFactorAccount.OTP_LENGTH, TwoFactorAccount.ALGORITHM, TwoFactorAccount.PERIOD, TwoFactorAccount.COUNTER, TwoFactorAccount.LAST_USE, TwoFactorAccount.STATUS, TwoFactorAccount.PIN_TIME, TwoFactorAccountsHelper.TABLE_NAME, TwoFactorAccount.ROW_ID));
+            database.execSQL(String.format("DROP TABLE %s_old", TwoFactorAccountsHelper.TABLE_NAME));
         }
     }
 

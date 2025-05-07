@@ -77,6 +77,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private final TextView mOtpNext;
     private final TextView mOtpCounter;
     private final View mAccountPinned;
+    private final View mNewAccount;
     private final View mAccountDataNotSynced;
     private final View mAccountDataDeleted;
     private final TextView mOtpError;
@@ -98,6 +99,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mOtpNext = (TextView) parent.findViewById(R.id.otp_next);
         mOtpCounter = (TextView) parent.findViewById(R.id.otp_counter);
         mAccountPinned = (ImageView) parent.findViewById(R.id.account_pinned);
+        mNewAccount = (TextView) parent.findViewById(R.id.account_new);
         mAccountDataNotSynced = parent.findViewById(R.id.account_data_not_synced);
         mAccountDataDeleted = parent.findViewById(R.id.account_data_deleted);
         mOtpError = (TextView) parent.findViewById(R.id.otp_error);
@@ -145,6 +147,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         else { setOtpAnimationByState(millis_until_next_otp); }
         mOtpCounter.setVisibility(millis_until_next_otp == Long.MAX_VALUE ? View.VISIBLE : View.GONE);
         mAccountPinned.setVisibility(account.isPinned() ? View.VISIBLE : View.GONE);
+        mNewAccount.setVisibility(options.isNewAccount(context, account) ? View.VISIBLE : View.GONE);
         mAccountDataNotSynced.setVisibility(account.isSynced() && ((! account.hasGroup()) || account.getGroup().isSynced()) && ((! account.hasIcon()) || account.getIcon().isSynced()) ? View.GONE : View.VISIBLE);
         mAccountDataDeleted.setVisibility(account.isDeleted() ? View.VISIBLE : View.GONE);
         final boolean error = ((! is_otp_type_supported) || (otp == null));
