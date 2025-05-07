@@ -48,13 +48,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="5dp"
                     android:layout_gravity="center_vertical"
-                    android:paddingStart="3dp"
-                    android:paddingEnd="3dp"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
                     android:paddingBottom="2dp"
-                    android:background="@color/text_icon_background"
+                    android:background="@drawable/border_frame"
                     android:text="@string/new_account"
-                    android:textColor="@color/text_icon_foreground"
-                    android:textSize="10sp" />
+                    android:textColor="@color/border_frame_foreground"
+                    android:textSize="12sp" />
 
                 <ImageView
                     android:id="@+id/account_data_not_synced"
@@ -122,7 +122,7 @@
                         android:id="@+id/otp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="32sp"
+                        android:textSize="34sp"
                         style="@style/Base.TextAppearance.AppCompat.Headline" />
 
                     <TextView
@@ -140,7 +140,7 @@
                     android:id="@+id/otp_next"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
+                    android:textSize="24sp"
                     android:textColor="?android:textColorSecondary"
                     style="@style/Base.TextAppearance.AppCompat.Headline" />
 
