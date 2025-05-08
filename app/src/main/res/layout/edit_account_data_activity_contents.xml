@@ -353,29 +353,6 @@
                         android:text="@string/number_8"
                         android:tag="8" />
 
-                    <Button
-                        android:id="@id/digit"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="5dp"
-                        android:layout_marginEnd="5dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:text="@string/number_9"
-                        android:tag="9" />
-
-                    <Button
-                        android:id="@id/digit"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="5dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:text="@string/number_10"
-                        android:tag="10" />
-
                 </LinearLayout>
 
             </LinearLayout>
