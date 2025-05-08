@@ -1,19 +1,19 @@
 package com.twofauth.android;
 
 import android.app.Activity;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.format.DateUtils;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -51,6 +52,9 @@ import com.twofauth.android.api_tasks.SaveAccountData;
 import com.twofauth.android.api_tasks.SaveAccountData.OnDataSavedListener;
 import com.twofauth.android.edit_account_data_activity.tasks.PinOrUnPinAccount;
 import com.twofauth.android.edit_account_data_activity.tasks.PinOrUnPinAccount.OnAccountPinStatusChangedListener;
+import com.twofauth.android.RepeatingEvents.OnTickListener;
+import com.twofauth.android.main_activity.AppearanceOptions;
+import com.twofauth.android.main_activity.accounts_list.TwoFactorAccountViewHolder;
 import com.twofauth.android.utils.Bitmaps;
 import com.twofauth.android.utils.Clipboard;
 import com.twofauth.android.utils.Lists;
@@ -67,7 +71,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class EditAccountDataActivity extends BaseActivityWithTextController implements OnAccountEditionNeededDataLoadedListener, OnDataSavedListener, OnDataDeletedListener, OnDataUndeletedListener, OnAccountPinStatusChangedListener, OnQRLoadedListener, OnAuthenticatorFinishListener, OnClickListener, OnItemSelectedListener {
+public class EditAccountDataActivity extends BaseActivityWithTextController implements OnAccountEditionNeededDataLoadedListener, OnDataSavedListener, OnDataDeletedListener, OnDataUndeletedListener, OnAccountPinStatusChangedListener, OnQRLoadedListener, OnAuthenticatorFinishListener, OnTickListener, OnClickListener, OnItemSelectedListener {
     public static final String EXTRA_ACCOUNT_ID = "account-id";
 
     public static final String EXTRA_ACCOUNT_SERVER_IDENTITY = "server-identity";
@@ -200,6 +204,9 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private EditText mPeriodEditText;
     private View mCounterContainer;
     private EditText mCounterEditText;
+    private View mCurrentOtpLayout;
+    private Button mCurrentOtpButton;
+    private ProgressBar mCurrentOtpRemainingTime;
     private Button mToggleOtpGenerationAttributesButton;
     private View mOtpAttributesLayout;
     private FloatingActionButton mEditOrSaveAccountDataButton;
@@ -222,10 +229,14 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private boolean mAddingAccountFromFirstTime = true;
     private boolean mFinishingActivity = false;
 
+    private AppearanceOptions mAppearanceOptions;
+    private final int mRepeatingEventsIdentifier = RepeatingEvents.obtainIdentifier();
+
     @Override
     protected void onCreate(@Nullable final Bundle saved_instance_state) {
         super.onCreate(saved_instance_state);
         mAuthenticator = new Authenticator(this);
+        mAppearanceOptions = new AppearanceOptions(this);
         setResult(Activity.RESULT_CANCELED);
         setContentView(R.layout.edit_account_data_activity);
         mIconImageView = (ImageView) findViewById(R.id.icon);
@@ -265,6 +276,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mCounterContainer = findViewById(R.id.counter_block_container);
         mCounterEditText = (EditText) findViewById(R.id.counter);
         mCounterEditText.addTextChangedListener(this);
+        mCurrentOtpLayout = findViewById(R.id.current_otp_layout);
+        mCurrentOtpLayout.setVisibility(View.GONE);
+        mCurrentOtpButton = (Button) findViewById(R.id.current_otp);
+        mCurrentOtpRemainingTime = (ProgressBar) findViewById(R.id.current_otp_remaining_time);
         mToggleOtpGenerationAttributesButton = (Button) findViewById(R.id.toggle_otp_generation_attributes_visualization);
         mToggleOtpGenerationAttributesButton.setOnClickListener(this);
         mOtpAttributesLayout = findViewById(R.id.otp_generation_attributes_layout);
@@ -299,6 +314,18 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     protected void onDestroy() {
         Threads.interrupt(mDataLoader);
         super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+        RepeatingEvents.cancel(mRepeatingEventsIdentifier);
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, null);
     }
 
     // Process back button action
@@ -367,10 +394,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
 
     // Check if account data is valid
 
-    private boolean isValid() {
-        if (! mCurrentAccountData.hasServerIdentity()) { return false; }
-        if (Strings.isEmptyOrNull(mCurrentAccountData.getService())) { return false; }
-        if (Strings.isEmptyOrNull(mCurrentAccountData.getAccount())) { return false; }
+    private boolean canGenerateOtpCodes() {
         if (mCurrentAccountData.getValidatedSecret() == null) { return false; }
         if (Strings.isEmptyOrNull(mCurrentAccountData.getOtpType())) { return false; }
         if (! mCurrentAccountData.isSteam()) {
@@ -380,6 +404,13 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             if ((mCurrentAccountData.isTotp()) && (mCurrentAccountData.getPeriod() == 0)) { return false; }
         }
         return true;
+    }
+
+    private boolean isValid() {
+        if (! mCurrentAccountData.hasServerIdentity()) { return false; }
+        if (Strings.isEmptyOrNull(mCurrentAccountData.getService())) { return false; }
+        if (Strings.isEmptyOrNull(mCurrentAccountData.getAccount())) { return false; }
+        return canGenerateOtpCodes();
     }
 
     // Check if account data is changed, compared with the one loaded at Activity startup
@@ -401,6 +432,22 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             if ((mCurrentAccountData.isTotp()) && (mCurrentAccountData.getPeriod() != mInitialAccountData.getPeriod())) { return true; }
         }
         return false;
+    }
+
+    // Show current OTP code
+
+    @Override
+    public void onTick(int identifier, long start_time, long end_time, long elapsed_time, Object data) {
+        if (mCurrentAccountData != null) {
+            final boolean can_generate_otp_codes = canGenerateOtpCodes();
+            if (can_generate_otp_codes) {
+                mCurrentOtpButton.setText(mAppearanceOptions.ungroupOtp(mCurrentAccountData.getOtp()));
+                final long interval_until_current_otp_cycle_ends = mCurrentAccountData.getMillisUntilNextOtp(), cycle_time = mCurrentAccountData.getOtpMillis();
+                mCurrentOtpRemainingTime.setProgress(Math.max(0, (int) ((100 * interval_until_current_otp_cycle_ends) / cycle_time)));
+                mCurrentOtpRemainingTime.setProgressTintList(ColorStateList.valueOf(getResources().getColor(interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, getTheme())));
+            }
+            mCurrentOtpLayout.setVisibility(can_generate_otp_codes ? View.VISIBLE : View.GONE);
+        }
     }
 
     // Set buttons state
