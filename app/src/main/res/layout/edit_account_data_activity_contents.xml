@@ -160,12 +160,43 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/toggle_otp_generation_attributes_visualization"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/current_otp_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp">
+
+                <Button
+                    android:id="@+id/current_otp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="8dp" />
+
+                <ProgressBar
+                    android:id="@+id/current_otp_remaining_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_gravity="bottom|center_horizontal"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:max="100" />
+
+            </FrameLayout>
+
+            <Button
+                android:id="@+id/toggle_otp_generation_attributes_visualization"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/otp_generation_attributes_layout"
@@ -321,29 +352,6 @@
                         android:paddingEnd="8dp"
                         android:text="@string/number_8"
                         android:tag="8" />
-
-                    <Button
-                        android:id="@id/digit"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="5dp"
-                        android:layout_marginEnd="5dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:text="@string/number_9"
-                        android:tag="9" />
-
-                    <Button
-                        android:id="@id/digit"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="5dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:text="@string/number_10"
-                        android:tag="10" />
 
                 </LinearLayout>
 

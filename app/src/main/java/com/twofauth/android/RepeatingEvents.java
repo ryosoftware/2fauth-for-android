@@ -36,7 +36,7 @@ public class RepeatingEvents {
         public boolean onTick(final int identifier) {
             final long current_time = SystemClock.elapsedRealtime();
             listener.onTick(identifier, startTime, endTime, current_time - startTime, mData);
-            return current_time > endTime;
+            return ((endTime > 0) && (current_time > endTime));
         }
     }
 
@@ -75,9 +75,13 @@ public class RepeatingEvents {
     public static void start(final int identifier, @NotNull final OnTickListener listener, final long repeat_interval, final long end_time, @Nullable final Object data) {
         synchronized (mData) {
             cancel(identifier);
-            mData.put(identifier, new RepeatingEventData(listener, repeat_interval, SystemClock.elapsedRealtime() + end_time, data));
+            mData.put(identifier, new RepeatingEventData(listener, repeat_interval, end_time > 0 ? SystemClock.elapsedRealtime() + end_time : 0, data));
             mHandler.sendEmptyMessageDelayed(identifier, repeat_interval);
         }
+    }
+
+    public static void start(final int identifier, @NotNull final OnTickListener listener, final long repeat_interval, @Nullable final Object data) {
+        start(identifier, listener, repeat_interval, 0, data);
     }
 
     public static int obtainIdentifier() {

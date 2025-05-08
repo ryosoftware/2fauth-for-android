@@ -206,8 +206,8 @@
     <string name="group">Grupo</string>
     <string name="no_group">Ninguno</string>
     <string name="add_group">Añadir un grupo</string>
-    <string name="show_otp_generation_attributes">Mostrar atributos de generación de OTP</string>
-    <string name="hide_otp_generation_attributes">Ocultar atributos de generación de OTP</string>
+    <string name="show_otp_generation_attributes">Ver atributos OTP</string>
+    <string name="hide_otp_generation_attributes">Ocultar atributos OTP</string>
     <string name="otp_type">Tipo de autenticación</string>
     <string name="otp_type_totp">TOTP</string>
     <string name="otp_type_hotp">HOTP</string>

@@ -34,8 +34,11 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginEnd="5dp"
+                android:padding="15dp"
                 app:icon="@drawable/ic_actionbar_qr"
                 app:iconGravity="top"
+                app:iconSize="30dp"
+                app:iconPadding="15dp"
                 android:text="@string/add_account_data_from_a_qr_code"
                 android:maxLines="2" />
 
@@ -45,8 +48,11 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginStart="5dp"
+                android:padding="15dp"
                 app:icon="@drawable/ic_actionbar_edit"
                 app:iconGravity="top"
+                app:iconSize="30dp"
+                app:iconPadding="15dp"
                 android:text="@string/add_account_data_from_a_form"
                 android:maxLines="2" />
 
@@ -96,8 +102,8 @@
 
         <RelativeLayout
             android:id="@+id/qr_layout"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
             android:layout_marginTop="30dp"
             android:layout_gravity="center_horizontal"
             android:visibility="gone">
@@ -106,7 +112,7 @@
                 android:id="@+id/qr"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerInside" />
+                android:scaleType="fitCenter" />
 
             <ProgressBar
                 android:layout_width="wrap_content"
