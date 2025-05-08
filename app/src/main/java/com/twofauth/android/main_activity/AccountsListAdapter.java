@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder> implements OnViewHolderClickListener, OnIndexEntryClickListener, OnTickListener {
+public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnViewHolderClickListener, OnIndexEntryClickListener, OnTickListener {
     private static final int TYPE_2FA_AUTH_ACCOUNT = 1;
 
     public interface OnAccountNeedsToBeSynchronizedListener {
@@ -62,7 +62,7 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
         }
     }
 
-    private static class AccountsListScroller extends androidx.recyclerview.widget.RecyclerView.OnScrollListener {
+    private static class AccountsListScroller extends RecyclerView.OnScrollListener {
         private final AccountsListAdapter mAdapter;
 
         AccountsListScroller(@NotNull final AccountsListAdapter adapter) {
@@ -70,13 +70,13 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
         }
 
         @Override
-        public void onScrollStateChanged(@NotNull final androidx.recyclerview.widget.RecyclerView recycler_view, final int new_state) {
+        public void onScrollStateChanged(@NotNull final RecyclerView recycler_view, final int new_state) {
             super.onScrollStateChanged(recycler_view, new_state);
 
         }
 
         @Override
-        public void onScrolled(@NotNull final androidx.recyclerview.widget.RecyclerView recycler_view, final int dx, final int dy) {
+        public void onScrolled(@NotNull final RecyclerView recycler_view, final int dx, final int dy) {
             super.onScrolled(recycler_view, dx, dy);
             mAdapter.onFirstVisibleItemChanged();
         }
@@ -98,7 +98,7 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
     private View mNotEmptyView = null;
     private View mEmptyView = null;
 
-    private int mActiveAccountPosition = androidx.recyclerview.widget.RecyclerView.NO_POSITION;
+    private int mActiveAccountPosition = RecyclerView.NO_POSITION;
 
     private boolean mResumed = false;
 
@@ -114,7 +114,7 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
     }
 
     @Override
-    public synchronized void onAttachedToRecyclerView(@NotNull final androidx.recyclerview.widget.RecyclerView recycler_view) {
+    public synchronized void onAttachedToRecyclerView(@NotNull final RecyclerView recycler_view) {
         super.onAttachedToRecyclerView(recycler_view);
         mRecyclerView = recycler_view;
         mRecyclerView.addOnScrollListener(mAccountsListScroller);
@@ -122,7 +122,7 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
     }
 
     @Override
-    public synchronized void onDetachedFromRecyclerView(@NotNull final androidx.recyclerview.widget.RecyclerView recycler_view) {
+    public synchronized void onDetachedFromRecyclerView(@NotNull final RecyclerView recycler_view) {
         super.onDetachedFromRecyclerView(recycler_view);
         mRecyclerView.removeOnScrollListener(mAccountsListScroller);
         mRecyclerView = null;
@@ -135,11 +135,11 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
     }
 
     @Override
-    public synchronized void onBindViewHolder(@NotNull final androidx.recyclerview.widget.RecyclerView.ViewHolder view_holder, final int position) {
+    public synchronized void onBindViewHolder(@NotNull final RecyclerView.ViewHolder view_holder, final int position) {
         if (getItemViewType(position) == TYPE_2FA_AUTH_ACCOUNT) {
             final TwoFactorAccount item = getItem(position);
             if (mOptions == null) { mOptions = new AppearanceOptions(mRecyclerView.getContext()); }
-            ((TwoFactorAccountViewHolder) view_holder).draw(mRecyclerView.getContext(), item, mActiveAccountPosition == position, mActiveAccountPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION, mOptions);
+            ((TwoFactorAccountViewHolder) view_holder).draw(mRecyclerView.getContext(), item, mActiveAccountPosition == position, mActiveAccountPosition != RecyclerView.NO_POSITION, mOptions);
         }
     }
 
@@ -238,9 +238,9 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
     }
 
     private void onOtpCodeHidden(final boolean force) {
-        if ((force) || (mActiveAccountPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION)) {
+        if ((force) || (mActiveAccountPosition != RecyclerView.NO_POSITION)) {
             RepeatingEvents.cancel(mRepeatingEventsIdentifier);
-            mActiveAccountPosition = androidx.recyclerview.widget.RecyclerView.NO_POSITION;
+            mActiveAccountPosition = RecyclerView.NO_POSITION;
             if (mOnOtpCodeVisibleStateChangedListener != null) {
                 mOnOtpCodeVisibleStateChangedListener.onOtpCodeHidden();
             }
@@ -275,8 +275,8 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
     public synchronized void onClick(final int position) {
         final int older_active_account_position = mActiveAccountPosition;
         onOtpCodeHidden();
-        mActiveAccountPosition = (older_active_account_position == position) ? androidx.recyclerview.widget.RecyclerView.NO_POSITION : position;
-        if ((older_active_account_position != androidx.recyclerview.widget.RecyclerView.NO_POSITION) && (mActiveAccountPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION)) { RecyclerViews.notifyItemChanged(this, mRecyclerView, older_active_account_position); }
+        mActiveAccountPosition = (older_active_account_position == position) ? RecyclerView.NO_POSITION : position;
+        if ((older_active_account_position != RecyclerView.NO_POSITION) && (mActiveAccountPosition != RecyclerView.NO_POSITION)) { RecyclerViews.notifyItemChanged(this, mRecyclerView, older_active_account_position); }
         else { RecyclerViews.notifyDataSetChanged(this, mRecyclerView); }
         if (mActiveAccountPosition != RecyclerView.NO_POSITION) {
             final TwoFactorAccount account = getItem(position);
@@ -305,7 +305,7 @@ public class AccountsListAdapter extends androidx.recyclerview.widget.RecyclerVi
                 onOtpCodeAnimated(false, (TwoFactorAccount) object);
             }
             else {
-                onClick(androidx.recyclerview.widget.RecyclerView.NO_POSITION);
+                onClick(RecyclerView.NO_POSITION);
             }
         }
     }
