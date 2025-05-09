@@ -18,6 +18,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -71,7 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class EditAccountDataActivity extends BaseActivityWithTextController implements OnAccountEditionNeededDataLoadedListener, OnDataSavedListener, OnDataDeletedListener, OnDataUndeletedListener, OnAccountPinStatusChangedListener, OnQRLoadedListener, OnAuthenticatorFinishListener, OnTickListener, OnClickListener, OnItemSelectedListener {
+public class EditAccountDataActivity extends BaseActivityWithTextController implements OnAccountEditionNeededDataLoadedListener, OnDataSavedListener, OnDataDeletedListener, OnDataUndeletedListener, OnAccountPinStatusChangedListener, OnQRLoadedListener, OnAuthenticatorFinishListener, OnTickListener, OnClickListener, OnLongClickListener, OnItemSelectedListener {
     public static final String EXTRA_ACCOUNT_ID = "account-id";
 
     public static final String EXTRA_ACCOUNT_SERVER_IDENTITY = "server-identity";
@@ -282,6 +283,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mCurrentOtpLayout.setVisibility(View.GONE);
         mCurrentOtpButton = (Button) findViewById(R.id.current_otp);
         mCurrentOtpButton.setOnClickListener(this);
+        mCurrentOtpButton.setOnLongClickListener(this);
         mCurrentOtpRemainingTime = (ProgressBar) findViewById(R.id.current_otp_remaining_time);
         mToggleOtpGenerationAttributesButton = (Button) findViewById(R.id.toggle_otp_generation_attributes_visualization);
         mToggleOtpGenerationAttributesButton.setOnClickListener(this);
@@ -472,7 +474,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     // User interaction
 
     @Override
-    public void onClick(final View view) {
+    public void onClick(@NotNull final View view) {
         final int view_id = view.getId();
         Vibrator.vibrate(this, Constants.NORMAL_HAPTIC_FEEDBACK);
         if (view_id == R.id.current_otp) { mDisplayOtp = true; }
@@ -492,6 +494,18 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         else if (view_id == R.id.clone_account_data) { cloneAccountData(); }
         else if (view_id == R.id.pin_or_unpin_account_data) { toggleAccountPinned(); }
         else if (view_id == R.id.show_qr_code) { showQR(); }
+    }
+
+    @Override
+    public boolean onLongClick(@NotNull final View view) {
+        if (view.getId() == R.id.current_otp) {
+            if ((mCurrentAccountData != null) && canGenerateOtpCodes()) {
+                Vibrator.vibrate(view.getContext(), Constants.LONG_HAPTIC_FEEDBACK);
+                TwoFactorAccountViewHolder.copyToClipboard(this, mCurrentAccountData, false);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

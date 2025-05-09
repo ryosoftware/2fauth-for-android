@@ -189,15 +189,19 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return false;
     }
 
-    public static boolean copyToClipboard(@NotNull final Activity activity, @NotNull final TwoFactorAccount account) {
+    public static boolean copyToClipboard(@NotNull final Activity activity, @NotNull final TwoFactorAccount account, final boolean minimize_app_after_copy_to_clipboard) {
         final String otp_code = account.getOtp();
         if (otp_code != null) {
-            final boolean minimize_app_after_copy_to_clipboard = Preferences.getDefaultSharedPreferences(activity).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, activity.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard));
             Clipboard.copy(activity, otp_code, true, minimize_app_after_copy_to_clipboard);
             return minimize_app_after_copy_to_clipboard;
         }
         return false;
     }
+
+    public static boolean copyToClipboard(@NotNull final Activity activity, @NotNull final TwoFactorAccount account) {
+        return copyToClipboard(activity, account, Preferences.getDefaultSharedPreferences(activity).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, activity.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard)));
+    }
+
     public static @NotNull TwoFactorAccountViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
         return new TwoFactorAccountViewHolder(parent, on_click_listener);
     }
