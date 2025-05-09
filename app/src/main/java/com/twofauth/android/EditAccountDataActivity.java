@@ -232,6 +232,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private AppearanceOptions mAppearanceOptions;
     private final int mRepeatingEventsIdentifier = RepeatingEvents.obtainIdentifier();
 
+    private boolean mDisplayOtp = false;
+
     @Override
     protected void onCreate(@Nullable final Bundle saved_instance_state) {
         super.onCreate(saved_instance_state);
@@ -279,6 +281,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mCurrentOtpLayout = findViewById(R.id.current_otp_layout);
         mCurrentOtpLayout.setVisibility(View.GONE);
         mCurrentOtpButton = (Button) findViewById(R.id.current_otp);
+        mCurrentOtpButton.setOnClickListener(this);
         mCurrentOtpRemainingTime = (ProgressBar) findViewById(R.id.current_otp_remaining_time);
         mToggleOtpGenerationAttributesButton = (Button) findViewById(R.id.toggle_otp_generation_attributes_visualization);
         mToggleOtpGenerationAttributesButton.setOnClickListener(this);
@@ -318,6 +321,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
 
     @Override
     public void onPause() {
+        mDisplayOtp = false;
         RepeatingEvents.cancel(mRepeatingEventsIdentifier);
         super.onPause();
     }
@@ -437,14 +441,17 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     // Show current OTP code
 
     @Override
-    public void onTick(int identifier, long start_time, long end_time, long elapsed_time, Object data) {
+    public void onTick(final int identifier, final long start_time, final long end_time, final long elapsed_time, @Nullable final Object data) {
         if (mCurrentAccountData != null) {
             final boolean can_generate_otp_codes = canGenerateOtpCodes();
             if (can_generate_otp_codes) {
-                mCurrentOtpButton.setText(mAppearanceOptions.ungroupOtp(mCurrentAccountData.getOtp()));
+                final String otp = mCurrentAccountData.getOtp();
+                mCurrentOtpButton.setTag(otp);
+                mCurrentOtpButton.setText(mAppearanceOptions.ungroupOtp(mDisplayOtp ? otp : Strings.toHiddenString(otp)));
                 final long interval_until_current_otp_cycle_ends = mCurrentAccountData.getMillisUntilNextOtp(), cycle_time = mCurrentAccountData.getOtpMillis();
                 mCurrentOtpRemainingTime.setProgress(Math.max(0, (int) ((100 * interval_until_current_otp_cycle_ends) / cycle_time)));
                 mCurrentOtpRemainingTime.setProgressTintList(ColorStateList.valueOf(getResources().getColor(interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, getTheme())));
+                mCurrentOtpRemainingTime.setVisibility(mDisplayOtp ? View.VISIBLE : View.GONE);
             }
             mCurrentOtpLayout.setVisibility(can_generate_otp_codes ? View.VISIBLE : View.GONE);
         }
@@ -468,7 +475,8 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     public void onClick(final View view) {
         final int view_id = view.getId();
         Vibrator.vibrate(this, Constants.NORMAL_HAPTIC_FEEDBACK);
-        if (view_id == R.id.select_icon) { startActivityFromIntent(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)); }
+        if (view_id == R.id.current_otp) { mDisplayOtp = true; }
+        else if (view_id == R.id.select_icon) { startActivityFromIntent(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)); }
         else if (view_id == R.id.delete_icon) { deleteIcon(); }
         else if (view_id == R.id.copy_icon_to_server) { copyIconToServer(); }
         else if (view_id == R.id.copy_icon_to_clipboard) { copyIconToClipboard(); }
