@@ -141,7 +141,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="24sp"
-                    android:textColor="?android:textColorSecondary"
+                    android:textColor="@color/gray"
                     style="@style/Base.TextAppearance.AppCompat.Headline" />
 
             </LinearLayout>
@@ -150,7 +150,7 @@
                 android:id="@+id/otp_error"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/light_red"
+                android:textColor="@color/otp_error"
                 android:textStyle="italic"
                 style="@style/Base.TextAppearance.AppCompat.Caption" />
 

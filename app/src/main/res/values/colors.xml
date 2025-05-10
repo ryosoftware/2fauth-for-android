@@ -6,10 +6,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#FF49454F</color>
 
-    <color name="light_blue">#FF6768B0</color>
-    <color name="light_yellow">#FFF7DC6F</color>
-    <color name="light_red">#FFB06769</color>
-
     <color name="text_icon_background">#FF1E1B21</color>
     <color name="text_icon_foreground">@color/white</color>
 
@@ -36,10 +32,16 @@
     <color name="otp_attribute_foreground_selected">@color/otp_attribute_background</color>
     <color name="otp_attribute_foreground_disabled_selected">@color/otp_attribute_background_disabled</color>
 
-    <color name="otp_hidden">@color/gray</color>
-    <color name="otp_visible_normal">@color/light_blue</color>
+    <color name="otp_error">#FFB06769</color>
 
-    <color name="otp_visible_near_of_last_seconds">@color/light_yellow</color>
-    <color name="otp_visible_last_seconds">@color/light_red</color>
+    <color name="otp_hidden_with_theme_background">@color/gray</color>
+    <color name="otp_visible_normal_with_theme_background">@color/otp_attribute_background_selected</color>
+    <color name="otp_visible_near_of_last_seconds_with_theme_background">#FFD35400</color>
+    <color name="otp_visible_last_seconds_with_theme_background">#FFFF0000</color>
+
+    <color name="otp_hidden_with_button_background">@color/otp_attribute_foreground_selected</color>
+    <color name="otp_visible_normal_with_button_background">@color/otp_hidden_with_button_background</color>
+    <color name="otp_visible_near_of_last_seconds_with_button_background">@color/otp_visible_near_of_last_seconds_with_theme_background</color>
+    <color name="otp_visible_last_seconds_with_button_background">@color/otp_visible_last_seconds_with_theme_background</color>
 
 </resources>

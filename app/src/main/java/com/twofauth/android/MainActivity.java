@@ -339,7 +339,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     @Override
     public void onTotpCodeShowAnimated(final long interval_until_current_otp_cycle_ends, final long cycle_time) {
         mRemainingOtpTimeProgressBar.setProgress(Math.max(0, (int) ((100 * interval_until_current_otp_cycle_ends) / cycle_time)));
-        mRemainingOtpTimeProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, getTheme())));
+        mRemainingOtpTimeProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds_with_theme_background : interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds_with_theme_background : R.color.otp_visible_normal_with_theme_background, getTheme())));
     }
 
     @Override

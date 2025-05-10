@@ -205,9 +205,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private EditText mPeriodEditText;
     private View mCounterContainer;
     private EditText mCounterEditText;
-    private View mCurrentOtpLayout;
     private Button mCurrentOtpButton;
-    private ProgressBar mCurrentOtpRemainingTime;
     private Button mToggleOtpGenerationAttributesButton;
     private View mOtpAttributesLayout;
     private FloatingActionButton mEditOrSaveAccountDataButton;
@@ -279,12 +277,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         mCounterContainer = findViewById(R.id.counter_block_container);
         mCounterEditText = (EditText) findViewById(R.id.counter);
         mCounterEditText.addTextChangedListener(this);
-        mCurrentOtpLayout = findViewById(R.id.current_otp_layout);
-        mCurrentOtpLayout.setVisibility(View.GONE);
         mCurrentOtpButton = (Button) findViewById(R.id.current_otp);
+        mCurrentOtpButton.setVisibility(View.GONE);
         mCurrentOtpButton.setOnClickListener(this);
         mCurrentOtpButton.setOnLongClickListener(this);
-        mCurrentOtpRemainingTime = (ProgressBar) findViewById(R.id.current_otp_remaining_time);
         mToggleOtpGenerationAttributesButton = (Button) findViewById(R.id.toggle_otp_generation_attributes_visualization);
         mToggleOtpGenerationAttributesButton.setOnClickListener(this);
         mOtpAttributesLayout = findViewById(R.id.otp_generation_attributes_layout);
@@ -445,17 +441,18 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     @Override
     public void onTick(final int identifier, final long start_time, final long end_time, final long elapsed_time, @Nullable final Object data) {
         if (mCurrentAccountData != null) {
-            final boolean can_generate_otp_codes = canGenerateOtpCodes();
+            final boolean can_generate_otp_codes = canGenerateOtpCodes(), is_visible = mCurrentOtpButton.getVisibility() != View.GONE;
             if (can_generate_otp_codes) {
-                final String otp = mCurrentAccountData.getOtp();
+                final String otp = mCurrentAccountData.getOtp(), visible_otp = mAppearanceOptions.ungroupOtp(mDisplayOtp ? otp : Strings.toHiddenString(otp));
+                final boolean is_new_otp_code = ! Strings.equals(otp, (String) mCurrentOtpButton.getTag());
+                if (mDisplayOtp && is_new_otp_code && is_visible) { UI.animateTextChange(mCurrentOtpButton, visible_otp, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
+                else if (mDisplayOtp && is_new_otp_code) { UI.animateShowOrHide(mCurrentOtpButton, true, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
+                else { mCurrentOtpButton.setText(visible_otp); }
                 mCurrentOtpButton.setTag(otp);
-                mCurrentOtpButton.setText(mAppearanceOptions.ungroupOtp(mDisplayOtp ? otp : Strings.toHiddenString(otp)));
-                final long interval_until_current_otp_cycle_ends = mCurrentAccountData.getMillisUntilNextOtp(), cycle_time = mCurrentAccountData.getOtpMillis();
-                mCurrentOtpRemainingTime.setProgress(Math.max(0, (int) ((100 * interval_until_current_otp_cycle_ends) / cycle_time)));
-                mCurrentOtpRemainingTime.setProgressTintList(ColorStateList.valueOf(getResources().getColor(interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, getTheme())));
-                mCurrentOtpRemainingTime.setVisibility(mDisplayOtp ? View.VISIBLE : View.GONE);
+                final long interval_until_current_otp_cycle_ends = mCurrentAccountData.getMillisUntilNextOtp();
+                mCurrentOtpButton.setTextColor(ColorStateList.valueOf(getResources().getColor(mDisplayOtp ? interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds_with_button_background : interval_until_current_otp_cycle_ends < TwoFactorAccountViewHolder.OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds_with_button_background : R.color.otp_visible_normal_with_button_background : R.color.otp_visible_normal_with_button_background, getTheme())));
             }
-            mCurrentOtpLayout.setVisibility(can_generate_otp_codes ? View.VISIBLE : View.GONE);
+            if (is_visible != can_generate_otp_codes) { UI.animateShowOrHide(mCurrentOtpButton, can_generate_otp_codes, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION); }
         }
     }
 
@@ -477,8 +474,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     public void onClick(@NotNull final View view) {
         final int view_id = view.getId();
         Vibrator.vibrate(this, Constants.NORMAL_HAPTIC_FEEDBACK);
-        if (view_id == R.id.current_otp) { mDisplayOtp = true; }
-        else if (view_id == R.id.select_icon) { startActivityFromIntent(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)); }
+        if (view_id == R.id.select_icon) { startActivityFromIntent(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)); }
         else if (view_id == R.id.delete_icon) { deleteIcon(); }
         else if (view_id == R.id.copy_icon_to_server) { copyIconToServer(); }
         else if (view_id == R.id.copy_icon_to_clipboard) { copyIconToClipboard(); }
@@ -494,6 +490,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
         else if (view_id == R.id.clone_account_data) { cloneAccountData(); }
         else if (view_id == R.id.pin_or_unpin_account_data) { toggleAccountPinned(); }
         else if (view_id == R.id.show_qr_code) { showQR(); }
+        else if (view_id == R.id.current_otp) { mDisplayOtp = ! mDisplayOtp; }
     }
 
     @Override
