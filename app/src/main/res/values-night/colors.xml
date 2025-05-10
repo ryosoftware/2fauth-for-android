@@ -2,10 +2,6 @@
 
 <resources>
 
-    <color name="light_blue">#FFBABFFC</color>
-    <color name="light_yellow">#FFFCF3CF</color>
-    <color name="light_red">#FFFCBABF</color>
-
     <color name="text_icon_background">#FFDFD9E3</color>
     <color name="text_icon_foreground">@color/black</color>
 
@@ -26,5 +22,12 @@
     <color name="otp_attribute_foreground_selected">@color/otp_attribute_background</color>
     <color name="otp_attribute_foreground_disabled">@color/otp_attribute_background_disabled_selected</color>
     <color name="otp_attribute_foreground_disabled_selected">@color/otp_attribute_background_disabled</color>
+
+    <color name="otp_error">#FFFCBABE</color>
+
+    <color name="otp_hidden_with_theme_background">@color/gray</color>
+    <color name="otp_visible_normal_with_theme_background">@color/floating_action_buttons_background</color>
+
+    <color name="otp_hidden_with_button_background">@color/otp_attribute_foreground</color>
 
 </resources>

@@ -2,15 +2,9 @@ package com.twofauth.android.main_activity.accounts_list;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipDescription;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
-import android.media.Image;
-import android.os.Build;
-import android.os.PersistableBundle;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -139,7 +133,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mIcon.setImageBitmap(bitmap);
         mIcon.setVisibility(bitmap == null ? View.INVISIBLE : View.VISIBLE);
         mOtp.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp) : otp);
-        mOtp.setTextColor(context.getResources().getColor((millis_until_next_otp < 0) ? R.color.otp_hidden : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds : millis_until_next_otp < OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds : R.color.otp_visible_normal, context.getTheme()));
+        mOtp.setTextColor(context.getResources().getColor((millis_until_next_otp < 0) ? R.color.otp_hidden_with_theme_background : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds_with_theme_background : millis_until_next_otp < OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds_with_theme_background : R.color.otp_visible_normal_with_theme_background, context.getTheme()));
         mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);
         mOtpNext.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp_next) : otp_next);
         mOtpNext.setVisibility((otp_next == null) || (millis_until_next_otp == Long.MAX_VALUE) ? View.GONE : View.VISIBLE);
@@ -189,15 +183,19 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         return false;
     }
 
-    public static boolean copyToClipboard(@NotNull final Activity activity, @NotNull final TwoFactorAccount account) {
+    public static boolean copyToClipboard(@NotNull final Activity activity, @NotNull final TwoFactorAccount account, final boolean minimize_app_after_copy_to_clipboard) {
         final String otp_code = account.getOtp();
         if (otp_code != null) {
-            final boolean minimize_app_after_copy_to_clipboard = Preferences.getDefaultSharedPreferences(activity).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, activity.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard));
             Clipboard.copy(activity, otp_code, true, minimize_app_after_copy_to_clipboard);
             return minimize_app_after_copy_to_clipboard;
         }
         return false;
     }
+
+    public static boolean copyToClipboard(@NotNull final Activity activity, @NotNull final TwoFactorAccount account) {
+        return copyToClipboard(activity, account, Preferences.getDefaultSharedPreferences(activity).getBoolean(Constants.MINIMIZE_APP_AFTER_COPY_TO_CLIPBOARD_KEY, activity.getResources().getBoolean(R.bool.minimize_app_after_copy_to_clipboard)));
+    }
+
     public static @NotNull TwoFactorAccountViewHolder newInstance(@NotNull final View parent, @Nullable final OnViewHolderClickListener on_click_listener) {
         return new TwoFactorAccountViewHolder(parent, on_click_listener);
     }

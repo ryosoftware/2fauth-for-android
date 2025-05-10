@@ -336,6 +336,35 @@ public class UI {
         return 0;
     }
 
+    public static void animateTextChange(@NotNull final Button button, @Nullable final String new_text, final long duration, final boolean toggle_enabled_state) {
+        if (allowAnimations) {
+            final AnimatorSet animator_set = new AnimatorSet();
+            animator_set.playTogether(ObjectAnimator.ofFloat(button, "scaleX", 1f, 0f), ObjectAnimator.ofFloat(button, "scaleY", 1f, 0f));
+            animator_set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(@NotNull final Animator animation) {
+                    animator_set.removeListener(this);
+                    button.setText(new_text);
+                    if (toggle_enabled_state) { button.setEnabled(! button.isEnabled()); }
+                    final AnimatorSet animator_set = new AnimatorSet();
+                    animator_set.playTogether(ObjectAnimator.ofFloat(button, "scaleX", 0f, 1f), ObjectAnimator.ofFloat(button, "scaleY", 0f, 1f));
+                    animator_set.setDuration(duration / 2);
+                    animator_set.start();
+                }
+            });
+            animator_set.setDuration(duration / 2);
+            animator_set.start();
+        }
+        else {
+            button.setText(new_text);
+            if (toggle_enabled_state) { button.setEnabled(! button.isEnabled()); }
+        }
+    }
+
+    public static void animateTextChange(@NotNull final Button button, @Nullable final String new_text, final long duration) {
+        animateTextChange(button, new_text , duration, false);
+    }
+
     public static void animateIconChange(@NotNull final FloatingActionButton button, final int new_icon, final long duration, final boolean toggle_enabled_state) {
         if (allowAnimations) {
             final AnimatorSet animator_set = new AnimatorSet();
@@ -374,6 +403,7 @@ public class UI {
                     @Override
                     public void onAnimationEnd(@NotNull final Animator animation) {
                         view_property_animator.setListener(null);
+                        if (! show) { view.setVisibility(View.GONE); }
                         listener.onAnimationEnd(view);
                     }
                 });

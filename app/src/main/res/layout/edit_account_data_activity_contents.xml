@@ -167,28 +167,13 @@
             android:layout_gravity="center_horizontal"
             android:orientation="horizontal">
 
-            <FrameLayout
-                android:id="@+id/current_otp_layout"
+            <Button
+                android:id="@+id/current_otp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp">
-
-                <Button
-                    android:id="@+id/current_otp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="8dp" />
-
-                <ProgressBar
-                    android:id="@+id/current_otp_remaining_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="2dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_gravity="bottom|center_horizontal"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:max="100" />
-
-            </FrameLayout>
+                android:layout_marginEnd="10dp"
+                android:paddingBottom="8dp"
+                android:textSize="20sp" />
 
             <Button
                 android:id="@+id/toggle_otp_generation_attributes_visualization"
