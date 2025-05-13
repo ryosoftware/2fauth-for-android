@@ -26,7 +26,7 @@
     <color name="otp_error">#FFFCBABE</color>
 
     <color name="otp_hidden_with_theme_background">@color/gray</color>
-    <color name="otp_visible_normal_with_theme_background">@color/floating_action_buttons_background</color>
+    <color name="otp_visible_normal_with_theme_background">@color/white</color>
 
     <color name="otp_hidden_with_button_background">@color/otp_attribute_foreground</color>
 
