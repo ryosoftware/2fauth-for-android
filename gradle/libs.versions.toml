@@ -13,10 +13,10 @@ androidxPreference = "1.2.1"
 recyclerView = "1.4.0"
 cardView = "1.0.0"
 bastiaanJansenOtp = "2.1.0"
-androidxBiometric = "1.4.0-alpha03"
+androidxBiometric = "1.4.0-alpha04"
 androidxLifecycle = "2.2.0"
 gson = "2.13.1"
-sqlCipher = "4.8.0"
+sqlCipher = "4.9.0"
 sqlite = "2.5.1"
 
 [libraries]
