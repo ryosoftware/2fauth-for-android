@@ -27,6 +27,8 @@
 
     <color name="otp_hidden_with_theme_background">@color/gray</color>
     <color name="otp_visible_normal_with_theme_background">@color/white</color>
+    <color name="otp_visible_near_of_last_seconds_with_theme_background">#FFE5A067</color>
+    <color name="otp_visible_last_seconds_with_theme_background">#FFE56767</color>
 
     <color name="otp_hidden_with_button_background">@color/otp_attribute_foreground</color>
 
