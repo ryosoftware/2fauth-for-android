@@ -767,7 +767,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
 
     private void toggleOtpAttributesVisibility() {
         final boolean opt_attributes_layout_will_be_visible = (mOtpAttributesLayout.getVisibility() == View.GONE);
-        if (opt_attributes_layout_will_be_visible) { mAuthenticator.authenticate(this, AuthenticatedActions.SHOW_ADVANCED_DATA); }
+        if (opt_attributes_layout_will_be_visible) {
+            if (mEditing) { onAuthenticationSuccess(AuthenticatedActions.SHOW_ADVANCED_DATA); }
+            else { mAuthenticator.authenticate(this, AuthenticatedActions.SHOW_ADVANCED_DATA); }
+        }
         else { setShowOtpAttributesVisibility(false); }
     }
 
