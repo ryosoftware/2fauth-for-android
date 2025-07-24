@@ -402,7 +402,7 @@ public class TwoFactorAccount extends SynceableTableRow {
     }
 
     public boolean hasServerIdentity() {
-        return ((mServerIdentity != null) && (mServerIdentity.getRemoteId() != 0));
+        return mServerIdentity != null;
     }
 
     public @Nullable TwoFactorServerIdentity getServerIdentity() { return mServerIdentity; }
