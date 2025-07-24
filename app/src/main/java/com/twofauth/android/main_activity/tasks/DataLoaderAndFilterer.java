@@ -164,10 +164,9 @@ public class DataLoaderAndFilterer {
         private boolean isVisible(@NotNull final TwoFactorAccount account) {
             if ((mActiveServerIdentity != null) && (account.getServerIdentity().getRowId() != mActiveServerIdentity.getRowId())) { return false; }
             if ((mActiveGroup != null) && ((! account.hasGroup()) || (mActiveGroup.getRowId() != account.getGroup().getRowId()))) { return false; }
-            if (! Strings.isEmptyOrNull(mText)) {
-                if ((account.hasService()) && (Strings.in(account.getService(), mText, true))) { return true; }
-                if ((account.hasAccount()) && (Strings.in(account.getAccount(), mText, true))) { return true; }
-            }
+            if (Strings.isEmptyOrNull(mText)) { return true; }
+            if ((account.hasService()) && (Strings.in(account.getService(), mText, true))) { return true; }
+            if ((account.hasAccount()) && (Strings.in(account.getAccount(), mText, true))) { return true; }
             return false;
         }
 
