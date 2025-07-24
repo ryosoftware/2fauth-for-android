@@ -1,14 +1,12 @@
 [versions]
 
-agp = "8.7.3"
+agp = "8.11.1"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-appcompat = "1.7.0"
-material = "1.13.0-alpha13"
+appcompat = "1.7.1"
+material = "1.13.0-beta01"
 constraintlayout = "2.2.1"
-navigationFragment = "2.9.0"
-navigationUi = "2.9.0"
+navigationFragment = "2.9.2"
+navigationUi = "2.9.2"
 androidxPreference = "1.2.1"
 recyclerView = "1.4.0"
 cardView = "1.0.0"
@@ -17,7 +15,7 @@ androidxBiometric = "1.4.0-alpha04"
 androidxLifecycle = "2.2.0"
 gson = "2.13.1"
 sqlCipher = "4.9.0"
-sqlite = "2.5.1"
+sqlite = "2.5.2"
 
 [libraries]
 
