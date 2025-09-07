@@ -32,6 +32,8 @@
 
     <PreferenceCategory android:title="@string/security">
 
+        <CheckBoxPreference android:key="allow-insecure-certificates" android:title="@string/allow_insecure_certificates" android:summary="@string/allow_insecure_certificates_summary" android:defaultValue="@bool/allow_insecure_certificates" />
+
         <CheckBoxPreference android:key="disable-screenshots" android:title="@string/disable_screenshots" android:summary="@string/disable_screenshots_summary" android:defaultValue="@bool/disable_screenshots" />
 
         <CheckBoxPreference android:key="hide-otp-codes-automatically" android:title="@string/hide_otp_codes_automatically" android:summary="@string/hide_otp_codes_automatically_summary" android:defaultValue="@bool/hide_otp_codes_automatically" />

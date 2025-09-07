@@ -124,6 +124,10 @@
 
     <string name="security">Seguridad</string>
 
+    <string name="allow_insecure_certificates">Permitir certificados inseguros</string>
+    <string name="allow_insecure_certificates_summary">Permitir la conexión con servidores que exponen certificados inseguros o autofirmados (muy poco recomendable, especialmente en entornos de producción)</string>
+    <string name="allow_insecure_certificates_warning">Esta opción le permitirá conectarse con el servidor 2FA independientemente de que el certificado del sitio no coincida, esté caducado, autofirmado o tenga algún otro problema de seguridad.\n\nNo lo recomendamos en absoluto&#8230;</string>
+
     <string name="disable_screenshots">Desactivar capturas de pantalla</string>
     <string name="disable_screenshots_summary">En la lista de cuentas no se permitirán capturas de pantalla</string>
     <string name="change_will_be_applied_next_time_you_start_the_app">El cambio se hará efectivo la próxima vez que inicie la app</string>

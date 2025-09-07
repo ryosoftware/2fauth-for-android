@@ -31,6 +31,8 @@ public class Constants {
     public static final String PIN_CODE_KEY = "pin-code";
     public static final String USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY = "use-fingerprint-instead-of-pin-code";
     public static final String ALLOW_COPY_SERVER_ACCESS_TOKEN_KEY = "allow-copy-server-access-tokens";
+
+    public static final String ALLOW_INSECURE_CERTIFICATES_KEY = "allow-insecure-certificates";
     public static final String DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_KEY = "download-icons-from-external-sources";
     public static final String DOWNLOAD_ICONS_FROM_EXTERNAL_SOURCES_ONLY_ONE_TIME_KEY = "download-icons-from-external-sources-only-one-time";
     public static final String AUTO_UPDATE_APP_KEY = "auto-update-app";

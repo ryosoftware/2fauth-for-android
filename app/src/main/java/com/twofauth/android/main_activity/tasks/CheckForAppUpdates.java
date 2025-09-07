@@ -102,7 +102,7 @@ public class CheckForAppUpdates {
             JSONObject last_release = null;
             int page = 1;
             do {
-                final HttpURLConnection connection = HTTP.get(new URL(LATEST_RELEASES_URL.replace("%PAGE%", String.valueOf(page ++))));
+                final HttpURLConnection connection = HTTP.get(new URL(LATEST_RELEASES_URL.replace("%PAGE%", String.valueOf(page ++))), false);
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     final List<JSONObject> releases = JSON.toListOfJSONObjects(HTTP.getContentString(connection));
                     if (Lists.isEmptyOrNull(releases)) { break; }
@@ -137,7 +137,7 @@ public class CheckForAppUpdates {
         private @Nullable HttpURLConnection getAssetFileConnection(@NotNull final JSONObject object, final boolean raise_exception_on_error) throws Exception {
             final String location = object.optString(ENTRY_LOCATION_ENTRY_NAME);
             if (! location.isEmpty()) {
-                final HttpURLConnection connection = HTTP.get(new URL(location));
+                final HttpURLConnection connection = HTTP.get(new URL(location), false);
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return connection; }
                 else if (raise_exception_on_error) { throw new Exception(connection.getResponseMessage()); }
             }

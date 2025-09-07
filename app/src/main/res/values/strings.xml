@@ -123,6 +123,10 @@
 
     <string name="security">Security</string>
 
+    <string name="allow_insecure_certificates">Allow insecure certificates</string>
+    <string name="allow_insecure_certificates_summary">Allow connect with servers that exposes insecure or self-signed certificates (highly not recommended, especially in production environments)</string>
+    <string name="allow_insecure_certificates_warning">This option will allow the app to connect to the 2FA server regardless of whether the site\'s certificate does not match, is expired, self-signed or has some other security issue.\n\nWe strongly discourage this&#8230;</string>
+
     <string name="disable_screenshots">Disable screenshots</string>
     <string name="disable_screenshots_summary">Do not allow to take screenshots from the accounts list</string>
     <string name="change_will_be_applied_next_time_you_start_the_app">The change will be applied the next time you start the app</string>
@@ -156,7 +160,7 @@
     <string name="allow_copy_server_access_tokens_summary">Include a button in the identity data edition screen to copy the server access token to the clipboard (highly unrecommended if a secure access method is not activated)</string>
 
     <string name="privacy">Privacy</string>
-  
+
     <string name="download_icons_from_external_sources">Download from external sources</string>
     <string name="download_icons_from_external_sources_summary">We will attempt to download icons that was not found on your server, or was an incompatible format, from open source repositories using the service name, which may leak some private data, such as the 2FA services you use or your IP address</string>
 
