@@ -27,12 +27,12 @@ fun increaseVersionCode(): Int {
 
 android {
     namespace = "com.twofauth.android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.twofauth.android"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = increaseVersionCode()
         versionName = "3.21"
     }
