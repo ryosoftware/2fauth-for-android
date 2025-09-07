@@ -34,6 +34,8 @@
 
     <bool name="allow_copy_server_access_tokens">false</bool>
 
+    <bool name="allow_insecure_certificates">false</bool>
+
     <bool name="download_icons_from_external_sources">true</bool>
     <bool name="download_icons_from_external_sources_only_one_time">true</bool>
 

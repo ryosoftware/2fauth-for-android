@@ -1,10 +1,14 @@
 package com.twofauth.android.preferences_activity.tasks;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.twofauth.android.API;
+import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
+import com.twofauth.android.R;
 import com.twofauth.android.database.TwoFactorServerIdentity;
+import com.twofauth.android.utils.Preferences;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,8 +34,9 @@ public class LoadServerIdentityAndGroupsDataFromServer {
         @Override
         public @Nullable Object onBackgroundTaskStarted(@Nullable final Object data) {
             try {
-                API.refreshIdentityData(mServerIdentity, true);
-                API.getGroups(mServerIdentity, true);
+                final Context context = Main.getInstance();
+                API.refreshIdentityData(mServerIdentity, context, true);
+                API.getGroups(mServerIdentity, context, true);
                 mSuccess = true;
             }
             catch (Exception e) {

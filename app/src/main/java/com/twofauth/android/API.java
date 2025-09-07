@@ -78,9 +78,13 @@ public class API {
         }
 
         public static @Nullable Bitmap getIcon(@NotNull final String service, @Nullable final BitmapTheme theme) throws Exception {
-            final HttpURLConnection connection = HTTP.get(new URL(BASE_LOCATION.replace("%SERVICE%", standardizeServiceName(service, theme == null ? NO_THEMED_ICON : theme == BitmapTheme.DARK ? DARK_THEMED_ICON : LIGHT_THEMED_ICON))));
+            final HttpURLConnection connection = HTTP.get(new URL(BASE_LOCATION.replace("%SERVICE%", standardizeServiceName(service, theme == null ? NO_THEMED_ICON : theme == BitmapTheme.DARK ? DARK_THEMED_ICON : LIGHT_THEMED_ICON))), false);
             return (connection.getResponseCode() == HttpURLConnection.HTTP_OK) ? Bitmaps.get(connection) : null;
         }
+    }
+
+    private static boolean areInsecureCertificatesAllowed(@NotNull final Context context) {
+        return Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.ALLOW_INSECURE_CERTIFICATES_KEY, context.getResources().getBoolean(R.bool.allow_insecure_certificates));
     }
 
     private static void raiseNetworkErrorException(@NotNull final HttpURLConnection connection) throws Exception {
@@ -91,8 +95,8 @@ public class API {
         throw new Exception(connection.getResponseMessage());
     }
 
-    public static boolean refreshIdentityData(@NotNull final TwoFactorServerIdentity server_identity, final boolean raise_exception_on_error) throws Exception {
-        final HttpURLConnection connection = HTTP.get(new URL(GET_USER_DATA_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
+    public static boolean refreshIdentityData(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context, final boolean raise_exception_on_error) throws Exception {
+        final HttpURLConnection connection = HTTP.get(new URL(GET_USER_DATA_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), areInsecureCertificatesAllowed(context));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             final JSONObject object = JSON.toJSONObject(HTTP.getContentString(connection));
             server_identity.setRemoteId(object.optInt(Constants.USER_DATA_ID_KEY, 0));
@@ -107,15 +111,15 @@ public class API {
         return false;
     }
 
-    public static @Nullable List<JSONObject> getAccounts(@NotNull final TwoFactorServerIdentity server_identity, final boolean raise_exception_on_error) throws Exception {
-        final HttpURLConnection connection = HTTP.get(new URL(LIST_ACCOUNTS_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
+    public static @Nullable List<JSONObject> getAccounts(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context, final boolean raise_exception_on_error) throws Exception {
+        final HttpURLConnection connection = HTTP.get(new URL(LIST_ACCOUNTS_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), areInsecureCertificatesAllowed(context));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return JSON.toListOfJSONObjects(HTTP.getContentString(connection)); }
         else if (raise_exception_on_error) { raiseNetworkErrorException(connection); }
         return null;
     }
 
-    public static @Nullable List<TwoFactorGroup> getGroups(@NotNull final TwoFactorServerIdentity server_identity, final boolean raise_exception_on_network_error) throws Exception {
-        final HttpURLConnection connection = HTTP.get(new URL(GROUPS_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
+    public static @Nullable List<TwoFactorGroup> getGroups(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context, final boolean raise_exception_on_network_error) throws Exception {
+        final HttpURLConnection connection = HTTP.get(new URL(GROUPS_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), areInsecureCertificatesAllowed(context));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             final List<JSONObject> groups_objects = JSON.toListOfJSONObjects(HTTP.getContentString(connection));
             if (groups_objects != null) {
@@ -149,8 +153,8 @@ public class API {
         return (icon == null) ? null : icon.getBitmap(context, theme);
     }
 
-    private static @Nullable Bitmap getBitmapFromServer(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, final boolean raise_exception_on_network_error) throws Exception {
-        final HttpURLConnection connection = HTTP.get(new URL(GET_ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", icon_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
+    private static @Nullable Bitmap getBitmapFromServer(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String icon_id, @NotNull final Context context, final boolean raise_exception_on_network_error) throws Exception {
+        final HttpURLConnection connection = HTTP.get(new URL(GET_ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", icon_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), areInsecureCertificatesAllowed(context));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return Bitmaps.get(connection); }
         else if (raise_exception_on_network_error) { raiseNetworkErrorException(connection); }
         return null;
@@ -167,7 +171,7 @@ public class API {
             if (server_icon_supported && (theme == null)) {
                 if ((icons_map_by_icon_file != null) && icons_map_by_icon_file.containsKey(server_icon_file)) { icon = icons_map_by_icon_file.get(server_icon_file); break; }
                 bitmap = getBitmapFromDatabase(database, context, server_identity, server_icon_file);
-                if (bitmap == null) { bitmap = getBitmapFromServer(server_identity, server_icon_file, raise_exception_on_network_error); }
+                if (bitmap == null) { bitmap = getBitmapFromServer(server_identity, server_icon_file, context, raise_exception_on_network_error); }
             }
             else if ((! server_icon_supported) && (download_icons_from_external_sources || download_icons_from_external_sources_only_one_time) && (! Strings.isEmptyOrNull(service))) {
                 if ((icons_map_by_service != null) && icons_map_by_service.containsKey(service)) { icon = icons_map_by_service.get(service); break; }
@@ -210,15 +214,15 @@ public class API {
         }
     }
 
-    public static @Nullable String getQR(@NotNull final TwoFactorServerIdentity server_identity, final int account_id, final boolean raise_exception_on_network_error) throws Exception {
-        final HttpURLConnection connection = HTTP.get(new URL(ACCOUNT_QR_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%ID%", String.valueOf(account_id))), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
+    public static @Nullable String getQR(@NotNull final TwoFactorServerIdentity server_identity, final int account_id, @NotNull final Context context, final boolean raise_exception_on_network_error) throws Exception {
+        final HttpURLConnection connection = HTTP.get(new URL(ACCOUNT_QR_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%ID%", String.valueOf(account_id))), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), areInsecureCertificatesAllowed(context));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { return JSON.toJSONObject(HTTP.getContentString(connection)).optString(QR_CODE_JSON_KEY); }
         else if (raise_exception_on_network_error) { raiseNetworkErrorException(connection); }
         return null;
     }
 
-    public static @Nullable String getQR(@NotNull final TwoFactorAccount account, final boolean raise_exception_on_network_error) throws Exception {
-        return getQR(account.getServerIdentity(), account.getRemoteId(), raise_exception_on_network_error);
+    public static @Nullable String getQR(@NotNull final TwoFactorAccount account, @NotNull final Context context, final boolean raise_exception_on_network_error) throws Exception {
+        return getQR(account.getServerIdentity(), account.getRemoteId(), context, raise_exception_on_network_error);
     }
 
     private static void onAccountDataUpdated(@NotNull final SQLiteDatabase database, @NotNull final Context context, @NotNull final TwoFactorAccount account, @NotNull final JSONObject object, final boolean reload_icon, final boolean raise_exception_on_network_error) throws Exception {
@@ -238,7 +242,7 @@ public class API {
         if (icon != null) {
             if (API.ICON_SOURCE_DEFAULT.equals(icon.getSource())) {
                 final String source_id = icon.getSourceId();
-                if (! Strings.isEmptyOrNull(source_id)) { deleteIcon(account.getServerIdentity(), source_id, raise_exception_on_network_error); }
+                if (! Strings.isEmptyOrNull(source_id)) { deleteIcon(account.getServerIdentity(), source_id, context, raise_exception_on_network_error); }
                 icon.setSourceData(null, null);
             }
             if (physical_remove) { icon.setBitmaps((Bitmap) null, (Bitmap) null, (Bitmap) null); }
@@ -254,7 +258,7 @@ public class API {
         if (account.isDeleted()) {
             if (account.isRemote()) {
                 // Is a server account that was locally deleted we try to remote delete
-                final HttpURLConnection connection = HTTP.delete(url, authorization);
+                final HttpURLConnection connection = HTTP.delete(url, authorization, areInsecureCertificatesAllowed(context));
                 if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) || (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND)) {
                     // Account is remote deleted then we delete locally (we try to delete the icon, if any)
                     onAccountDataRemoved(database, context, account, true, raise_exception_on_network_error);
@@ -278,7 +282,7 @@ public class API {
             // After synchronize icon we try to synchronize account, but before we synchronize or create group data, if account belongs to a group
             if (! account.hasGroup() || synchronizeGroup(database, context, account.getGroup(), reload_data_after_synchronization, raise_exception_on_network_error)) {
                 // We sent the account data (if is not a new account we use put, in other case we use post)
-                final HttpURLConnection connection = account.isRemote() ? HTTP.put(url, authorization, JSON.toString(account.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(account.toJSONObject()));
+                final HttpURLConnection connection = account.isRemote() ? HTTP.put(url, authorization, JSON.toString(account.toJSONObject()), areInsecureCertificatesAllowed(context)) : HTTP.post(url, authorization, JSON.toString(account.toJSONObject()), areInsecureCertificatesAllowed(context));
                 if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
                     // Account has been updated or created. We update values to the ones sent by the server, reload icon (if param) then set status to default then save data
                     onAccountDataUpdated(database, context, account, JSON.toJSONObject(HTTP.getContentString(connection)), reload_data_after_synchronization, raise_exception_on_network_error);
@@ -297,7 +301,7 @@ public class API {
         }
         else if (reload_data_after_synchronization && account.isRemote()) {
             // We try to download account data
-            final HttpURLConnection connection = HTTP.get(url, authorization);
+            final HttpURLConnection connection = HTTP.get(url, authorization, areInsecureCertificatesAllowed(context));
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // Account data exists and their data has been downloaded
                 onAccountDataUpdated(database, context, account, JSON.toJSONObject(HTTP.getContentString(connection)), reload_data_after_synchronization, raise_exception_on_network_error);
@@ -341,7 +345,7 @@ public class API {
         if (group.isDeleted()) {
             if (group.isRemote()) {
                 // Is a server group that was locally deleted we try to remote delete
-                final HttpURLConnection connection = HTTP.delete(url, authorization);
+                final HttpURLConnection connection = HTTP.delete(url, authorization, areInsecureCertificatesAllowed(context));
                 if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) || (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND)) {
                     // Group has been deleted
                     onGroupDataRemoved(database, context, group);
@@ -359,7 +363,7 @@ public class API {
         }
         else if (! group.isSynced()) {
             // Group is out of sync (we use a put if group already exists and post in other case)
-            final HttpURLConnection connection = group.isRemote() ? HTTP.put(url, authorization, JSON.toString(group.toJSONObject())) : HTTP.post(url, authorization, JSON.toString(group.toJSONObject()));
+            final HttpURLConnection connection = group.isRemote() ? HTTP.put(url, authorization, JSON.toString(group.toJSONObject()), areInsecureCertificatesAllowed(context)) : HTTP.post(url, authorization, JSON.toString(group.toJSONObject()), areInsecureCertificatesAllowed(context));
             if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED)) {
                 // Group has been updated or created
                 onGroupDataUpdated(database, context, group, JSON.toJSONObject(HTTP.getContentString(connection)));
@@ -377,7 +381,7 @@ public class API {
         }
         else if (reload_data_if_synchronized && group.isRemote()) {
             // We try to download group data
-            final HttpURLConnection connection = HTTP.get(url, authorization);
+            final HttpURLConnection connection = HTTP.get(url, authorization, areInsecureCertificatesAllowed(context));
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // Group data exists and their data has been downloaded
                 onGroupDataUpdated(database, context, group, JSON.toJSONObject(HTTP.getContentString(connection)));
@@ -402,8 +406,8 @@ public class API {
 
     // Synchronizes a icon source
 
-    private static boolean deleteIcon(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String source_id, final boolean raise_exception_on_network_error) throws Exception {
-        final HttpURLConnection connection = HTTP.delete(new URL(ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", source_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()));
+    private static boolean deleteIcon(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final String source_id, @NotNull final Context context, final boolean raise_exception_on_network_error) throws Exception {
+        final HttpURLConnection connection = HTTP.delete(new URL(ICON_LOCATION.replace("%SERVER%", server_identity.getServer()).replace("%FILE%", source_id)), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), areInsecureCertificatesAllowed(context));
         if ((connection.getResponseCode() == HttpURLConnection.HTTP_OK) || (connection.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) || (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND)) {
             return true;
         }
@@ -421,7 +425,7 @@ public class API {
             final String authorization = AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), source_id = icon.getSourceId();
             // If source-id has a value this is a 2FA icon that has been deleted/updated by the user at local and is still not synchronized
             if (! Strings.isEmptyOrNull(source_id)) {
-                if (deleteIcon(server_identity, source_id, raise_exception_on_network_error)) {
+                if (deleteIcon(server_identity, source_id, context, raise_exception_on_network_error)) {
                     icon.setSourceData(null, null);
                     // If icon has no bitmap and is not referenced by an account, we delete from database, in other case we save data
                     if ((bitmap == null) && (! icon.isReferenced(database))) { icon.delete(database, context); }
@@ -433,7 +437,7 @@ public class API {
             }
             // If bitmap is not empty, we try to send it to the server
             if (bitmap != null) {
-                final HttpURLConnection connection = HTTP.post(new URL(ICONS_LOCATION.replace("%SERVER%", server_identity.getServer())), authorization, Bitmaps.bytes(bitmap), ICON_DATA_NAME, HTTP.CONTENT_TYPE_MULTIPART_FORM_DATA);
+                final HttpURLConnection connection = HTTP.post(new URL(ICONS_LOCATION.replace("%SERVER%", server_identity.getServer())), authorization, Bitmaps.bytes(bitmap), ICON_DATA_NAME, HTTP.CONTENT_TYPE_MULTIPART_FORM_DATA, areInsecureCertificatesAllowed(context));
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_CREATED) {
                     final JSONObject object = JSON.toJSONObject(HTTP.getContentString(connection));
                     icon.setSourceData(ICON_SOURCE_DEFAULT, object.getString(Constants.ICON_DATA_ID_KEY));
@@ -450,10 +454,10 @@ public class API {
         return success;
     }
 
-    public static @Nullable JSONObject decodeQR(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Bitmap qr) throws Exception {
+    public static @Nullable JSONObject decodeQR(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Bitmap qr, @NotNull final Context context) throws Exception {
         final URL url = new URL(QR_DECODER_LOCATION.replace("%SERVER%", server_identity.getServer()));
         final String authorization = AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken());
-        final HttpURLConnection connection = HTTP.post(url, authorization, Bitmaps.bytes(qr), QR_DATA_NAME, HTTP.CONTENT_TYPE_MULTIPART_FORM_DATA);
+        final HttpURLConnection connection = HTTP.post(url, authorization, Bitmaps.bytes(qr), QR_DATA_NAME, HTTP.CONTENT_TYPE_MULTIPART_FORM_DATA, areInsecureCertificatesAllowed(context));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             final Uri uri = Uri.parse(JSON.toJSONObject(HTTP.getContentString(connection)).getString("data"));
             if (Strings.equals(uri.getScheme(), "otpauth")) {

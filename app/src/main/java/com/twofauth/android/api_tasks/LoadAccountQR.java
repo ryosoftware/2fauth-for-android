@@ -29,7 +29,7 @@ public class LoadAccountQR {
         @Override
         public @Nullable Object onBackgroundTaskStarted(@Nullable final Object data) {
             try {
-                mQR = API.getQR(mAccount, true);
+                mQR = API.getQR(mAccount, Main.getInstance(), true);
             }
             catch (Exception e) {
                 Log.e(Main.LOG_TAG_NAME, "Exception while trying to load a QR", e);

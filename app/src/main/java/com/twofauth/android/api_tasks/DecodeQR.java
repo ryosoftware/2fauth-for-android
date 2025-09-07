@@ -35,7 +35,7 @@ public class DecodeQR {
         @Override
         public @Nullable Object onBackgroundTaskStarted(@Nullable final Object data) {
             try {
-                mObject = API.decodeQR(mmServerIdentity, mQR);
+                mObject = API.decodeQR(mmServerIdentity, mQR, Main.getInstance());
             }
             catch (Exception e) {
                 Log.e(Main.LOG_TAG_NAME, "Exception while trying to decode a QR code", e);

@@ -2,6 +2,7 @@ package com.twofauth.android.preferences_activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -167,6 +168,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.ALLOW_ANIMATIONS_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.APP_THEME_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.APP_THEME_KEY).setSummary(getUserSelectedThemeLabel(context, getCurrentUserSelectedThemeValue(context)));
+        findPreference(Constants.ALLOW_INSECURE_CERTIFICATES_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISABLE_SCREENSHOTS_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.HIDE_OTP_AUTOMATICALLY_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.SHOW_NEXT_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
@@ -288,6 +290,19 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         else if (Constants.ALLOW_ANIMATIONS_KEY.equals(preference.getKey())) {
             UI.allowAnimations = (Boolean) new_value;
         }
+        else if (Constants.ALLOW_INSECURE_CERTIFICATES_KEY.equals(preference.getKey())) {
+            if ((boolean) new_value) {
+                UI.showConfirmDialog(getActivity(), R.string.allow_insecure_certificates_warning, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Preferences.getDefaultSharedPreferences(getContext()).edit().putBoolean(Constants.ALLOW_INSECURE_CERTIFICATES_KEY, true).apply();
+                        if (isAdded()) ((CheckBoxPreference) preference).setChecked(true);
+                        onSettingValueChanged(preference.getKey());
+                    }
+                });
+                return false;
+            }
+        }
         else if (Constants.DISABLE_SCREENSHOTS_KEY.equals(preference.getKey())) {
             UI.showMessageDialog(getActivity(), R.string.change_will_be_applied_next_time_you_start_the_app);
         }
@@ -297,9 +312,10 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             return false;
         }
         else if (Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY.equals(preference.getKey())) {
-            if (! (boolean) new_value) { onSettingValueChanged(preference.getKey()); return true; }
-            AuthenticateWithBiometrics.authenticate(getActivity(), this);
-            return false;
+            if ((boolean) new_value) {
+                AuthenticateWithBiometrics.authenticate(getActivity(), this);
+                return false;
+            }
         }
         onSettingValueChanged(preference.getKey());
         return true;

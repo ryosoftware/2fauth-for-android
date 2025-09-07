@@ -250,7 +250,7 @@ public class ServerDataSynchronizer
                                 if (willBeSynchronized(server_identity)) {
                                     accounts_will_be_synced ++;
                                     // Refresh server identity data
-                                    API.refreshIdentityData(server_identity, true);
+                                    API.refreshIdentityData(server_identity, mService, true);
                                     // Synchronize out of sync accounts and groups (deleted, updated or added accounts) with server before start download
                                     final List<TwoFactorIcon> not_synced_icons = Main.getInstance().getDatabaseHelper().getTwoFactorIconsHelper().get(database, server_identity, true);
                                     final List<TwoFactorGroup> not_synced_groups = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database, server_identity, true);
@@ -259,8 +259,8 @@ public class ServerDataSynchronizer
                                     synchronizeGroupsData(database, not_synced_groups, true);
                                     synchronizeAccountsData(database, not_synced_accounts, not_synced_groups, not_synced_icons, true);
                                     // Gets server data (we raise an exception if we can't access data)
-                                    final List<JSONObject> server_loaded_accounts_raw = API.getAccounts(server_identity, true);
-                                    final List<TwoFactorGroup> server_loaded_groups = API.getGroups(server_identity, true);
+                                    final List<JSONObject> server_loaded_accounts_raw = API.getAccounts(server_identity, mService, true);
+                                    final List<TwoFactorGroup> server_loaded_groups = API.getGroups(server_identity, mService, true);
                                     setAccountGroup(server_loaded_accounts_raw, server_loaded_groups);
                                     // Icons are less relevant than other data (we do not raise an exception on network error)
                                     API.getIcons(database, mService, server_identity, server_loaded_accounts_raw, false);
