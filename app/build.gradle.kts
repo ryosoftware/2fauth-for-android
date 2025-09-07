@@ -34,7 +34,7 @@ android {
         minSdk = 29
         targetSdk = 36
         versionCode = increaseVersionCode()
-        versionName = "3.21"
+        versionName = "3.22"
     }
 
     buildTypes {
