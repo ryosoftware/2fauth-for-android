@@ -84,7 +84,7 @@ public class Constants {
     public static final String GROUP_DATA_ID_KEY = "id";
     public static final String GROUP_DATA_NAME_KEY = "name";
 
-    public static final String GROUP_NAME_VALID_REGEXP = "^[\\p{L}0-9 ]+$";
+    public static final String GROUP_NAME_VALID_REGEXP = "^[A-Za-zÀ-ú0-9\\-_' ]+$";
 
     // Relevant fields from a 2FA account icon
 
