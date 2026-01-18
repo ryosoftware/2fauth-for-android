@@ -84,7 +84,10 @@ public class Constants {
     public static final String GROUP_DATA_ID_KEY = "id";
     public static final String GROUP_DATA_NAME_KEY = "name";
 
-    public static final String GROUP_NAME_VALID_REGEXP = "^[A-Za-zÀ-ú0-9\\-_' ]+$";
+    public static final String GROUP_NAME_VALID_REGEXP_WITHOUT_APOSTROPHE_SUPPORT = "^[A-Za-zÀ-ú0-9\\-_ ]+$";
+    public static final String GROUP_NAME_VALID_REGEXP_WITH_APOSTROPHE_SUPPORT = "^[A-Za-zÀ-ú0-9\\-_' ]+$";
+
+    public static final String MIN_API_VERSION_SUPPORTING_APOSTROPHE_IN_GROUP_NAME = "6.0.0";
 
     // Relevant fields from a 2FA account icon
 

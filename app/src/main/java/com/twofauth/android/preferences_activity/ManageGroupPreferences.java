@@ -14,9 +14,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.twofauth.android.Constants;
-import com.twofauth.android.EditAccountDataActivity;
 import com.twofauth.android.R;
-import com.twofauth.android.api_tasks.DeleteAccountData;
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.preferences_activity.ManageGroupsPreferences.TwoFactorGroupsUtils;
@@ -115,7 +113,8 @@ public class ManageGroupPreferences extends PreferenceFragmentCompat implements 
     }
 
     private void editGroupName() {
-        UI.showEditTextDialog(getActivity(), R.string.edit_group_name_dialog_title, R.string.edit_group_name_dialog_message, mGroup.storedData.getName(), 0, Constants.GROUP_NAME_VALID_REGEXP, R.string.accept, R.string.cancel, new UI.OnTextEnteredListener() {
+        final String group_name_valid_regexp = mGroup.storedData.getServerIdentity().isApiVersionGreaterThan(Constants.MIN_API_VERSION_SUPPORTING_APOSTROPHE_IN_GROUP_NAME, true) ? Constants.GROUP_NAME_VALID_REGEXP_WITH_APOSTROPHE_SUPPORT : Constants.GROUP_NAME_VALID_REGEXP_WITHOUT_APOSTROPHE_SUPPORT;
+        UI.showEditTextDialog(getActivity(), R.string.edit_group_name_dialog_title, R.string.edit_group_name_dialog_message, mGroup.storedData.getName(), 0, group_name_valid_regexp, R.string.accept, R.string.cancel, new UI.OnTextEnteredListener() {
             @Override
             public void onTextEntered(@NotNull final String name) {
                 if (TwoFactorGroupsUtils.indexOf(mGroups, name) < 0) { onNameChanged(name); }
