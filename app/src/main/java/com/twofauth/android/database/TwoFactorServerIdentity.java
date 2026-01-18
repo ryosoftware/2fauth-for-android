@@ -8,6 +8,7 @@ import com.twofauth.android.Main;
 import com.twofauth.android.R;
 import com.twofauth.android.utils.Strings;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +22,7 @@ public class TwoFactorServerIdentity extends TableRow {
     public static final String IS_ADMIN = "is_admin";
     public static final String SYNC_ON_STARTUP = "sync_on_startup";
     public static final String SYNC_IMMEDIATELY = "sync_immediately";
+    public static final String SERVER_VERSION = "server_version";
 
     protected static final String[] PROJECTION = new String[] {
         ROW_ID,
@@ -33,6 +35,7 @@ public class TwoFactorServerIdentity extends TableRow {
         IS_ADMIN,
         SYNC_ON_STARTUP,
         SYNC_IMMEDIATELY,
+        SERVER_VERSION,
     };
 
     private static final int LABEL_ORDER = ROW_ID_ORDER  + 1;
@@ -44,6 +47,7 @@ public class TwoFactorServerIdentity extends TableRow {
     private static final int IS_ADMIN_ORDER = EMAIL_ORDER + 1;
     private static final int SYNC_ON_STARTUP_ORDER = IS_ADMIN_ORDER + 1;
     private static final int SYNC_IMMEDIATELY_ORDER = SYNC_ON_STARTUP_ORDER + 1;
+    private static final int SERVER_VERSION_ORDER = SYNC_IMMEDIATELY_ORDER + 1;
 
     private String mLabel;
     private String mServer;
@@ -54,6 +58,7 @@ public class TwoFactorServerIdentity extends TableRow {
     private boolean mIsAdmin;
     private boolean mSyncOnStartup;
     private boolean mSyncImmediately;
+    private String mServerVersion;
 
     public TwoFactorServerIdentity(@NotNull final Cursor cursor) {
         super(TwoFactorServerIdentitiesHelper.TABLE_NAME, cursor);
@@ -66,6 +71,7 @@ public class TwoFactorServerIdentity extends TableRow {
         mIsAdmin = cursor.getInt(IS_ADMIN_ORDER) != 0;
         mSyncOnStartup = cursor.getInt(SYNC_ON_STARTUP_ORDER) != 0;
         mSyncImmediately = cursor.getInt(SYNC_IMMEDIATELY_ORDER) != 0;
+        mServerVersion = cursor.getString(SERVER_VERSION_ORDER);
     }
 
     public TwoFactorServerIdentity() {
@@ -77,6 +83,7 @@ public class TwoFactorServerIdentity extends TableRow {
         mName = null;
         mEmail = null;
         mIsAdmin = false;
+        mServerVersion = null;
         final Resources resources = Main.getInstance().getResources();
         mSyncOnStartup = resources.getBoolean(R.bool.sync_on_startup);
         mSyncImmediately = resources.getBoolean(R.bool.sync_immediately);
@@ -98,6 +105,7 @@ public class TwoFactorServerIdentity extends TableRow {
         setIsAdmin(server_identity.isAdmin());
         setSyncOnStartup(server_identity.isSyncingOnStartup());
         setSyncImmediately(server_identity.isSyncingImmediately());
+        setServerVersion(server_identity.getServerVersion());
         setDirty(server_identity.isDirty());
     }
 
@@ -185,6 +193,23 @@ public class TwoFactorServerIdentity extends TableRow {
         if (mSyncImmediately != sync_immediately) { setDirty(SYNC_IMMEDIATELY, mSyncImmediately = sync_immediately); }
     }
 
+    private static long getComparableServerVersion(@Nullable final String version) {
+        final String[] version_parts = Strings.isEmptyOrNull(version) ? new String[] { "0" } : version.split("\\.");
+        long version_number = 0;
+        for (int i = version_parts.length - 1, multiplier = 1; i >= 0; i --, multiplier *= 1000) { version_number += Long.parseLong(version_parts[i]) * multiplier; }
+        return version_number;
+    }
+    public boolean isServerVersionGreaterThan(@Nullable final String version, boolean allow_equal_value) {
+        final long server_version_number = getComparableServerVersion(mServerVersion), version_number = getComparableServerVersion(version);
+        return ((server_version_number > version_number) || ((allow_equal_value) && (server_version_number == version_number)));
+    }
+
+    public @Nullable String getServerVersion() { return mServerVersion; }
+
+    public void setServerVersion(final @Nullable String server_version) {
+        if (! Strings.equals(mServerVersion, server_version)) { setDirty(SERVER_VERSION, mServerVersion = server_version); }
+    }
+
     protected void setDatabaseValues(@NotNull final ContentValues values) {
         if (values.size() == 0) {
             values.put(LABEL, mLabel);
@@ -196,6 +221,7 @@ public class TwoFactorServerIdentity extends TableRow {
             values.put(IS_ADMIN, mIsAdmin ? 1 : 0);
             values.put(SYNC_ON_STARTUP, mSyncImmediately ? 1 : 0);
             values.put(SYNC_IMMEDIATELY, mSyncImmediately ? 1 : 0);
+            values.put(SERVER_VERSION, mServerVersion);
         }
     }
 }

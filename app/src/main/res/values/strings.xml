@@ -229,6 +229,9 @@
     <string name="name">Name</string>
     <string name="email">E-mail</string>
     <string name="is_admin">Service Administrator</string>
+    <string name="server_version">Server version</string>
+    <string name="server_version_less_than_v6">5.6.1 or lower</string>
+    <string name="server_version_higher_than_v6">6.0.0 or higher</string>
 
     <string name="groups">Groups</string>
     <string name="groups_summary">Manage groups</string>

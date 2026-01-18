@@ -20,6 +20,8 @@
 
         <Preference android:key="is-admin" android:title="@string/is_admin" />
 
+        <Preference android:key="server-version" android:title="@string/server_version" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -50,6 +50,7 @@ public class API {
     private static final String GET_ICON_LOCATION = SERVER_LOCATION + "/storage/icons/%FILE%";
     private static final String ICON_DATA_NAME = "icon";
 
+    private static final String GET_SERVER_VERSION = ICONS_LOCATION + "/packs";
     private static final String ACCOUNT_QR_LOCATION = ACCOUNT_LOCATION + "/qrcode";
     private static final String QR_CODE_JSON_KEY = "qrcode";
 
@@ -95,9 +96,21 @@ public class API {
         throw new Exception(connection.getResponseMessage());
     }
 
+    private static String getServerVersion(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context) {
+        try {
+            final HttpURLConnection connection = HTTP.get(new URL(GET_SERVER_VERSION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), areInsecureCertificatesAllowed(context));
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) return "6.0.0";
+            else if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return "5.6.1";
+        }
+        catch (Exception ignored) { }
+        return null;
+    }
+
     public static boolean refreshIdentityData(@NotNull final TwoFactorServerIdentity server_identity, @NotNull final Context context, final boolean raise_exception_on_error) throws Exception {
         final HttpURLConnection connection = HTTP.get(new URL(GET_USER_DATA_LOCATION.replace("%SERVER%", server_identity.getServer())), AUTH_TOKEN.replace("%TOKEN%", server_identity.getToken()), areInsecureCertificatesAllowed(context));
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            final String server_version = getServerVersion(server_identity, context);
+            if (server_version != null) { server_identity.setServerVersion(server_version); }
             final JSONObject object = JSON.toJSONObject(HTTP.getContentString(connection));
             server_identity.setRemoteId(object.optInt(Constants.USER_DATA_ID_KEY, 0));
             server_identity.setName(object.optString(Constants.USER_DATA_NAME_KEY, ""));

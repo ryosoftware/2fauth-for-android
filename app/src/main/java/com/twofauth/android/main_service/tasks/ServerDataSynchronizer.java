@@ -1,5 +1,6 @@
 package com.twofauth.android.main_service.tasks;
 
+import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.util.Log;

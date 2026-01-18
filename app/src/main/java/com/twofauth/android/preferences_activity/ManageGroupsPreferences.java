@@ -231,7 +231,8 @@ public class ManageGroupsPreferences extends PreferenceFragmentCompat implements
             @Override
             public void onAnimationEnd(View view) {
                 if (isAdded()) {
-                    UI.showEditTextDialog(getActivity(), R.string.add_group_dialog_title, R.string.add_group_dialog_message, null, 0, Constants.GROUP_NAME_VALID_REGEXP, R.string.accept, R.string.cancel, new UI.OnTextEnteredListener() {
+                    final String group_name_valid_regexp = mServerIdentity.isServerVersionGreaterThan(Constants.MIN_API_VERSION_SUPPORTING_APOSTROPHE_IN_GROUP_NAME, true) ? Constants.GROUP_NAME_VALID_REGEXP_WITH_APOSTROPHE_SUPPORT : Constants.GROUP_NAME_VALID_REGEXP_WITHOUT_APOSTROPHE_SUPPORT;
+                    UI.showEditTextDialog(getActivity(), R.string.add_group_dialog_title, R.string.add_group_dialog_message, null, 0, group_name_valid_regexp, R.string.accept, R.string.cancel, new UI.OnTextEnteredListener() {
                         @Override
                         public void onTextEntered(@NotNull final String name) {
                             addGroup(name);

@@ -63,6 +63,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
     private static final String NAME_KEY = "name";
     private static final String EMAIL_KEY = "email";
     private static final String IS_ADMIN_KEY = "is-admin";
+    private static final String SERVER_VERSION_KEY = "server-version";
 
     private static enum AuthenticatedActions { DELETE_SERVER_IDENTITY, ENABLE_SERVER_IDENTITY_EDITION, MANAGE_GROUPS, COPY_TOKEN_TO_CLIPBOARD };
 
@@ -213,6 +214,12 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         mAuthenticator = new Authenticator(getActivity());
     }
 
+    private void setServerVersionSummary() {
+        final Preference server_version_preference = findPreference(SERVER_VERSION_KEY);
+        final String server_version = mCurrentServerIdentity.storedData.getServerVersion();
+        server_version_preference.setVisible(! Strings.isEmptyOrNull(server_version));
+        server_version_preference.setSummary(mCurrentServerIdentity.storedData.isServerVersionGreaterThan("6.0.0", true) ? R.string.server_version_higher_than_v6 : R.string.server_version_less_than_v6);
+    }
     private void initializePreferences() {
         final EditTextPreference label_preference = (EditTextPreference) findPreference(LABEL_KEY), server_location_preference = (EditTextPreference) findPreference(SERVER_LOCATION_KEY), token_preference = (EditTextPreference) findPreference(TOKEN_KEY);
         final CheckBoxPreference sync_on_startup_preference = (CheckBoxPreference) findPreference(SYNC_ON_STARTUP_KEY), sync_immediately_preference = (CheckBoxPreference) findPreference(SYNC_IMMEDIATELY_KEY);
@@ -252,6 +259,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         findPreference(NAME_KEY).setSummary(mCurrentServerIdentity.storedData.getName());
         findPreference(EMAIL_KEY).setSummary(mCurrentServerIdentity.storedData.getEmail());
         findPreference(IS_ADMIN_KEY).setSummary(mCurrentServerIdentity.storedData.isAdmin() ? R.string.yes : R.string.no);
+        setServerVersionSummary();
         findPreference(SERVER_LOADED_DATA_KEY).setVisible(mCurrentServerIdentity.storedData.hasName());
     }
 
@@ -414,6 +422,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
             findPreference(NAME_KEY).setSummary(mCurrentServerIdentity.storedData.getName());
             findPreference(EMAIL_KEY).setSummary(mCurrentServerIdentity.storedData.getEmail());
             findPreference(IS_ADMIN_KEY).setSummary(mCurrentServerIdentity.storedData.isAdmin() ? R.string.yes : R.string.no);
+            setServerVersionSummary();
             setButtonsAvailability();
         }
     }
