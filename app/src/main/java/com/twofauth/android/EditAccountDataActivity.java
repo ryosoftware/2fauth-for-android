@@ -722,7 +722,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
     private void addGroup() {
         final int selected_server_identity_index = mServerIdentitySpinner.getSelectedItemPosition();
         if (selected_server_identity_index >= 0) {
-            final String group_name_valid_regexp = mCurrentAccountData.hasServerIdentity() ? mCurrentAccountData.getServerIdentity().isApiVersionGreaterThan(Constants.MIN_API_VERSION_SUPPORTING_APOSTROPHE_IN_GROUP_NAME, true) ? Constants.GROUP_NAME_VALID_REGEXP_WITH_APOSTROPHE_SUPPORT : Constants.GROUP_NAME_VALID_REGEXP_WITHOUT_APOSTROPHE_SUPPORT : Constants.GROUP_NAME_VALID_REGEXP_WITHOUT_APOSTROPHE_SUPPORT;
+            final String group_name_valid_regexp = mCurrentAccountData.hasServerIdentity() ? mCurrentAccountData.getServerIdentity().isServerVersionGreaterThan(Constants.MIN_API_VERSION_SUPPORTING_APOSTROPHE_IN_GROUP_NAME, true) ? Constants.GROUP_NAME_VALID_REGEXP_WITH_APOSTROPHE_SUPPORT : Constants.GROUP_NAME_VALID_REGEXP_WITHOUT_APOSTROPHE_SUPPORT : Constants.GROUP_NAME_VALID_REGEXP_WITHOUT_APOSTROPHE_SUPPORT;
             UI.showEditTextDialog(this, R.string.add_group_dialog_title, R.string.add_group_dialog_message, "", 0, group_name_valid_regexp, R.string.accept, R.string.cancel, new UI.OnTextEnteredListener() {
                 @Override
                 public void onTextEntered(@NotNull final String name) {

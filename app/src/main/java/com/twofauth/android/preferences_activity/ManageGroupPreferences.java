@@ -113,7 +113,7 @@ public class ManageGroupPreferences extends PreferenceFragmentCompat implements 
     }
 
     private void editGroupName() {
-        final String group_name_valid_regexp = mGroup.storedData.getServerIdentity().isApiVersionGreaterThan(Constants.MIN_API_VERSION_SUPPORTING_APOSTROPHE_IN_GROUP_NAME, true) ? Constants.GROUP_NAME_VALID_REGEXP_WITH_APOSTROPHE_SUPPORT : Constants.GROUP_NAME_VALID_REGEXP_WITHOUT_APOSTROPHE_SUPPORT;
+        final String group_name_valid_regexp = mGroup.storedData.getServerIdentity().isServerVersionGreaterThan(Constants.MIN_API_VERSION_SUPPORTING_APOSTROPHE_IN_GROUP_NAME, true) ? Constants.GROUP_NAME_VALID_REGEXP_WITH_APOSTROPHE_SUPPORT : Constants.GROUP_NAME_VALID_REGEXP_WITHOUT_APOSTROPHE_SUPPORT;
         UI.showEditTextDialog(getActivity(), R.string.edit_group_name_dialog_title, R.string.edit_group_name_dialog_message, mGroup.storedData.getName(), 0, group_name_valid_regexp, R.string.accept, R.string.cancel, new UI.OnTextEnteredListener() {
             @Override
             public void onTextEntered(@NotNull final String name) {

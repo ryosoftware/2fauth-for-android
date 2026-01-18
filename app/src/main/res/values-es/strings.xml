@@ -230,6 +230,9 @@
     <string name="name">Nombre</string>
     <string name="email">E-mail</string>
     <string name="is_admin">Administrador del servicio</string>
+    <string name="server_version">Versión del servidor</string>
+    <string name="server_version_less_than_v6">5.6.1 o inferior</string>
+    <string name="server_version_higher_than_v6">6.0.0 o superior</string>
 
     <string name="groups">Grupos</string>
     <string name="groups_summary">Mantenimiento de grupos</string>
