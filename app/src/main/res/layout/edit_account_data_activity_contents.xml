@@ -136,6 +136,7 @@
                 android:id="@+id/account"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="textUri|textNoSuggestions|textVisiblePassword"
                 android:lines="1" />
 
         </LinearLayout>
@@ -277,6 +278,7 @@
                         android:layout_alignParentStart="true"
                         android:layout_toStartOf="@id/copy_secret"
                         android:layout_alignWithParentIfMissing="true"
+                        android:inputType="textUri|textNoSuggestions|textVisiblePassword"
                         android:lines="1" />
 
                 </RelativeLayout>

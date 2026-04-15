@@ -1,7 +1,9 @@
 package com.twofauth.android.preferences_activity;
 
 import android.content.Context;
+import android.text.InputType;
 import android.util.AttributeSet;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,6 +53,13 @@ public class CancellableEditTextPreference extends EditTextPreference implements
 
     public OnPreferenceClickListener getOnPreferenceClickListener() {
         return mOnClickListener;
+    }
+
+    public static void disableSuggestions(@NonNull final EditText edittext) {
+        edittext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        edittext.setSingleLine(true);
+        edittext.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+        edittext.setRawInputType(InputType.TYPE_CLASS_TEXT);
     }
 
     public void showDialog() {
