@@ -221,7 +221,8 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         server_version_preference.setSummary(mCurrentServerIdentity.storedData.isServerVersionGreaterThan("6.0.0", true) ? R.string.server_version_higher_than_v6 : R.string.server_version_less_than_v6);
     }
     private void initializePreferences() {
-        final EditTextPreference label_preference = (EditTextPreference) findPreference(LABEL_KEY), server_location_preference = (EditTextPreference) findPreference(SERVER_LOCATION_KEY), token_preference = (EditTextPreference) findPreference(TOKEN_KEY);
+        final EditTextPreference label_preference = (EditTextPreference) findPreference(LABEL_KEY);
+        final CancellableEditTextPreference server_location_preference = (CancellableEditTextPreference) findPreference(SERVER_LOCATION_KEY), token_preference = (CancellableEditTextPreference) findPreference(TOKEN_KEY);
         final CheckBoxPreference sync_on_startup_preference = (CheckBoxPreference) findPreference(SYNC_ON_STARTUP_KEY), sync_immediately_preference = (CheckBoxPreference) findPreference(SYNC_IMMEDIATELY_KEY);
         label_preference.setSummary(mCurrentServerIdentity.storedData.hasLabel() ? mCurrentServerIdentity.storedData.getLabel() : getString(R.string.label_not_set));
         label_preference.setOnPreferenceClickListener(this);
@@ -230,6 +231,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
             public void onBindEditText(@NotNull final EditText edit_text) {
                 edit_text.setText(mCurrentServerIdentity.storedData.getLabel());
                 edit_text.setSelection(edit_text.getText().length());
+                CancellableEditTextPreference.disableSuggestions(edit_text);
             }
         });
         server_location_preference.setSummary(mCurrentServerIdentity.storedData.hasServer() ? mCurrentServerIdentity.storedData.getServer() : getString(R.string.server_location_is_not_set));
@@ -240,6 +242,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
             public void onBindEditText(@NotNull EditText edit_text) {
                 edit_text.setText(mCurrentServerIdentity.storedData.getServer());
                 edit_text.setSelection(edit_text.getText().length());
+                CancellableEditTextPreference.disableSuggestions(edit_text);
             }
         });
         token_preference.setSummary(mCurrentServerIdentity.storedData.hasToken() ? R.string.token_value_is_set_summary : R.string.token_value_is_not_set_summary);
