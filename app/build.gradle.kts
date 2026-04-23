@@ -34,7 +34,7 @@ android {
         minSdk = 29
         targetSdk = 36
         versionCode = increaseVersionCode()
-        versionName = "3.24"
+        versionName = "3.25"
     }
 
     buildTypes {
@@ -70,7 +70,8 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.androidx.preferences)
     implementation(libs.androidx.biometric)
-    implementation(libs.androidx.lifecycle)
+    implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.recyclerview)
     implementation(libs.cardview)
     implementation(libs.bastiaanjansen.otp)

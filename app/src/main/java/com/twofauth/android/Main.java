@@ -95,7 +95,7 @@ public class Main extends Application implements LifecycleEventObserver {
 
     @Override
     public void onStateChanged(@NotNull final LifecycleOwner owner, @NotNull final Lifecycle.Event event) {
-        if (event == Lifecycle.Event.ON_PAUSE) { Preferences.getDefaultSharedPreferences(this).edit().putLong(LAST_APP_BACKGROUND_TIME_KEY, SystemClock.elapsedRealtime()).apply(); }
+        if (event == Lifecycle.Event.ON_STOP) { Preferences.getDefaultSharedPreferences(this).edit().putLong(LAST_APP_BACKGROUND_TIME_KEY, SystemClock.elapsedRealtime()).apply(); }
     }
 
     public void startObservingIfAppBackgrounded() {
