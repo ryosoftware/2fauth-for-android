@@ -43,6 +43,12 @@ The app signature certification can be checked by the following command:
 
 `apksigner verify --verbose --print-certs app-release.apk | grep "Signer #1 certificate SHA-256 digest"`
 
+# KNOWN ISSUES
+
+The PIN dialog displays the correct layout when display starts but does not change design when the device is rotated.
+
+You tell me more...
+
 # OPEN SOURCE LIBRARIES WE USE
 
 We generate the TOTP/HOTP codes using the JAVA library from <A HREF="https://github.com/BastiaanJansen/otp-java">Bastiaan Jansen</A> (<A HREF="https://github.com/BastiaanJansen/otp-java/blob/main/LICENSE">license summary</A>).
