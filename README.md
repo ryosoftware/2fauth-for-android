@@ -60,12 +60,6 @@ Because Bubka 2FA uses SVG icons by default and Android does not natively suppor
 
 To design the app icon, we made modifications to the <A HREF="https://pictogrammers.com/library/mdi/icon/account-lock/">account-lock</A> icon available at <A HREF="https://pictogrammers.com">Pictogrammers.com</A> (<A HREF="https://pictogrammers.com/docs/general/license">license summary</A>).
 
-# DONATE
-
-If you want, you can invite me to a coffee or a seafood platter
-
-<A HREF="https://www.paypal.com/donate/?hosted_button_id=L46URT58CQNDJ"><IMG SRC="assets/paypal.png"></A>
-
 # DISCLAIMER
 
 THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
