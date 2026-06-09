@@ -12,6 +12,7 @@ import com.bastiaanjansen.otp.HMACAlgorithm;
 import com.bastiaanjansen.otp.HOTPGenerator;
 import com.bastiaanjansen.otp.TOTPGenerator;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
 import com.twofauth.android.utils.Strings;
@@ -151,7 +152,7 @@ public class TwoFactorAccount extends SynceableTableRow {
             }
             catch (Exception e)
             {
-                Log.e(Main.LOG_TAG_NAME, "Exception while generating a Steam OTP Code", e);
+                Log.e(BuildConfig.TAG, "Exception while generating a Steam OTP Code", e);
             }
             return null;
         }
@@ -194,7 +195,7 @@ public class TwoFactorAccount extends SynceableTableRow {
                 return String.format("%0" + mDigits + "d", binary_code % (int) Math.pow(10, mDigits));
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while generating a MD5 OTP Code", e);
+                Log.e(BuildConfig.TAG, "Exception while generating a MD5 OTP Code", e);
             }
             return null;
         }
@@ -388,7 +389,7 @@ public class TwoFactorAccount extends SynceableTableRow {
             return object;
         }
         catch (JSONException e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to convert an account to JSON", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to convert an account to JSON", e);
             throw new RuntimeException(e);
         }
     }
@@ -768,7 +769,7 @@ public class TwoFactorAccount extends SynceableTableRow {
                 catch (SQLiteConstraintException ignored) {
                 }
                 catch (Exception e) {
-                    Log.e(Main.LOG_TAG_NAME, "Exception while trying to delete an icon", e);
+                    Log.e(BuildConfig.TAG, "Exception while trying to delete an icon", e);
                 }
             }
         }

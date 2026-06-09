@@ -149,7 +149,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (mWritableDatabase != null) { mWritableDatabase.close(); }
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to effectively close a database", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to effectively close a database", e);
         }
         finally {
             mReadableDatabase = mWritableDatabase = null;

@@ -23,8 +23,6 @@ import com.twofauth.android.utils.Vibrator;
 import org.jetbrains.annotations.NotNull;
 
 public class Main extends Application implements LifecycleEventObserver {
-    public static final String LOG_TAG_NAME = "2FAuth";
-
     private static final String LAST_APP_BACKGROUND_TIME_KEY = "last-app-background-time";
 
     public interface OnBackgroundTaskExecutionListener {
@@ -51,7 +49,7 @@ public class Main extends Application implements LifecycleEventObserver {
                 final_data = mListener.onBackgroundTaskStarted(mInitialData);
             }
             catch (Exception e) {
-                Log.e(LOG_TAG_NAME, "Exception while in background thread", e);
+                Log.e(BuildConfig.TAG, "Exception while in background thread", e);
             }
             finally {
                 if (! interrupted()) { finish(final_data); }
@@ -72,7 +70,7 @@ public class Main extends Application implements LifecycleEventObserver {
         super.onCreate();
         mMain = this;
         setTheme();
-        mDebugRelease = getResources().getBoolean(R.bool.is_debug_version);
+        mDebugRelease = ! BuildConfig.BUILD_TYPE.equals("release");
         final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(this);
         final Resources resources = getResources();
         UI.allowAnimations = preferences.getBoolean(Constants.ALLOW_ANIMATIONS_KEY, resources.getBoolean(R.bool.allow_animations));
@@ -133,8 +131,7 @@ public class Main extends Application implements LifecycleEventObserver {
     }
 
     public boolean isPreRelease() {
-        final String app_name = getString(R.string.app_version_name_value);
-        return (app_name.contains("-alpha") || app_name.contains("-beta") || (app_name.contains("-rc")));
+        return mDebugRelease;
     }
 
     public static Main getInstance() {

@@ -5,6 +5,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
 import com.twofauth.android.API;
@@ -304,7 +305,7 @@ public class ServerDataSynchronizer
                             catch (Exception e) {
                                 final String exception_message = e.getMessage();
                                 (new TwoFactorServerIdentityWithSyncData(server_identity)).onSyncError(mService, Strings.isEmptyOrNull(exception_message) ? "Unknown error" : exception_message);
-                                Log.e(Main.LOG_TAG_NAME, "Exception while trying to synchronize accounts", e);
+                                Log.e(BuildConfig.TAG, "Exception while trying to synchronize accounts", e);
                                 accounts_has_errors ++;
                             }
                         }
@@ -321,7 +322,7 @@ public class ServerDataSynchronizer
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while syncing 2FA accounts", e);
+                Log.e(BuildConfig.TAG, "Exception while syncing 2FA accounts", e);
             }
             return result_type;
         }

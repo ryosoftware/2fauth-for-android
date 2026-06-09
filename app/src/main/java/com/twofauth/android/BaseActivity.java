@@ -93,7 +93,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Activity
             super.startActivity(intent);
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to start an activity", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to start an activity", e);
         }
     }
 

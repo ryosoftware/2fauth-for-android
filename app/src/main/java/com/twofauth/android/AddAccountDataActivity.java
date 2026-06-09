@@ -52,7 +52,7 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
                 return uri == null ? null : Bitmaps.get(context, uri);
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load a bitmap from a Uri", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to load a bitmap from a Uri", e);
             }
             return null;
         }
@@ -62,7 +62,7 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
                 return file == null ? null : Bitmaps.get(file);
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load a bitmap from a File", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to load a bitmap from a File", e);
             }
             return null;
         }
@@ -154,7 +154,7 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
                 }
                 catch (JSONException e) {
                     UI.showToast(this, R.string.cannot_process_request_due_to_an_internal_error);
-                    Log.e(Main.LOG_TAG_NAME, "Exception while trying to manipulate a JSON Object", e);
+                    Log.e(BuildConfig.TAG, "Exception while trying to manipulate a JSON Object", e);
                 }
             }
         }
@@ -196,7 +196,7 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
             }
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while opening an image chooser", e);
+            Log.e(BuildConfig.TAG, "Exception while opening an image chooser", e);
         }
     }
 

@@ -2,6 +2,7 @@ package com.twofauth.android.utils;
 
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 
 import org.jetbrains.annotations.NotNull;
@@ -31,8 +32,8 @@ public class Threads {
     public static void interrupt(@Nullable final Thread thread) { interrupt(new Thread[] { thread }); }
 
     public static void printStackTrace(@Nullable final String initial_message, @Nullable final String final_message) {
-        if (initial_message != null) { Log.d(Main.LOG_TAG_NAME, initial_message); }
-        for (final StackTraceElement element : Thread.currentThread().getStackTrace()) { Log.d(Main.LOG_TAG_NAME, element.toString()); }
-        if (final_message != null) { Log.d(Main.LOG_TAG_NAME, final_message); }
+        if (initial_message != null) { Log.d(BuildConfig.TAG, initial_message); }
+        for (final StackTraceElement element : Thread.currentThread().getStackTrace()) { Log.d(BuildConfig.TAG, element.toString()); }
+        if (final_message != null) { Log.d(BuildConfig.TAG, final_message); }
     }
 }

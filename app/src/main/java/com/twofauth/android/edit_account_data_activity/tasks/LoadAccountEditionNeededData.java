@@ -2,6 +2,7 @@ package com.twofauth.android.edit_account_data_activity.tasks;
 
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorGroup;
@@ -87,7 +88,7 @@ public class LoadAccountEditionNeededData {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load data needed by Edit Account Activity", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to load data needed by Edit Account Activity", e);
             }
             return null;
         }

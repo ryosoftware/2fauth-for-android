@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.twofauth.android.API;
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorServerIdentity;
@@ -38,7 +39,7 @@ public class DecodeQR {
                 mObject = API.decodeQR(mmServerIdentity, mQR, Main.getInstance());
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to decode a QR code", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to decode a QR code", e);
             }
             return null;
         }

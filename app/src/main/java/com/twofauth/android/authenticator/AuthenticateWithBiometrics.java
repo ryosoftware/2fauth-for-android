@@ -10,6 +10,7 @@ import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.utils.KeyStore;
 import com.twofauth.android.Main;
@@ -36,7 +37,7 @@ public class AuthenticateWithBiometrics {
             return true;
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to regenerate biometric based keystore alias", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to regenerate biometric based keystore alias", e);
         }
         return false;
     }

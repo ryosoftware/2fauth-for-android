@@ -27,32 +27,46 @@ fun increaseVersionCode(): Int {
 
 android {
     namespace = "com.twofauth.android"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.twofauth.android"
+
         minSdk = 29
-        targetSdk = 36
+        targetSdk = 37
+
         versionCode = increaseVersionCode()
-        versionName = "3.25"
+        versionName = "3.26"
+
+         buildConfigField(
+                "String",
+                "TAG",
+                "\"2FAuth\""
+        )
+        buildConfigField(
+                "String",
+                "versionName",
+                "\"${versionName}\""
+        )
+        buildConfigField(
+                "String",
+                "versionCode",
+                "\"${versionCode}\""
+        )
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            resValue("string", "app_version_name_value", "${defaultConfig.versionName}")
-            resValue("integer", "app_version_number_value", "${defaultConfig.versionCode}")
-            resValue("bool", "is_debug_version", "false");
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
-            resValue("string", "app_version_name_value", "${defaultConfig.versionName}")
-            resValue("integer", "app_version_number_value", "${defaultConfig.versionCode}")
-            resValue("bool", "is_debug_version", "true");
         }
     }
 
     buildFeatures {
+        buildConfig = true
+        compose = true
         viewBinding = false
     }
 

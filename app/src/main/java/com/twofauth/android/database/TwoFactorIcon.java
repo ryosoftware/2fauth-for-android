@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.twofauth.android.API;
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.utils.Bitmaps;
 import com.twofauth.android.Main;
 import com.twofauth.android.utils.Files;
@@ -150,7 +151,7 @@ public class TwoFactorIcon extends TableRow {
             if ((file != null) && file.exists()) { return Bitmaps.get(file); }
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while reading a bitmap from storage", e);
+            Log.e(BuildConfig.TAG, "Exception while reading a bitmap from storage", e);
         }
         return null;
     }

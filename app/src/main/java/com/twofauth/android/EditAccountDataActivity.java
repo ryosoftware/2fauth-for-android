@@ -553,7 +553,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             }
             catch (Exception e) {
                 UI.showToast(this, R.string.cannot_load_selected_image);
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load an user selected image", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to load an user selected image", e);
             }
         }
     }

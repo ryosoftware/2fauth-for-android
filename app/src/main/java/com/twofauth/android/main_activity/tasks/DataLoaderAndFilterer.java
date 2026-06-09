@@ -3,6 +3,7 @@ package com.twofauth.android.main_activity.tasks;
 import android.content.Context;
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
 import com.twofauth.android.R;
@@ -156,7 +157,7 @@ public class DataLoaderAndFilterer {
                 return accounts;
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load accounts", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to load accounts", e);
             }
             return null;
         }

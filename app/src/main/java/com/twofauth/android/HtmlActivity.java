@@ -53,7 +53,7 @@ public class HtmlActivity extends BaseActivity {
             activity.startActivity(new Intent(Intent.ACTION_VIEW).setData(uri).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, String.format("Exception trying to open Uri: %s", uri), e);
+            Log.e(BuildConfig.TAG, String.format("Exception trying to open Uri: %s", uri), e);
         }
     }
 }

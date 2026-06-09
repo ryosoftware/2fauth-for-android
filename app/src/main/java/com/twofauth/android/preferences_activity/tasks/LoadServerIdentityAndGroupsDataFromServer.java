@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.twofauth.android.API;
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
 import com.twofauth.android.R;
@@ -40,7 +41,7 @@ public class LoadServerIdentityAndGroupsDataFromServer {
                 mSuccess = true;
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to refresh server identity data", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to refresh server identity data", e);
             }
             return null;
         }

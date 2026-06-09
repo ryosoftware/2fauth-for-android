@@ -1,8 +1,8 @@
 [versions]
 
-agp = "9.0.1"
+agp = "9.2.1"
 appcompat = "1.7.1"
-material = "1.13.0"
+material = "1.14.0"
 constraintlayout = "2.2.1"
 navigationFragment = "2.9.8"
 navigationUi = "2.9.8"
@@ -13,8 +13,8 @@ bastiaanJansenOtp = "2.1.0"
 androidxBiometric = "1.4.0-alpha07"
 androidxLifecycleProcess = "2.10.0"
 androidxLifecycleRuntime = "2.10.0"
-gson = "2.13.2"
-sqlCipher = "4.14.1"
+gson = "2.14.0"
+sqlCipher = "4.16.0"
 sqlite = "2.6.2"
 
 [libraries]
