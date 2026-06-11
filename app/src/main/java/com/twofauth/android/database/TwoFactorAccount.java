@@ -20,6 +20,7 @@ import com.twofauth.android.API;
 
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
@@ -49,6 +50,14 @@ public class TwoFactorAccount extends SynceableTableRow {
     public static final String LAST_USE = "last_use";
     public static final String PIN_TIME = "pin_time";
 
+    public static final String IS_SHARED = "is_shared";
+
+    public static final String IS_SHARED_WITH_ALL = "is_shared_with_all";
+
+    public static final String IS_BORROWED = "is_borrowed";
+
+    public static final String SHARED_BY = "shared_by";
+
     protected static final String[] PROJECTION = new String[] {
         ROW_ID,
         ADD_TIME,
@@ -67,6 +76,10 @@ public class TwoFactorAccount extends SynceableTableRow {
         LAST_USE,
         STATUS,
         PIN_TIME,
+        IS_SHARED,
+        IS_SHARED_WITH_ALL,
+        IS_BORROWED,
+        SHARED_BY,
     };
 
     private static final int ADD_TIME_ORDER = ROW_ID_ORDER + 1;
@@ -85,6 +98,10 @@ public class TwoFactorAccount extends SynceableTableRow {
     private static final int LAST_USE_ORDER = COUNTER_ORDER + 1;
     private static final int STATUS_ORDER = LAST_USE_ORDER + 1;
     private static final int PIN_TIME_ORDER = STATUS_ORDER + 1;
+    public static final int IS_SHARED_ORDER = PIN_TIME_ORDER + 1;
+    public static final int IS_SHARED_WITH_ALL_ORDER = IS_SHARED_ORDER + 1;
+    public static final int IS_BORROWED_ORDER = IS_SHARED_WITH_ALL_ORDER + 1;
+    public static final int SHARED_BY_ORDER = IS_BORROWED_ORDER + 1;
 
     private static class Base32Utils {
         private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -243,7 +260,10 @@ public class TwoFactorAccount extends SynceableTableRow {
     private int mCounter;
     private long mLastUse;
     private long mPinTime;
-
+    private boolean mIsShared;
+    private boolean mIsSharedWithAll;
+    private boolean mIsBorrowed;
+    private String mSharedBy;
     private Object mPasswordGenerator = null;
 
     public TwoFactorAccount(@NotNull final SQLiteDatabase database, @NotNull final Cursor cursor) throws Exception {
@@ -262,6 +282,10 @@ public class TwoFactorAccount extends SynceableTableRow {
         mCounter = cursor.getInt(COUNTER_ORDER);
         mLastUse = cursor.getLong(LAST_USE_ORDER);
         mPinTime = cursor.getLong(PIN_TIME_ORDER);
+        mIsShared = cursor.getInt(IS_SHARED_ORDER) != 0;
+        mIsSharedWithAll = cursor.getInt(IS_SHARED_WITH_ALL_ORDER) != 0;
+        mIsBorrowed = cursor.getInt(IS_BORROWED_ORDER) != 0;
+        mSharedBy = cursor.getString(SHARED_BY_ORDER);
     }
 
     public TwoFactorAccount() {
@@ -280,6 +304,10 @@ public class TwoFactorAccount extends SynceableTableRow {
         mCounter = Constants.DEFAULT_COUNTER;
         mLastUse = 0;
         mPinTime = 0;
+        mIsShared = false;
+        mIsSharedWithAll = false;
+        mIsBorrowed = false;
+        mSharedBy = null;
     }
 
     public TwoFactorAccount(@NotNull final TwoFactorAccount account) {
@@ -301,6 +329,10 @@ public class TwoFactorAccount extends SynceableTableRow {
         setLastUse(account.getLastUse());
         setStatus(account.getStatus());
         setPinTime(account.getPinTime());
+        setIsShared(account.isShared());
+        setIsSharedWithAll(account.isSharedWithAll());
+        setIsBorrowed(account.isBorrowed());
+        setSharedBy(account.getSharedBy());
     }
 
     public TwoFactorAccount(@NotNull final SQLiteDatabase database, @Nullable final TwoFactorServerIdentity server_identity, @NotNull final JSONObject object) throws Exception {
@@ -369,6 +401,10 @@ public class TwoFactorAccount extends SynceableTableRow {
         setAlgorithm(object.optString(Constants.ACCOUNT_DATA_ALGORITHM_KEY, mAlgorithm));
         setPeriod(object.optInt(Constants.ACCOUNT_DATA_PERIOD_KEY, mPeriod));
         setCounter(object.optInt(Constants.ACCOUNT_DATA_COUNTER_KEY, mCounter));
+        setIsShared(object.optBoolean(Constants.ACCOUNT_DATA_IS_SHARED_KEY, mIsShared));
+        setIsSharedWithAll(object.optBoolean(Constants.ACCOUNT_DATA_IS_SHARED_WITH_ALL_KEY, mIsSharedWithAll));
+        setIsBorrowed(object.optBoolean(Constants.ACCOUNT_DATA_IS_BORROWED_KEY, mIsBorrowed));
+        setSharedBy(object.optString(Constants.ACCOUNT_DATA_SHARED_BY_KEY, mSharedBy));
     }
 
     public @NotNull JSONObject toJSONObject() {
@@ -714,6 +750,38 @@ public class TwoFactorAccount extends SynceableTableRow {
 
     public void setPinned(final boolean pinned) { setPinTime(pinned ? System.currentTimeMillis() : 0); }
 
+    public boolean isShared() { return mIsShared; }
+
+    public void setIsShared(final boolean shared) {
+        if (mIsShared != shared) {
+            setDirty(IS_SHARED, mIsShared = shared);
+        }
+    }
+
+    public boolean isSharedWithAll() { return mIsSharedWithAll; }
+
+    public void setIsSharedWithAll(final boolean shared) {
+        if (mIsSharedWithAll != shared) {
+            setDirty(IS_SHARED_WITH_ALL, mIsSharedWithAll = shared);
+        }
+    }
+
+    public boolean isBorrowed() { return mIsBorrowed; }
+
+    public void setIsBorrowed(final boolean borrowed) {
+        if (mIsBorrowed != borrowed) {
+            setDirty(IS_BORROWED, mIsBorrowed = borrowed);
+        }
+    }
+
+    public @Nullable String getSharedBy() { return mSharedBy; }
+
+    public void setSharedBy(final @Nullable String shared_by) {
+        if (!StringUtils.equals(mSharedBy, shared_by)) {
+            setDirty(SHARED_BY, mSharedBy = shared_by);
+        }
+    }
+
     @Override
     public boolean isDirty() {
         return ((hasIcon() && getIcon().isDirty()) || (hasGroup() && getGroup().isDirty()) || super.isDirty());
@@ -727,7 +795,7 @@ public class TwoFactorAccount extends SynceableTableRow {
     }
 
     protected void setDatabaseValues(@NotNull final ContentValues values) {
-        if (values.size() == 0) {
+        if (values.isEmpty()) {
             values.put(ADD_TIME, mAddTime);
             if (mServerIdentity == null) { throw new SQLException("Server Identity cannot be NULL"); }
             values.put(SERVER_IDENTITY, mServerIdentity.getRowId());
@@ -744,6 +812,10 @@ public class TwoFactorAccount extends SynceableTableRow {
             values.put(COUNTER, mCounter);
             values.put(LAST_USE, mLastUse);
             values.put(PIN_TIME, mPinTime);
+            values.put(IS_SHARED, mIsShared);
+            values.put(IS_SHARED_WITH_ALL, mIsSharedWithAll);
+            values.put(IS_BORROWED, mIsBorrowed);
+            values.put(SHARED_BY, mSharedBy);
         }
         else {
             if (values.containsKey(SERVER_IDENTITY)) {

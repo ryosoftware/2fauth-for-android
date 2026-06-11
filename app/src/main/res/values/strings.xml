@@ -318,6 +318,11 @@
     <string name="number_10">10</string>
     <string name="key_delete">\u232B</string>
 
+    <string name="is_shared">is shared</string>
+    <string name="is_shared_with_all">is shared with all</string>
+    <string name="is_borrowed">is borrowed</string>
+    <string name="shared_by">shared by %1$s</string>
+
     <string name="new_account">new</string>
 
     <string name="cannot_process_request_due_to_an_internal_error">Cannot process request due to an internal error</string>

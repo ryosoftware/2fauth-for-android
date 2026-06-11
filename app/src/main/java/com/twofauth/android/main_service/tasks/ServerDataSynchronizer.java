@@ -152,6 +152,10 @@ public class ServerDataSynchronizer
                     account.setAlgorithm(account_object.getString(Constants.ACCOUNT_DATA_ALGORITHM_KEY));
                     if (account_object.has(Constants.ACCOUNT_DATA_PERIOD_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_PERIOD_KEY))) { account.setPeriod(account_object.getInt(Constants.ACCOUNT_DATA_PERIOD_KEY)); }
                     if (account_object.has(Constants.ACCOUNT_DATA_COUNTER_KEY) && (! account_object.isNull(Constants.ACCOUNT_DATA_COUNTER_KEY))) { account.setPeriod(account_object.getInt(Constants.ACCOUNT_DATA_COUNTER_KEY)); }
+                    account.setIsShared(account_object.optBoolean(Constants.ACCOUNT_DATA_IS_SHARED_KEY, false));
+                    account.setIsSharedWithAll(account_object.optBoolean(Constants.ACCOUNT_DATA_IS_SHARED_WITH_ALL_KEY, false));
+                    account.setIsBorrowed(account_object.optBoolean(Constants.ACCOUNT_DATA_IS_BORROWED_KEY, false));
+                    account.setSharedBy(account_object.optString(Constants.ACCOUNT_DATA_SHARED_BY_KEY));
                     account.setStatus(TwoFactorAccount.STATUS_DEFAULT);
                     accounts.add(account);
                 }
@@ -182,6 +186,10 @@ public class ServerDataSynchronizer
             local_loaded_account.setCounter(server_loaded_account.getCounter());
             local_loaded_account.setLastUse(server_loaded_account.getLastUse());
             local_loaded_account.setStatus(SynceableTableRow.STATUS_DEFAULT);
+            local_loaded_account.setIsShared(server_loaded_account.isShared());
+            local_loaded_account.setIsSharedWithAll(server_loaded_account.isSharedWithAll());
+            local_loaded_account.setIsBorrowed(server_loaded_account.isBorrowed());
+            local_loaded_account.setSharedBy(server_loaded_account.getSharedBy());
         }
 
         private void combineData(@NotNull final SQLiteDatabase database, @Nullable final List<TwoFactorAccount> server_loaded_accounts, @Nullable final List<TwoFactorAccount> local_loaded_accounts, @Nullable final List<TwoFactorGroup> server_loaded_groups) throws Exception {

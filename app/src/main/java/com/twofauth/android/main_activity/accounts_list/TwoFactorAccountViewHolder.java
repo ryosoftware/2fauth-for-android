@@ -24,6 +24,7 @@ import com.twofauth.android.utils.Threads;
 import com.twofauth.android.utils.Vibrator;
 import com.twofauth.android.database.TwoFactorAccount;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,6 +72,11 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private final TextView mOtpNext;
     private final TextView mOtpCounter;
     private final View mAccountPinned;
+
+    private final View mIsShared;
+    private final View mIsSharedWithAll;
+    private final View mIsBorrowed;
+    private final TextView mSharedBy;
     private final View mNewAccount;
     private final View mAccountDataNotSynced;
     private final View mAccountDataDeleted;
@@ -93,6 +99,10 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mOtpNext = (TextView) parent.findViewById(R.id.otp_next);
         mOtpCounter = (TextView) parent.findViewById(R.id.otp_counter);
         mAccountPinned = (ImageView) parent.findViewById(R.id.account_pinned);
+        mIsShared = (TextView) parent.findViewById(R.id.is_shared);
+        mIsSharedWithAll = (TextView) parent.findViewById(R.id.is_shared_with_all);
+        mIsBorrowed = (TextView) parent.findViewById(R.id.is_borrowed);
+        mSharedBy = (TextView) parent.findViewById(R.id.shared_by);
         mNewAccount = (TextView) parent.findViewById(R.id.account_new);
         mAccountDataNotSynced = parent.findViewById(R.id.account_data_not_synced);
         mAccountDataDeleted = parent.findViewById(R.id.account_data_deleted);
@@ -141,6 +151,11 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         else { setOtpAnimationByState(millis_until_next_otp); }
         mOtpCounter.setVisibility(millis_until_next_otp == Long.MAX_VALUE ? View.VISIBLE : View.GONE);
         mAccountPinned.setVisibility(account.isPinned() ? View.VISIBLE : View.GONE);
+        mIsShared.setVisibility(account.isShared() && (! account.isSharedWithAll()) ? View.VISIBLE : View.GONE);
+        mIsSharedWithAll.setVisibility(account.isSharedWithAll() ? View.VISIBLE : View.GONE);
+        mIsBorrowed.setVisibility(account.isBorrowed() ? View.VISIBLE : View.GONE);
+        mSharedBy.setText(context.getString(R.string.shared_by, account.getSharedBy()));
+        mSharedBy.setVisibility(Strings.isEmptyOrNull(account.getSharedBy()) ? View.GONE : View.VISIBLE);
         mNewAccount.setVisibility(options.isNewAccount(context, account) ? View.VISIBLE : View.GONE);
         mAccountDataNotSynced.setVisibility(account.isSynced() && ((! account.hasGroup()) || account.getGroup().isSynced()) && ((! account.hasIcon()) || account.getIcon().isSynced()) ? View.GONE : View.VISIBLE);
         mAccountDataDeleted.setVisibility(account.isDeleted() ? View.VISIBLE : View.GONE);
