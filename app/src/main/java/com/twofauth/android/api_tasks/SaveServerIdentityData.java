@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorAccount;
@@ -74,7 +75,7 @@ public class SaveServerIdentityData {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to store/synchronize a server identity", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to store/synchronize a server identity", e);
             }
             return null;
         }

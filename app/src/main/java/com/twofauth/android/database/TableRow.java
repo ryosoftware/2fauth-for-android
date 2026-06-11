@@ -105,7 +105,7 @@ public abstract class TableRow {
         if ((_id < 0) || isDirty()) {
             final ContentValues values = getContentValues();
             if (onSavingData(database, context, values)) {
-                if (_id < 0) { values.clear(); }
+                if (_id < 0) values.clear();
                 setDatabaseValues(values);
                 save(database, values);
                 setDirty(false);

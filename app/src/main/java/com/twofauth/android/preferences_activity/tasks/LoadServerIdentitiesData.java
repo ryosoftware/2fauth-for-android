@@ -3,6 +3,7 @@ package com.twofauth.android.preferences_activity.tasks;
 import android.content.Context;
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.database.TwoFactorServerIdentity;
@@ -92,7 +93,7 @@ public class LoadServerIdentitiesData {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load server identities data", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to load server identities data", e);
             }
             return null;
         }

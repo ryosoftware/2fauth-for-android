@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.utils.HTTP;
 import com.twofauth.android.utils.JSON;
@@ -205,14 +206,13 @@ public class CheckForAppUpdates {
                         final File apk_local_file = getApkLocalFile();
                         final JSONObject object = getLatestReleaseData(preferences.getBoolean(Constants.AUTO_UPDATE_APP_INCLUDE_PRERELEASES_KEY, resources.getBoolean(R.bool.auto_update_app_include_prereleases)), true);
                         if (object != null) {
-                            final int installed_app_version_code = resources.getInteger(R.integer.app_version_number_value);
                             final DownloadeableAppVersionData latest_release_version_data = getLatestReleaseVersionData(object, true);
                             AppVersionData latest_downloaded_version_data = getLastDownloadedAppVersionData(preferences);
-                            if ((latest_downloaded_version_data != null) && ((latest_downloaded_version_data.code < installed_app_version_code) || ((latest_release_version_data != null) && (latest_downloaded_version_data.code < latest_release_version_data.version.code)))) {
+                            if ((latest_downloaded_version_data != null) && ((latest_downloaded_version_data.code < BuildConfig.VERSION_CODE) || ((latest_release_version_data != null) && (latest_downloaded_version_data.code < latest_release_version_data.version.code)))) {
                                 deleteLastDownloadedAppData(preferences, apk_local_file);
                                 latest_downloaded_version_data = null;
                             }
-                            if ((latest_release_version_data != null) && (latest_release_version_data.version.code > installed_app_version_code)) {
+                            if ((latest_release_version_data != null) && (latest_release_version_data.version.code > BuildConfig.VERSION_CODE)) {
                                 boolean there_is_an_app_update = (latest_downloaded_version_data != null);
                                 if ((latest_downloaded_version_data == null) && (downloadAssetFile(object, latest_release_version_data.name, apk_local_file, true))) {
                                     setLastDownloadedAppData(preferences, latest_release_version_data.version);
@@ -228,7 +228,7 @@ public class CheckForAppUpdates {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while checking for app updates", e);
+                Log.e(BuildConfig.TAG, "Exception while checking for app updates", e);
                 return e;
             }
             return null;

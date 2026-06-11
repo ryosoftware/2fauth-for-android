@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.twofauth.android.API;
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 import com.twofauth.android.preferences_activity.tasks.LoadGroupsData.TwoFactorGroupWithReferencesInformation;
 import com.twofauth.android.database.TwoFactorGroup;
@@ -60,7 +61,7 @@ public class SaveGroupData {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to store/synchronize a group", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to store/synchronize a group", e);
             }
             return null;
         }

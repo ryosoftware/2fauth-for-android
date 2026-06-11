@@ -2,6 +2,7 @@ package com.twofauth.android.preferences_activity.tasks;
 
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorGroup;
 import com.twofauth.android.database.TwoFactorServerIdentity;
@@ -68,7 +69,7 @@ public class LoadGroupsData {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load groups data", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to load groups data", e);
             }
             return null;
         }

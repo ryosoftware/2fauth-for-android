@@ -3,6 +3,7 @@ package com.twofauth.android.api_tasks;
 import android.content.ContentValues;
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.database.TwoFactorAccountsHelper;
@@ -50,7 +51,7 @@ public class ResetAccountsLastUsage {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to load users data", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to load users data", e);
             }
             return null;
         }

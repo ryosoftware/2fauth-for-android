@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.twofauth.android.API;
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 import com.twofauth.android.database.TwoFactorAccount;
 
@@ -63,7 +64,7 @@ public class DeleteAccountData {
                 }
             }
             catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to delete an account", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to delete an account", e);
             }
             return null;
         }

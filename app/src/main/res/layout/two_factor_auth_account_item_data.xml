@@ -93,6 +93,68 @@
                 android:textColor="?android:textColorSecondary"
                 style="@style/Base.TextAppearance.AppCompat.Body1" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/is_shared"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_gravity="center_vertical"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="2dp"
+                    android:background="@drawable/border_frame"
+                    android:text="@string/is_shared"
+                    android:textColor="@color/border_frame_foreground"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/is_shared_with_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_gravity="center_vertical"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="2dp"
+                    android:background="@drawable/border_frame"
+                    android:text="@string/is_shared_with_all"
+                    android:textColor="@color/border_frame_foreground"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/is_borrowed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_gravity="center_vertical"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="2dp"
+                    android:background="@drawable/border_frame"
+                    android:text="@string/is_borrowed"
+                    android:textColor="@color/border_frame_foreground"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/shared_by"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_gravity="center_vertical"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="2dp"
+                    android:background="@drawable/border_frame"
+                    android:textColor="@color/border_frame_foreground"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/group"
                 android:layout_width="wrap_content"

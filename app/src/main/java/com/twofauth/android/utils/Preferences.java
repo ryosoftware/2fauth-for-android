@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
 import com.twofauth.android.R;
@@ -20,7 +21,7 @@ public class Preferences {
         }
         catch (Exception e) {
             UI.showToast(context, R.string.keystore_access_error);
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to decrypt a string");
+            Log.e(BuildConfig.TAG, "Exception while trying to decrypt a string");
         }
         return null;
     }
@@ -45,7 +46,7 @@ public class Preferences {
         }
         catch (Exception e) {
             UI.showToast(context, R.string.keystore_access_error);
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to encrypt a string");
+            Log.e(BuildConfig.TAG, "Exception while trying to encrypt a string");
         }
         return false;
     }

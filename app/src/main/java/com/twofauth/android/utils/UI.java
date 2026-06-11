@@ -32,6 +32,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 import com.twofauth.android.R;
 
@@ -79,7 +80,7 @@ public class UI {
                 alert_dialog_builder.setPositiveButton(R.string.ok, (DialogInterface.OnClickListener) null);
                 alert_dialog_builder.create().show();
             } catch (Exception e) {
-                Log.e(Main.LOG_TAG_NAME, "Exception while trying to show a message dialog", e);
+                Log.e(BuildConfig.TAG, "Exception while trying to show a message dialog", e);
             }
         }
     }
@@ -100,7 +101,7 @@ public class UI {
             }
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to show a confirmation dialog", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to show a confirmation dialog", e);
         }
     }
 
@@ -132,7 +133,7 @@ public class UI {
             alert_dialog_builder.create().show();
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to show a Base64 image in a dialog", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to show a Base64 image in a dialog", e);
         }
     }
 
@@ -167,7 +168,7 @@ public class UI {
             alert_dialog_builder.create().show();
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to show a Base64 image in a dialog", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to show a Base64 image in a dialog", e);
         }
     }
 
@@ -243,7 +244,7 @@ public class UI {
             alert_dialog.show();
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to show a EditText dialog", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to show a EditText dialog", e);
         }
     }
 
@@ -255,7 +256,7 @@ public class UI {
         try {
             Toast.makeText(context, message_id, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to show a toast", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to show a toast", e);
         }
     }
 

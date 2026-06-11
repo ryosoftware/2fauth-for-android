@@ -3,6 +3,7 @@ package com.twofauth.android.utils;
 import android.content.Context;
 import android.util.Log;
 
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +40,7 @@ public class Files {
             return file;
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to create a file", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to create a file", e);
         }
         return null;
     }
@@ -51,7 +52,7 @@ public class Files {
             return File.createTempFile(prefix, suffix, folder == null ? context.getExternalFilesDir("cache") : folder);
         }
         catch (Exception e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to create a temp file", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to create a temp file", e);
         }
         return null;
     }

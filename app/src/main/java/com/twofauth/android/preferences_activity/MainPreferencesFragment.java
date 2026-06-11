@@ -23,6 +23,7 @@ import androidx.preference.SeekBarPreference;
 
 import com.twofauth.android.Authenticator;
 import com.twofauth.android.Authenticator.OnAuthenticatorFinishListener;
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.HtmlActivity;
 import com.twofauth.android.Main;
@@ -185,7 +186,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.AUTO_UPDATE_APP_ONLY_IN_WIFI_KEY).setOnPreferenceChangeListener(this);
         findPreference(CHECK_FOR_UPDATES_KEY).setOnPreferenceClickListener(this);
         findPreference(OPEN_SOURCE_LICENSES_KEY).setOnPreferenceClickListener(this);
-        String app_version = getString(Main.getInstance().isPreRelease() ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, getString(R.string.app_version_name_value), resources.getInteger(R.integer.app_version_number_value));
+        String app_version = getString(Main.getInstance().isPreRelease() ? R.string.app_build_version_number_prerelease : R.string.app_build_version_number, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
         if (Main.getInstance().isDebugRelease()) { app_version = getString(R.string.app_version_is_debug_release, app_version); }
         findPreference(APP_VERSION_KEY).setSummary(app_version);
     }

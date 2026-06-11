@@ -6,6 +6,7 @@ import android.database.SQLException;
 import android.util.Log;
 
 import com.twofauth.android.API;
+import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Constants;
 import com.twofauth.android.Main;
 import com.twofauth.android.utils.Strings;
@@ -68,7 +69,7 @@ public class TwoFactorGroup extends SynceableTableRow {
             return object;
         }
         catch (JSONException e) {
-            Log.e(Main.LOG_TAG_NAME, "Exception while trying to convert a group to JSON", e);
+            Log.e(BuildConfig.TAG, "Exception while trying to convert a group to JSON", e);
             throw new RuntimeException(e);
         }
     }

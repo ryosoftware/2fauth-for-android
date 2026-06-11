@@ -59,6 +59,10 @@ public class Constants {
     public static final String ACCOUNT_DATA_ALGORITHM_KEY = "algorithm";
     public static final String ACCOUNT_DATA_PERIOD_KEY = "period";
     public static final String ACCOUNT_DATA_COUNTER_KEY = "counter";
+    public static final String ACCOUNT_DATA_IS_SHARED_KEY = "is_shared";
+    public static final String ACCOUNT_DATA_IS_SHARED_WITH_ALL_KEY = "is_shared_with_all";
+    public static final String ACCOUNT_DATA_IS_BORROWED_KEY = "is_borrowed";
+    public static final String ACCOUNT_DATA_SHARED_BY_KEY = "shared_by";
 
     // OTP Options
 
