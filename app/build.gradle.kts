@@ -8,7 +8,7 @@ import java.io.File;
 
 fun increaseVersionCode(): Int {
     val properties = Properties()
-    val file = File("version.propierties")
+    val file = rootProject.file("version.properties")
     if (file.exists()) {
         file.inputStream().use {
             properties.load(it)
@@ -21,7 +21,7 @@ fun increaseVersionCode(): Int {
         return new_version_code
     } 
     else {
-        throw FileNotFoundException("File 'version.propierties' not found")
+        throw FileNotFoundException("File 'version.properties' not found")
     }
 }
 
@@ -36,7 +36,7 @@ android {
         targetSdk = 37
 
         versionCode = increaseVersionCode()
-        versionName = "3.26"
+        versionName = "3.27"
 
          buildConfigField(
                 "String",
@@ -57,7 +57,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
