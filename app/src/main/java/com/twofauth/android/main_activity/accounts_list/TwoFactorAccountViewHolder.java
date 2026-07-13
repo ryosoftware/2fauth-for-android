@@ -24,7 +24,6 @@ import com.twofauth.android.utils.Threads;
 import com.twofauth.android.utils.Vibrator;
 import com.twofauth.android.database.TwoFactorAccount;
 
-import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,6 +72,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
     private final TextView mOtpCounter;
     private final View mAccountPinned;
 
+    private final View mShareLayout;
     private final View mIsShared;
     private final View mIsSharedWithAll;
     private final View mIsBorrowed;
@@ -99,6 +99,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mOtpNext = (TextView) parent.findViewById(R.id.otp_next);
         mOtpCounter = (TextView) parent.findViewById(R.id.otp_counter);
         mAccountPinned = (ImageView) parent.findViewById(R.id.account_pinned);
+        mShareLayout = parent.findViewById(R.id.share_layout);
         mIsShared = (TextView) parent.findViewById(R.id.is_shared);
         mIsSharedWithAll = (TextView) parent.findViewById(R.id.is_shared_with_all);
         mIsBorrowed = (TextView) parent.findViewById(R.id.is_borrowed);
@@ -156,6 +157,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mIsBorrowed.setVisibility(account.isBorrowed() ? View.VISIBLE : View.GONE);
         mSharedBy.setText(context.getString(R.string.shared_by, account.getSharedBy()));
         mSharedBy.setVisibility(Strings.isEmptyOrNull(account.getSharedBy()) ? View.GONE : View.VISIBLE);
+        mShareLayout.setVisibility(account.isShared() || account.isSharedWithAll() || account.isBorrowed() ? View.VISIBLE : View.GONE);
         mNewAccount.setVisibility(options.isNewAccount(context, account) ? View.VISIBLE : View.GONE);
         mAccountDataNotSynced.setVisibility(account.isSynced() && ((! account.hasGroup()) || account.getGroup().isSynced()) && ((! account.hasIcon()) || account.getIcon().isSynced()) ? View.GONE : View.VISIBLE);
         mAccountDataDeleted.setVisibility(account.isDeleted() ? View.VISIBLE : View.GONE);
