@@ -30,7 +30,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.twofauth.android"
+        applicationId = namespace
 
         minSdk = 29
         targetSdk = 37
@@ -42,16 +42,6 @@ android {
                 "String",
                 "TAG",
                 "\"2FAuth\""
-        )
-        buildConfigField(
-                "String",
-                "versionName",
-                "\"${versionName}\""
-        )
-        buildConfigField(
-                "String",
-                "versionCode",
-                "\"${versionCode}\""
         )
     }
 
