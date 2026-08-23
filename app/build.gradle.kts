@@ -33,15 +33,15 @@ android {
         applicationId = namespace
 
         minSdk = 29
-        targetSdk = 37
+        targetSdk = compileSdk
 
         versionCode = increaseVersionCode()
-        versionName = "3.29"
+        versionName = "3.30"
 
          buildConfigField(
                 "String",
                 "TAG",
-                "\"2FAuth\""
+                "\"TwoFAuth\""
         )
     }
 

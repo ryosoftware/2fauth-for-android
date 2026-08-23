@@ -1,9 +1,9 @@
 [versions]
 
-agp = "9.2.1"
-appcompat = "1.7.1"
+agp = "9.3.1"
+appcompat = "1.8.0"
 material = "1.14.0"
-constraintlayout = "2.2.1"
+constraintlayout = "2.2.2"
 navigationFragment = "2.9.8"
 navigationUi = "2.9.8"
 androidxPreference = "1.2.1"
@@ -14,7 +14,7 @@ androidxBiometric = "1.4.0-alpha07"
 androidxLifecycleProcess = "2.11.0"
 androidxLifecycleRuntime = "2.11.0"
 gson = "2.14.0"
-sqlCipher = "4.17.0"
+sqlCipher = "4.18.0"
 sqlite = "2.7.0"
 
 [libraries]
