@@ -1,15 +1,18 @@
 package com.twofauth.android;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -20,6 +23,8 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -84,6 +89,10 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
 
     private static final String HOW_INTERACT_WITH_ACCOUNTS_MESSAGE_ALREADY_DISPLAYED_KEY = "how-interact-with-accounts-message-already-displayed";
 
+    private static final int REQUEST_PERMISSIONS = 1001;
+
+    private static final int MAX_LOCAL_NETWORK_PERMISSION_REQUESTS = 3;
+
     private final AccountsListIndexAdapter mAccountsListIndexAdapter = new AccountsListIndexAdapter();
     private final AccountsListAdapter mAccountsListAdapter = new AccountsListAdapter(this, this, this, mAccountsListIndexAdapter, false);;
     private final GroupsListAdapter mGroupsListAdapter = new GroupsListAdapter(this);
@@ -93,6 +102,8 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     private long mLastLoadTime = 0;
 
     private Authenticator mAuthenticator;
+
+    private int mLocalNetworkPermissionRequested = 0;
 
     private List<TwoFactorServerIdentity> mServerIdentities = null;
     private Map<Long, List<TwoFactorGroup>> mGroups = null;
@@ -183,6 +194,17 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         super.onDestroy();
     }
 
+    private void requestPermissions() {
+        List<String> permissions = new ArrayList<String>();
+        if ((Build.VERSION.SDK_INT >= 37) && (mLocalNetworkPermissionRequested < MAX_LOCAL_NETWORK_PERMISSION_REQUESTS) && (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_LOCAL_NETWORK) != PackageManager.PERMISSION_GRANTED)) {
+            permissions.add(Manifest.permission.ACCESS_LOCAL_NETWORK);
+            mLocalNetworkPermissionRequested ++;
+        }
+        if (! permissions.isEmpty()) {
+            ActivityCompat.requestPermissions(this, permissions.toArray(new String[0]), REQUEST_PERMISSIONS);
+        }
+    }
+
     // Show or hide functions
     // On Show we try to unlock the device then set the buttons state then, on first show, load data
     // On hide, we lock the app then, if activity is not being finish, we hide accounts (and header and list index)
@@ -268,6 +290,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
             preferences.edit().putBoolean(HOW_INTERACT_WITH_ACCOUNTS_MESSAGE_ALREADY_DISPLAYED_KEY, true).apply();
             UI.showMessageDialog(this, R.string.how_interact_with_accounts);
         }
+        requestPermissions();
     }
 
     public void onAuthenticationError(@Nullable final Object object) { finish(); }
