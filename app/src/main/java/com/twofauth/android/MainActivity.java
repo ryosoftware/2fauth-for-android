@@ -196,7 +196,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
 
     private void requestPermissions() {
         List<String> permissions = new ArrayList<String>();
-        if ((Build.VERSION.SDK_INT >= 37) && (mLocalNetworkPermissionRequested < MAX_LOCAL_NETWORK_PERMISSION_REQUESTS) && (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_LOCAL_NETWORK) != PackageManager.PERMISSION_GRANTED)) {
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) && (mLocalNetworkPermissionRequested < MAX_LOCAL_NETWORK_PERMISSION_REQUESTS) && (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_LOCAL_NETWORK) != PackageManager.PERMISSION_GRANTED)) {
             permissions.add(Manifest.permission.ACCESS_LOCAL_NETWORK);
             mLocalNetworkPermissionRequested ++;
         }
