@@ -1,11 +1,11 @@
 [versions]
 
-agp = "9.3.1"
+agp = "9.3.2"
 appcompat = "1.8.0"
 material = "1.14.0"
 constraintlayout = "2.2.2"
-navigationFragment = "2.9.8"
-navigationUi = "2.9.8"
+navigationFragment = "2.10.1"
+navigationUi = "2.10.1"
 androidxPreference = "1.2.1"
 recyclerView = "1.4.0"
 cardView = "1.0.0"
@@ -14,8 +14,8 @@ androidxBiometric = "1.4.0-alpha07"
 androidxLifecycleProcess = "2.11.0"
 androidxLifecycleRuntime = "2.11.0"
 gson = "2.14.0"
-sqlCipher = "4.18.0"
-sqlite = "2.7.0"
+sqlCipher = "4.19.0"
+sqlite = "2.7.1"
 
 [libraries]
 
