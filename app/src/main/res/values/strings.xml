@@ -117,6 +117,8 @@
     <string name="allow_animations_summary">Show animations for certain buttons, which adds a minimal delay to some actions in exchange for greater visual impact</string>
 
     <string name="theme">Theme</string>
+    <string name="use_dynamic_colors">Use wallpaper colors</string>
+    <string name="use_dynamic_colors_summary">Take the app colors from your wallpaper (Material You) instead of the default purple palette</string>
     <string name="light_theme">Light theme</string>
     <string name="dark_theme">Dark theme</string>
     <string name="follow_system_theme">Follow system theme</string>

@@ -21,6 +21,8 @@ import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SeekBarPreference;
 
+import com.google.android.material.color.DynamicColors;
+
 import com.twofauth.android.Authenticator;
 import com.twofauth.android.Authenticator.OnAuthenticatorFinishListener;
 import com.twofauth.android.BuildConfig;
@@ -170,6 +172,8 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.ALLOW_ANIMATIONS_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.APP_THEME_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.APP_THEME_KEY).setSummary(getUserSelectedThemeLabel(context, getCurrentUserSelectedThemeValue(context)));
+        findPreference(Constants.USE_DYNAMIC_COLORS_KEY).setOnPreferenceChangeListener(this);
+        findPreference(Constants.USE_DYNAMIC_COLORS_KEY).setVisible(DynamicColors.isDynamicColorAvailable());
         findPreference(Constants.ALLOW_INSECURE_CERTIFICATES_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.DISABLE_SCREENSHOTS_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.HIDE_OTP_AUTOMATICALLY_KEY).setOnPreferenceChangeListener(this);
@@ -305,6 +309,10 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                 return false;
             }
         }
+        else if (Constants.USE_DYNAMIC_COLORS_KEY.equals(preference.getKey())) {
+            // The new value is persisted after this listener returns, so recreate once it is stored
+            getListView().post(() -> { if (isAdded()) { getActivity().recreate(); } });
+        }
         else if (Constants.DISABLE_SCREENSHOTS_KEY.equals(preference.getKey())) {
             UI.showMessageDialog(getActivity(), R.string.change_will_be_applied_next_time_you_start_the_app);
         }
@@ -410,5 +418,9 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
     public static @Nullable Theme getCurrentUserSelectedThemeValue(@NotNull final Context context) {
         final String value = Preferences.getDefaultSharedPreferences(context).getString(Constants.APP_THEME_KEY, null);
         return value == null ? null : Theme.valueOf(value);
+    }
+
+    public static boolean isDynamicColorsEnabled(@NotNull final Context context) {
+        return DynamicColors.isDynamicColorAvailable() && Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.USE_DYNAMIC_COLORS_KEY, context.getResources().getBoolean(R.bool.use_dynamic_colors));
     }
 }

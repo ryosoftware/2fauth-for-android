@@ -118,6 +118,8 @@
     <string name="allow_animations_summary">Muestra animaciones para ciertos botones, lo que agrega un retraso mínimo en la ejecución de algunas acciones a cambio de un mayor impacto visual</string>
 
     <string name="theme">Tema</string>
+    <string name="use_dynamic_colors">Usar los colores del fondo de pantalla</string>
+    <string name="use_dynamic_colors_summary">Toma los colores de la app de tu fondo de pantalla (Material You) en lugar de la paleta morada predeterminada</string>
     <string name="light_theme">Tema claro</string>
     <string name="dark_theme">Tema oscuro</string>
     <string name="follow_system_theme">Seguir el tema del sistema</string>

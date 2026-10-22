@@ -28,6 +28,7 @@ public class Constants {
     public static final String HAPTIC_FEEDBACK_KEY = "haptic-feedback";
     public static final String ALLOW_ANIMATIONS_KEY = "allow-animations";
     public static final String APP_THEME_KEY = "theme";
+    public static final String USE_DYNAMIC_COLORS_KEY = "use-dynamic-colors";
     public static final String PIN_CODE_KEY = "pin-code";
     public static final String USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY = "use-fingerprint-instead-of-pin-code";
     public static final String PIN_AUTO_CONFIRM_KEY = "pin-auto-confirm";
