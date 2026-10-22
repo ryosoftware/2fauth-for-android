@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
@@ -19,19 +18,21 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.webkit.WebView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputLayout;
 import com.twofauth.android.BuildConfig;
 import com.twofauth.android.Main;
 import com.twofauth.android.R;
@@ -42,6 +43,10 @@ import java.util.List;
 
 public class UI {
     public static boolean allowAnimations = true;
+
+    private static final String SUBMENU_SCRIM_TAG = "submenu-scrim";
+    // 85% opaque: the content behind an open FAB menu stays recognisable but no longer competes with the menu entries
+    private static final int SUBMENU_SCRIM_ALPHA = 217;
 
     public interface OnSelectionDialogItemSelected {
         public abstract void onItemSelected(int position);
@@ -74,7 +79,7 @@ public class UI {
     public static void showMessageDialog(@NotNull final Activity activity, @Nullable final String message) {
         if (message != null) {
             try {
-                final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
+                final MaterialAlertDialogBuilder alert_dialog_builder = new MaterialAlertDialogBuilder(activity);
                 alert_dialog_builder.setTitle(R.string.information);
                 alert_dialog_builder.setMessage(message);
                 alert_dialog_builder.setPositiveButton(R.string.ok, (DialogInterface.OnClickListener) null);
@@ -92,7 +97,7 @@ public class UI {
     public static void showConfirmDialog(@NotNull final Activity activity, @Nullable final String message, final int accept_button_text_id, final int cancel_button_text_id, @Nullable final DialogInterface.OnClickListener on_accept_button_click, @Nullable final DialogInterface.OnClickListener on_cancel_button_click) {
         try {
             if (message != null) {
-                final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
+                final MaterialAlertDialogBuilder alert_dialog_builder = new MaterialAlertDialogBuilder(activity);
                 alert_dialog_builder.setTitle(R.string.warning);
                 alert_dialog_builder.setMessage(message);
                 alert_dialog_builder.setPositiveButton(accept_button_text_id == 0 ? R.string.accept : accept_button_text_id, on_accept_button_click);
@@ -128,7 +133,7 @@ public class UI {
             params.setMargins(0, 0, 0, 0);
             webview.setLayoutParams(params);
             webview.loadData(String.format("<html><body><center><img width='300' height='300' src='%s'/></center></body></html>", image), "text/html", "UTF-8");
-            final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
+            final MaterialAlertDialogBuilder alert_dialog_builder = new MaterialAlertDialogBuilder(activity);
             alert_dialog_builder.setView(webview);
             alert_dialog_builder.create().show();
         }
@@ -143,25 +148,20 @@ public class UI {
 
     public static void showSelectItemFromListDialog(@NotNull final Activity activity, @Nullable final String title, @Nullable final String message, @NotNull final List<String> elements, @Nullable final String selected_element, final int accept_button_text_id, final int cancel_button_text_id, @NotNull final OnSelectionDialogItemSelected on_element_selected_listener, @Nullable final DialogInterface.OnClickListener on_cancel_button_click) {
         try {
-            final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
-            alert_dialog_builder.setTitle(title);
-            alert_dialog_builder.setMessage(message);
-            final FrameLayout container = new FrameLayout(activity);
-            final Spinner spinner = new Spinner(activity, Spinner.MODE_DROPDOWN);
-            final ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            params.setMargins(getPixelsFromDp(activity, 20), getPixelsFromDp(activity, 20), getPixelsFromDp(activity, 20), 0);
-            spinner.setLayoutParams(params);
-            final ArrayAdapter<String> spinner_adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_item, elements);
-            spinner_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner.setAdapter(spinner_adapter);
-            final int selected_element_index = selected_element == null ? -1 : elements.indexOf(selected_element);
-            if (selected_element_index >= 0) { spinner.setSelection(selected_element_index); }
-            container.addView(spinner);
-            alert_dialog_builder.setView(container);
+            final MaterialAlertDialogBuilder alert_dialog_builder = new MaterialAlertDialogBuilder(activity);
+            // A dialog cannot show a message and a choice list at once, and callers pass one or the other
+            alert_dialog_builder.setTitle(title == null ? message : title);
+            final int[] selected_element_index = new int[] { Math.max(0, selected_element == null ? -1 : elements.indexOf(selected_element)) };
+            alert_dialog_builder.setSingleChoiceItems(elements.toArray(new String[0]), selected_element_index[0], new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(@NotNull final DialogInterface dialog, final int which) {
+                    selected_element_index[0] = which;
+                }
+            });
             alert_dialog_builder.setPositiveButton(accept_button_text_id == 0 ? R.string.accept : accept_button_text_id, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(@NotNull final DialogInterface dialog, final int which) {
-                    on_element_selected_listener.onItemSelected(spinner.getSelectedItemPosition());
+                    on_element_selected_listener.onItemSelected(selected_element_index[0]);
                 }
             });
             alert_dialog_builder.setNegativeButton(cancel_button_text_id == 0 ? R.string.cancel : cancel_button_text_id, on_cancel_button_click);
@@ -198,18 +198,15 @@ public class UI {
 
     public static void showEditTextDialog(@NotNull final Activity activity, @Nullable final String title, @Nullable final String message, @Nullable final String value, @Nullable final String hint, @Nullable final String regexp, final int accept_button_text_id, final int cancel_button_text_id, @NotNull final OnTextEnteredListener on_text_entered_listener) {
         try {
-            final AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(activity);
+            final MaterialAlertDialogBuilder alert_dialog_builder = new MaterialAlertDialogBuilder(activity);
             alert_dialog_builder.setTitle(title);
             alert_dialog_builder.setMessage(message);
-            final FrameLayout container = new FrameLayout(activity);
-            final EditText input_text = new EditText(activity);
-            final ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            params.setMargins(getPixelsFromDp(activity, 20), 0, getPixelsFromDp(activity, 20), 0);
-            input_text.setLayoutParams(params);
+            final View container = activity.getLayoutInflater().inflate(R.layout.text_input_dialog, null);
+            final TextInputLayout input_layout = container.findViewById(R.id.input_layout);
+            final EditText input_text = container.findViewById(R.id.input_text);
             input_text.setInputType(InputType.TYPE_CLASS_TEXT);
             input_text.setText(value);
-            input_text.setHint(hint);
-            container.addView(input_text);
+            input_layout.setHint(hint);
             alert_dialog_builder.setView(container);
             alert_dialog_builder.setPositiveButton(accept_button_text_id == 0 ? R.string.accept : accept_button_text_id, new DialogInterface.OnClickListener() {
                 @Override
@@ -272,15 +269,6 @@ public class UI {
         }
     }
 
-    public static int getWidth(@NotNull final View view) {
-        int width = view.getWidth();
-        if (width == 0) {
-            view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-            width = view.getMeasuredWidth();
-        }
-        return width;
-    }
-
     public static int getHeight(@NotNull final View view) {
         int height = view.getHeight();
         if (height == 0) {
@@ -306,7 +294,7 @@ public class UI {
 
     public static void startInfiniteRotationAnimationLoop(final View view, final long duration) {
         if (allowAnimations) {
-            final RotateAnimation animation = new RotateAnimation(0, 360, getWidth(view) / 2f, getHeight(view) / 2f);
+            final RotateAnimation animation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
             animation.setInterpolator(new LinearInterpolator());
             animation.setDuration(duration);
             animation.setRepeatCount(RotateAnimation.INFINITE);
@@ -427,8 +415,43 @@ public class UI {
         return view.getRotation() == 180;
     }
 
+    // An open FAB menu sits over list content; a scrim keeps its entries readable and closes the menu when tapped
+    // The FAB menu is a column of buttons; the scrim goes into that column's parent, right below the column
+    private static @NotNull View createSubmenuScrim(@NotNull final ViewGroup container, @NotNull final View fab_column, @NotNull final View submenu_toggle) {
+        final View scrim = new View(container.getContext());
+        scrim.setTag(SUBMENU_SCRIM_TAG);
+        scrim.setBackgroundColor(MaterialColors.compositeARGBWithAlpha(MaterialColors.getColor(container, com.google.android.material.R.attr.colorSurface), SUBMENU_SCRIM_ALPHA));
+        scrim.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(@NotNull final View view) {
+                submenu_toggle.performClick();
+            }
+        });
+        scrim.setAlpha(0f);
+        container.addView(scrim, container.indexOfChild(fab_column), new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        return scrim;
+    }
+
+    private static void setSubmenuScrimVisible(@NotNull final View submenu_toggle, final boolean visible, final long duration) {
+        if ((! (submenu_toggle.getParent() instanceof View)) || (! (((View) submenu_toggle.getParent()).getParent() instanceof ViewGroup))) { return; }
+        final View fab_column = (View) submenu_toggle.getParent();
+        final ViewGroup container = (ViewGroup) fab_column.getParent();
+        final View existing_scrim = container.findViewWithTag(SUBMENU_SCRIM_TAG);
+        if ((existing_scrim == null) && (! visible)) { return; }
+        final View scrim_view = (existing_scrim == null) ? createSubmenuScrim(container, fab_column, submenu_toggle) : existing_scrim;
+        scrim_view.animate().cancel();
+        if (visible) { scrim_view.setVisibility(View.VISIBLE); }
+        scrim_view.animate().alpha(visible ? 1f : 0f).setDuration(allowAnimations ? duration : 0).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                if (! visible) { scrim_view.setVisibility(View.GONE); }
+            }
+        }).start();
+    }
+
     private static void animateSubmenuOpenOrClose(@NotNull final View view, final int angle, long duration, @Nullable final View[] related_options, @Nullable final OnAnimationEndListener listener) {
         final boolean open_submenu = ! isSubmenuOpened(view);
+        setSubmenuScrimVisible(view, open_submenu, duration);
         if (related_options != null) {
             final long real_duration = startRotationAnimation(view, angle, duration, listener);
             for (final View related_option : related_options) {
@@ -443,6 +466,7 @@ public class UI {
         }
         else {
             final boolean open_submenu = ! isSubmenuOpened(view);
+            setSubmenuScrimVisible(view, open_submenu, 0);
             view.setRotation(open_submenu ? angle : 0);
             if (related_options != null) {
                 for (final View related_option : related_options) {
@@ -471,6 +495,7 @@ public class UI {
             }
         }
         else {
+            setSubmenuScrimVisible(view, false, 0);
             view.setRotation(0);
             view.setVisibility(View.GONE);
             if (related_options != null) {

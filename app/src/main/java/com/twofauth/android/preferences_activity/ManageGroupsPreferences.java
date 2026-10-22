@@ -144,6 +144,7 @@ public class ManageGroupsPreferences extends PreferenceFragmentCompat implements
         for (int i = 0; i < mGroups.size(); i ++) {
             final TwoFactorGroupWithReferencesInformation group = mGroups.get(i);
             final Preference preference = new Preference(context);
+            preference.setLayoutResource(R.layout.preference_card);
             preference.setTitle(group.storedData.getName());
             preference.setSummary(getSummary(context, group));
             preference.setKey(String.valueOf(i));

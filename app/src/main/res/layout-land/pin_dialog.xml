@@ -1,27 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="18dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:orientation="vertical">
 
     <TextView
         android:id="@+id/message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="?android:textColorSecondary"
-        style="@style/Base.TextAppearance.AppCompat.Body2" />
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -35,9 +30,9 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:maxLines="1"
-                android:textColor="?android:textColorPrimary"
-                android:textSize="34sp"
-                style="@style/Base.TextAppearance.AppCompat.Headline" />
+                android:letterSpacing="0.3"
+                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -47,67 +42,43 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_1"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_1" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_2" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_3"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_3" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_4"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_4" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_5"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_5" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_6"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_6" />
 
             </LinearLayout>
@@ -121,56 +92,37 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_7"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_7" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_8"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_8" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_9"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_9" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_0"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="18sp"
+                    style="@style/PinKey.Landscape"
                     android:text="@string/number_0" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_delete"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:contentDescription="@string/delete_digit"
                     android:layout_gravity="center"
-                    app:cornerRadius="25dp"
-                    style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
-                    android:textSize="11sp"
+                    style="@style/PinDeleteKey.Landscape"
                     android:text="@string/key_delete" />
 
             </LinearLayout>
@@ -179,4 +131,4 @@
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
