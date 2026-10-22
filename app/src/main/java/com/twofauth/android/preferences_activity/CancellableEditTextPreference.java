@@ -3,6 +3,7 @@ package com.twofauth.android.preferences_activity;
 import android.content.Context;
 import android.text.InputType;
 import android.util.AttributeSet;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -56,10 +57,10 @@ public class CancellableEditTextPreference extends EditTextPreference implements
     }
 
     public static void disableSuggestions(@NonNull final EditText edittext) {
-        edittext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        // Server addresses and API tokens must not end up in the keyboard's suggestions or learned words
+        edittext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         edittext.setSingleLine(true);
-        edittext.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-        edittext.setRawInputType(InputType.TYPE_CLASS_TEXT);
+        edittext.setImeOptions(edittext.getImeOptions() | EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
     }
 
     public void showDialog() {
