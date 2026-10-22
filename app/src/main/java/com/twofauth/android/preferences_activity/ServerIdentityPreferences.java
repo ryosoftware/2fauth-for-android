@@ -15,7 +15,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
-import androidx.preference.CheckBoxPreference;
+import androidx.preference.TwoStatePreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceClickListener;
@@ -223,7 +223,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
     private void initializePreferences() {
         final EditTextPreference label_preference = (EditTextPreference) findPreference(LABEL_KEY);
         final CancellableEditTextPreference server_location_preference = (CancellableEditTextPreference) findPreference(SERVER_LOCATION_KEY), token_preference = (CancellableEditTextPreference) findPreference(TOKEN_KEY);
-        final CheckBoxPreference sync_on_startup_preference = (CheckBoxPreference) findPreference(SYNC_ON_STARTUP_KEY), sync_immediately_preference = (CheckBoxPreference) findPreference(SYNC_IMMEDIATELY_KEY);
+        final TwoStatePreference sync_on_startup_preference = (TwoStatePreference) findPreference(SYNC_ON_STARTUP_KEY), sync_immediately_preference = (TwoStatePreference) findPreference(SYNC_IMMEDIATELY_KEY);
         label_preference.setSummary(mCurrentServerIdentity.storedData.hasLabel() ? mCurrentServerIdentity.storedData.getLabel() : getString(R.string.label_not_set));
         label_preference.setOnPreferenceClickListener(this);
         label_preference.setOnPreferenceChangeListener(this);
@@ -253,11 +253,11 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
                 CancellableEditTextPreference.disableSuggestions(edit_text);
             }
         });
-        token_preference.setEnabled(mCurrentServerIdentity.storedData.hasServer());
         sync_on_startup_preference.setChecked(mCurrentServerIdentity.storedData.isSyncingOnStartup());
         sync_on_startup_preference.setOnPreferenceChangeListener(this);
         sync_immediately_preference.setChecked(mCurrentServerIdentity.storedData.isSyncingImmediately());
         sync_immediately_preference.setOnPreferenceChangeListener(this);
+        setEditablePreferencesAvailability();
         findPreference(NAME_KEY).setSummary(mCurrentServerIdentity.storedData.getName());
         findPreference(EMAIL_KEY).setSummary(mCurrentServerIdentity.storedData.getEmail());
         findPreference(IS_ADMIN_KEY).setSummary(mCurrentServerIdentity.storedData.isAdmin() ? R.string.yes : R.string.no);
@@ -319,6 +319,15 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         mOpenServerLocationButton.setEnabled(mCurrentServerIdentity.storedData.hasServer());
     }
 
+    // Editable values look disabled until edition is enabled, so the read-only state is visible and not only enforced on click
+    private void setEditablePreferencesAvailability() {
+        findPreference(LABEL_KEY).setEnabled(mEditing);
+        findPreference(SERVER_LOCATION_KEY).setEnabled(mEditing);
+        findPreference(TOKEN_KEY).setEnabled(mEditing && mCurrentServerIdentity.storedData.hasServer());
+        findPreference(SYNC_ON_STARTUP_KEY).setEnabled(mEditing);
+        findPreference(SYNC_IMMEDIATELY_KEY).setEnabled(mEditing);
+    }
+
     // Entry points for the server identity parts changed
 
     private void onLabelChanged() {
@@ -331,7 +340,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         mCurrentServerIdentity.storedData.setToken(null);
         server_location_preference.setSummary(mCurrentServerIdentity.storedData.getServer());
         token_preference.setSummary(R.string.token_value_is_not_set_summary);
-        token_preference.setEnabled(mCurrentServerIdentity.storedData.hasServer());
+        setEditablePreferencesAvailability();
         setButtonsAvailability();
     }
 
@@ -548,6 +557,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
             UI.animateIconChange(mEditOrSaveIdentityDataButton, R.drawable.ic_actionbar_accept, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, true);
             UI.hideSubmenuAndRelatedOptions(mToggleSubmenuVisibilityButton, Constants.SUBMENU_OPEN_OR_CLOSE_ANIMATION_DURATION, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION, new FloatingActionButton[] { mDeleteIdentityDataButton, mManageGroupsButton, mSyncServerDataButton, mCopyTokenToClipboardButton, mOpenServerLocationButton });
             mEditing = true;
+            setEditablePreferencesAvailability();
         }
     }
 
@@ -556,6 +566,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
             UI.animateIconChange(mEditOrSaveIdentityDataButton, R.drawable.ic_actionbar_edit, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
             UI.animateShowOrHide(mToggleSubmenuVisibilityButton, true, Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
             mEditing = false;
+            setEditablePreferencesAvailability();
         }
     }
 

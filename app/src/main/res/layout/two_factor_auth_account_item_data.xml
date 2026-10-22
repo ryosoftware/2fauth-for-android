@@ -6,223 +6,165 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:background="?attr/selectableItemBackground"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    android:background="@drawable/account_item_background"
+    android:padding="12dp"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginTop="3dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_marginEnd="12dp"
+            android:importantForAccessibility="no"
             android:scaleType="centerInside" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/account_pinned"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_pinned"
+            android:importantForAccessibility="no"
+            android:scaleType="centerInside" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/account_data_not_synced"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_account_not_synced"
+            android:importantForAccessibility="no"
+            android:scaleType="centerInside" />
 
-                <ImageView
-                    android:id="@+id/account_pinned"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:src="@drawable/ic_pinned"
-                    android:scaleType="centerInside" />
+        <ImageView
+            android:id="@+id/account_data_deleted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_account_deleted"
+            android:importantForAccessibility="no"
+            android:scaleType="centerInside" />
 
-                <TextView
-                    android:id="@+id/account_new"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:layout_gravity="center_vertical"
-                    android:paddingStart="5dp"
-                    android:paddingEnd="5dp"
-                    android:paddingBottom="2dp"
-                    android:background="@drawable/border_frame"
-                    android:text="@string/new_account"
-                    android:textColor="@color/border_frame_foreground"
-                    android:textSize="12sp" />
+        <TextView
+            android:id="@+id/service"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorOnSurface" />
 
-                <ImageView
-                    android:id="@+id/account_data_not_synced"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:src="@drawable/ic_account_not_synced"
-                    android:scaleType="centerInside" />
-
-                <ImageView
-                    android:id="@+id/account_data_deleted"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:src="@drawable/ic_account_deleted"
-                    android:scaleType="centerInside" />
-
-                <TextView
-                    android:id="@+id/service"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:includeFontPadding="false"
-                    android:maxLines="1"
-                    android:textColor="?android:textColorPrimary"
-                    style="@style/Base.TextAppearance.AppCompat.Title" />
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/account"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="10dp"
-                android:maxLines="1"
-                android:textColor="?android:textColorSecondary"
-                style="@style/Base.TextAppearance.AppCompat.Body1" />
-
-            <LinearLayout
-                android:id="@+id/share_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/is_shared"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:layout_gravity="center_vertical"
-                    android:paddingStart="5dp"
-                    android:paddingEnd="5dp"
-                    android:paddingBottom="2dp"
-                    android:background="@drawable/border_frame"
-                    android:text="@string/is_shared"
-                    android:textColor="@color/border_frame_foreground"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/is_shared_with_all"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:layout_gravity="center_vertical"
-                    android:paddingStart="5dp"
-                    android:paddingEnd="5dp"
-                    android:paddingBottom="2dp"
-                    android:background="@drawable/border_frame"
-                    android:text="@string/is_shared_with_all"
-                    android:textColor="@color/border_frame_foreground"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/is_borrowed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:layout_gravity="center_vertical"
-                    android:paddingStart="5dp"
-                    android:paddingEnd="5dp"
-                    android:paddingBottom="2dp"
-                    android:background="@drawable/border_frame"
-                    android:text="@string/is_borrowed"
-                    android:textColor="@color/border_frame_foreground"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/shared_by"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:layout_gravity="center_vertical"
-                    android:paddingStart="5dp"
-                    android:paddingEnd="5dp"
-                    android:paddingBottom="2dp"
-                    android:background="@drawable/border_frame"
-                    android:textColor="@color/border_frame_foreground"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/group"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="10dp"
-                android:paddingStart="20dp"
-                android:paddingBottom="10dp"
-                android:paddingEnd="20dp"
-                android:gravity="center"
-                android:maxLines="1"
-                android:textColor="@color/border_frame_not_clickable"
-                android:background="@drawable/border_frame_not_clickable"
-                style="@style/Base.TextAppearance.AppCompat.Body2" />
-
-            <LinearLayout
-                android:id="@+id/otp_container"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/otp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="34sp"
-                        style="@style/Base.TextAppearance.AppCompat.Headline" />
-
-                    <TextView
-                        android:id="@+id/otp_counter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:textColor="@color/secondary_text"
-                        android:textSize="24sp"
-                        style="@style/Base.TextAppearance.AppCompat.Headline" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/otp_next"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="24sp"
-                    android:textColor="?android:textColorSecondary"
-                    style="@style/Base.TextAppearance.AppCompat.Headline" />
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/otp_error"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/otp_error"
-                android:textStyle="italic"
-                style="@style/Base.TextAppearance.AppCompat.Caption" />
-
-        </LinearLayout>
+        <!-- Set by the app, not the server, so it is styled apart from the server labels and always sits top right -->
+        <TextView
+            android:id="@+id/account_new"
+            android:text="@string/new_account"
+            style="@style/NewAccountBadge" />
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+
+    <LinearLayout
+        android:id="@+id/share_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/is_shared"
+            android:text="@string/is_shared"
+            style="@style/AccountLabel" />
+
+        <TextView
+            android:id="@+id/is_shared_with_all"
+            android:text="@string/is_shared_with_all"
+            style="@style/AccountLabel" />
+
+        <TextView
+            android:id="@+id/is_borrowed"
+            android:text="@string/is_borrowed"
+            style="@style/AccountLabel" />
+
+        <TextView
+            android:id="@+id/shared_by"
+            style="@style/AccountLabel" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/group"
+        android:layout_marginTop="8dp"
+        style="@style/AccountLabel" />
+
+    <LinearLayout
+        android:id="@+id/otp_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/otp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFeatureSettings="tnum"
+                android:textAppearance="?attr/textAppearanceHeadlineLarge" />
+
+            <TextView
+                android:id="@+id/otp_counter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFeatureSettings="tnum"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/otp_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFeatureSettings="tnum"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/otp_error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="@color/otp_error"
+        android:textStyle="italic" />
+
 </LinearLayout>
-
-
-
