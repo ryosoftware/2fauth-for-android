@@ -44,6 +44,8 @@
 
         <SwitchPreferenceCompat android:key="pin-access" android:title="@string/pin_access" android:summary="@string/pin_access_summary" android:defaultValue="false" />
 
+        <SwitchPreferenceCompat android:key="pin-auto-confirm" android:title="@string/pin_auto_confirm" android:summary="@string/pin_auto_confirm_summary" android:defaultValue="false" />
+
         <SwitchPreferenceCompat android:key="use-fingerprint-instead-of-pin-code" android:title="@string/use_fingerprint_instead_of_pin_code" android:summary="@string/use_fingerprint_instead_of_pin_code_summary" android:defaultValue="false" />
 
         <SwitchPreferenceCompat android:key="allow-copy-server-access-tokens" android:title="@string/allow_copy_server_access_tokens" android:summary="@string/allow_copy_server_access_tokens_summary" android:defaultValue="@bool/allow_copy_server_access_tokens" />

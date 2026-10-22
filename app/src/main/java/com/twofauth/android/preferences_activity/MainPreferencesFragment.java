@@ -133,6 +133,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                 UI.showToast(context, R.string.fingerprint_validation_disabled_due_to_biometric_enrollment);
             }
             fingerprint_access_preference.setEnabled(preferences.contains(Constants.PIN_CODE_KEY));
+            findPreference(Constants.PIN_AUTO_CONFIRM_KEY).setEnabled(preferences.contains(Constants.PIN_CODE_KEY));
             fingerprint_access_preference.setChecked(preferences.getBoolean(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY, false));
         }
     }
