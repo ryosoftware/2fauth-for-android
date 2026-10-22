@@ -28,6 +28,8 @@
 
         <Preference android:key="theme" android:title="@string/theme" />
 
+        <CheckBoxPreference android:key="use-dynamic-colors" android:title="@string/use_dynamic_colors" android:summary="@string/use_dynamic_colors_summary" android:defaultValue="@bool/use_dynamic_colors" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/security">

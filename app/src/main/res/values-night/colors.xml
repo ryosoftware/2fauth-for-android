@@ -7,29 +7,7 @@
 
     <color name="ic_launcher_background">#FF530066</color>
 
-    <color name="floating_action_buttons_background">#FF4F378B</color>
-    <color name="floating_action_buttons_foreground">@color/white</color>
-    <color name="floating_action_buttons_foreground_disabled">#FFD0BCFF</color>
-
-    <color name="border_frame_border">@android:color/white</color>
-
-    <color name="otp_attribute_background">#FFD0BCFF</color>
-    <color name="otp_attribute_background_disabled">#FFD7CCE9</color>
-    <color name="otp_attribute_background_selected">#FF4F378B</color>
-    <color name="otp_attribute_background_disabled_selected">#FF49454F</color>
-
-    <color name="otp_attribute_foreground">@color/otp_attribute_background_selected</color>
-    <color name="otp_attribute_foreground_selected">@color/otp_attribute_background</color>
-    <color name="otp_attribute_foreground_disabled">@color/otp_attribute_background_disabled_selected</color>
-    <color name="otp_attribute_foreground_disabled_selected">@color/otp_attribute_background_disabled</color>
-
-    <color name="otp_error">#FFFCBABE</color>
-
-    <color name="otp_hidden_with_theme_background">@color/gray</color>
-    <color name="otp_visible_normal_with_theme_background">@color/white</color>
     <color name="otp_visible_near_of_last_seconds_with_theme_background">#FFE5A067</color>
     <color name="otp_visible_last_seconds_with_theme_background">#FFE56767</color>
-
-    <color name="otp_hidden_with_button_background">@color/otp_attribute_foreground</color>
 
 </resources>

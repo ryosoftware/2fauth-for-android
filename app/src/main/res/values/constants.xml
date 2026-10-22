@@ -25,6 +25,8 @@
 
     <bool name="allow_animations">true</bool>
 
+    <bool name="use_dynamic_colors">false</bool>
+
     <bool name="hide_otp_codes_automatically">true</bool>
 
     <bool name="show_next_otp_code">false</bool>

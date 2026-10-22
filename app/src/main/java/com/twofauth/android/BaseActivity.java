@@ -31,11 +31,14 @@ public abstract class BaseActivity extends AppCompatActivity implements Activity
 
     private boolean mOnResumeFirstExec = true;
 
+    private boolean mDynamicColorsEnabled;
+
     private final ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this);
 
     protected void onCreate(@Nullable final Bundle saved_instance_state) {
         super.onCreate(saved_instance_state);
         Main.getInstance().setTheme();
+        mDynamicColorsEnabled = MainPreferencesFragment.isDynamicColorsEnabled(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, new OnBackInvokedCallback() {
                 @Override
@@ -54,6 +57,13 @@ public abstract class BaseActivity extends AppCompatActivity implements Activity
     }
 
     protected void onResumeFirstTime() {}
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        // Activities left in the back stack keep the palette they were created with until recreated
+        if (mDynamicColorsEnabled != MainPreferencesFragment.isDynamicColorsEnabled(this)) { recreate(); }
+    }
 
     protected void onResume() {
         super.onResume();
