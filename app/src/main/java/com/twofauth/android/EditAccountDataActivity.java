@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
@@ -655,6 +656,7 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             mDeleteOrUndeleteAccountDataButton.setImageResource(mInitialAccountData.isDeleted() ? R.drawable.ic_actionbar_undelete : R.drawable.ic_actionbar_delete);
             mPinOrUnPinAccountDataButton.setImageResource(mInitialAccountData.isPinned() ? R.drawable.ic_actionbar_unpin : R.drawable.ic_actionbar_pin);
             mCurrentAccountData = new TwoFactorAccount(mInitialAccountData);
+            setToolbarTitle();
             mEditing = ((! mCurrentAccountData.inDatabase()) || ((! mAddingAccountFromFirstTime) && (! mCurrentAccountData.isRemote())));
             mEditOrSaveAccountDataButton.setImageResource(mEditing ? R.drawable.ic_actionbar_accept : R.drawable.ic_actionbar_edit);
             UI.animateShowOrHide(mToggleSubmenuVisibilityButton, ! mEditing, mAddingAccountFromFirstTime ? 0 : Constants.BUTTON_SHOW_OR_HIDE_ANIMATION_DURATION);
@@ -663,6 +665,10 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
             setViewsAvailability(mEditing);
             setButtonsAvailability();
         }
+    }
+
+    private void setToolbarTitle() {
+        ((Toolbar) findViewById(R.id.toolbar)).setTitle(Strings.isEmptyOrNull(mCurrentAccountData.getService()) ? getString(R.string.add_account) : mCurrentAccountData.getService());
     }
 
     private void onAccountEditionNeededDataLoaded(@NotNull final TwoFactorAccount account) {

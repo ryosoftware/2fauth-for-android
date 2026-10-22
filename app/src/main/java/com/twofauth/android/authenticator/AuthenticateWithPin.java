@@ -1,14 +1,15 @@
 package com.twofauth.android.authenticator;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
 import com.twofauth.android.utils.Strings;
@@ -47,7 +48,7 @@ public class AuthenticateWithPin {
 
     public static void authenticate(@NotNull final FragmentActivity activity, @NotNull final OnPinAuthenticationFinishedListener callback, final String current_pin) {
         final PinData pin_data = new PinData();
-        final AlertDialog.Builder dialog_builder = new AlertDialog.Builder(activity);
+        final MaterialAlertDialogBuilder dialog_builder = new MaterialAlertDialogBuilder(activity, R.style.ThemeOverlay_App_PinDialog);
         final LayoutInflater inflater = activity.getLayoutInflater();
         final View dialog_view = inflater.inflate(R.layout.pin_dialog, null), button_delete = dialog_view.findViewById(R.id.button_delete);
         final TextView pin_textview = (TextView) dialog_view.findViewById(R.id.pin);
@@ -130,7 +131,7 @@ public class AuthenticateWithPin {
 
     public static void request(@NotNull final FragmentActivity activity, @NotNull final OnPinRequestFinishedListener callback) {
         final PinData[] pins_data = new PinData[] { new PinData(), new PinData() };
-        final AlertDialog.Builder dialog_builder = new AlertDialog.Builder(activity);
+        final MaterialAlertDialogBuilder dialog_builder = new MaterialAlertDialogBuilder(activity, R.style.ThemeOverlay_App_PinDialog);
         final LayoutInflater inflater = activity.getLayoutInflater();
         final View dialog_view = inflater.inflate(R.layout.pin_dialog, null), button_delete = dialog_view.findViewById(R.id.button_delete);
         final TextView pin_textview = (TextView) dialog_view.findViewById(R.id.pin), message_textview = (TextView) dialog_view.findViewById(R.id.message);

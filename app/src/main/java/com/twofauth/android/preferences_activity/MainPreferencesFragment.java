@@ -14,12 +14,11 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentResultListener;
-import androidx.preference.CheckBoxPreference;
+import androidx.preference.TwoStatePreference;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SeekBarPreference;
 
 import com.google.android.material.color.DynamicColors;
 
@@ -127,8 +126,8 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         if (isAdded()) {
             final Context context = getContext();
             final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(context);
-            ((CheckBoxPreference) findPreference(PIN_ACCESS_ENABLED_KEY)).setChecked(preferences.getBoolean(PIN_ACCESS_ENABLED_KEY, false));
-            final CheckBoxPreference fingerprint_access_preference = (CheckBoxPreference) findPreference(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY);
+            ((TwoStatePreference) findPreference(PIN_ACCESS_ENABLED_KEY)).setChecked(preferences.getBoolean(PIN_ACCESS_ENABLED_KEY, false));
+            final TwoStatePreference fingerprint_access_preference = (TwoStatePreference) findPreference(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY);
             if (preferences.getBoolean(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY, false) && ((! AuthenticateWithBiometrics.canUseBiometrics(context)) || (! AuthenticateWithBiometrics.areBiometricsLinked()))) {
                 preferences.edit().remove(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY).apply();
                 UI.showToast(context, R.string.fingerprint_validation_disabled_due_to_biometric_enrollment);
@@ -155,11 +154,11 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY).setOnPreferenceChangeListener(this);
         findPreference(RESET_ACCOUNTS_LAST_USE_KEY).setOnPreferenceClickListener(this);
         final int min_columns = resources.getInteger(R.integer.accounts_list_min_columns), max_columns = resources.getInteger(R.integer.accounts_list_max_columns);
-        ((SeekBarPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY)).setMin(min_columns);
-        ((SeekBarPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY)).setMax(max_columns);
+        ((SliderPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY)).setMin(min_columns);
+        ((SliderPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY)).setMax(max_columns);
         findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY).setOnPreferenceChangeListener(this);
-        ((SeekBarPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY)).setMin(min_columns);
-        ((SeekBarPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY)).setMax(max_columns);
+        ((SliderPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY)).setMin(min_columns);
+        ((SliderPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY)).setMax(max_columns);
         findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY).setSummary(getUngroupedOtpCodePartSizeSummary());
         findPreference(Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY).setOnPreferenceClickListener(this);
@@ -178,7 +177,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.HIDE_OTP_AUTOMATICALLY_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.SHOW_NEXT_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(PIN_ACCESS_ENABLED_KEY).setOnPreferenceChangeListener(this);
-        ((CheckBoxPreference) findPreference(PIN_ACCESS_ENABLED_KEY)).setChecked(preferences.contains(Constants.PIN_CODE_KEY));
+        ((TwoStatePreference) findPreference(PIN_ACCESS_ENABLED_KEY)).setChecked(preferences.contains(Constants.PIN_CODE_KEY));
         findPreference(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY).setVisible(AuthenticateWithBiometrics.canUseBiometrics(context));
         findPreference(Constants.ALLOW_COPY_SERVER_ACCESS_TOKEN_KEY).setOnPreferenceChangeListener(this);
@@ -301,7 +300,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Preferences.getDefaultSharedPreferences(getContext()).edit().putBoolean(Constants.ALLOW_INSECURE_CERTIFICATES_KEY, true).apply();
-                        if (isAdded()) ((CheckBoxPreference) preference).setChecked(true);
+                        if (isAdded()) ((TwoStatePreference) preference).setChecked(true);
                         onSettingValueChanged(preference.getKey());
                     }
                 });

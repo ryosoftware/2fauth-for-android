@@ -5,6 +5,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
@@ -14,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
@@ -47,6 +50,29 @@ public abstract class BaseActivity extends AppCompatActivity implements Activity
                 }
             });
         }
+    }
+
+    private void setToolbarNavigation() {
+        final View toolbar = findViewById(R.id.toolbar);
+        if (toolbar instanceof Toolbar) { ((Toolbar) toolbar).setNavigationOnClickListener(view -> processOnBackPressed()); }
+    }
+
+    @Override
+    public void setContentView(final int layout_res_id) {
+        super.setContentView(layout_res_id);
+        setToolbarNavigation();
+    }
+
+    @Override
+    public void setContentView(final View view) {
+        super.setContentView(view);
+        setToolbarNavigation();
+    }
+
+    @Override
+    public void setContentView(final View view, final ViewGroup.LayoutParams params) {
+        super.setContentView(view, params);
+        setToolbarNavigation();
     }
 
     protected void onPauseToHide() {}

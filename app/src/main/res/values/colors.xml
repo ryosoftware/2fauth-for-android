@@ -10,8 +10,6 @@
 
     <color name="ic_launcher_background">#FF530066</color>
 
-    <color name="border_frame_background">@android:color/transparent</color>
-
     <color name="otp_visible_near_of_last_seconds_with_theme_background">#FFD35400</color>
     <color name="otp_visible_last_seconds_with_theme_background">#FFFF0000</color>
 

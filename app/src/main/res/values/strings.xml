@@ -11,6 +11,27 @@
     <string name="how_interact_with_accounts">(This message will only be displayed once)\n\nWe\'ve modified the way you can interact with accounts:\n\nWhen an account\'s 2FA code isn\'t visible, a click will show it, while a long click will take you to the account editing activity.\n\nConversely, when an account\'s 2FA code is visible, a click in the account area will hide it, while a long click will copy it to the clipboard and, depending on your settings, minimizes the app</string>
 
     <string name="settings">Settings</string>
+    <string name="sync_now">Sync now</string>
+    <string name="filter_by_server_identity">Filter by identity</string>
+    <string name="add_account">Add account</string>
+    <string name="copy_code">Copy code</string>
+    <string name="navigate_up">Navigate up</string>
+    <string name="more_actions">More actions</string>
+    <string name="edit_or_save">Edit or save</string>
+    <string name="show_qr_code">Show QR code</string>
+    <string name="pin_or_unpin">Pin or unpin</string>
+    <string name="clone">Clone</string>
+    <string name="delete_or_restore">Delete or restore</string>
+    <string name="open_server_in_browser">Open server in browser</string>
+    <string name="copy_access_token">Copy access token</string>
+    <string name="add_identity">Add identity</string>
+    <string name="rename_group">Rename group</string>
+    <string name="choose_icon">Choose icon</string>
+    <string name="remove_icon">Remove icon</string>
+    <string name="copy_icon">Copy icon</string>
+    <string name="paste_icon">Paste icon</string>
+    <string name="copy_secret">Copy secret</string>
+    <string name="delete_digit">Delete last digit</string>
 
     <string name="sync_service_notifications_channel">Synchronization Service Notifications</string>
 
