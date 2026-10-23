@@ -1,16 +1,19 @@
 package com.twofauth.android.authenticator;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 
 import com.twofauth.android.Constants;
 import com.twofauth.android.R;
+import com.twofauth.android.utils.Preferences;
 import com.twofauth.android.utils.Strings;
 import com.twofauth.android.utils.UI;
 import com.twofauth.android.utils.Vibrator;
@@ -45,8 +48,20 @@ public class AuthenticateWithPin {
         PinData() {}
     }
 
+    private static boolean isAutoConfirmEnabled(@NotNull final Context context) {
+        return Preferences.getDefaultSharedPreferences(context).getBoolean(Constants.PIN_AUTO_CONFIRM_KEY, false);
+    }
+
+    // The stored PIN drops leading zeros, so the typed value's length is compared with it rather than the digit count.
+    // A stored value shorter than the minimum PIN length means the PIN starts with zeros; checking it automatically would
+    // reveal that, because no input without leading zeros could ever trigger the check, so such PINs always need Accept
+    private static boolean canAutoConfirm(@Nullable final String stored_pin) {
+        return (stored_pin != null) && (stored_pin.length() >= MIN_PIN_LENGTH);
+    }
+
     public static void authenticate(@NotNull final FragmentActivity activity, @NotNull final OnPinAuthenticationFinishedListener callback, final String current_pin) {
         final PinData pin_data = new PinData();
+        final boolean auto_confirm = isAutoConfirmEnabled(activity);
         final AlertDialog.Builder dialog_builder = new AlertDialog.Builder(activity);
         final LayoutInflater inflater = activity.getLayoutInflater();
         final View dialog_view = inflater.inflate(R.layout.pin_dialog, null), button_delete = dialog_view.findViewById(R.id.button_delete);
@@ -120,6 +135,10 @@ public class AuthenticateWithPin {
                     pin_textview.setText(Strings.toHiddenString(pin_data.digits));
                     button_delete.setEnabled(pin_data.digits > 0);
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(pin_data.digits >= MIN_PIN_LENGTH);
+                    // An automatic check that fails counts as a failed attempt, exactly like pressing Accept
+                    if (auto_confirm && canAutoConfirm(current_pin) && (pin_data.digits >= MIN_PIN_LENGTH) && (String.valueOf(pin_data.pin).length() == current_pin.length())) {
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
+                    }
                 }
             });
         }
@@ -130,6 +149,7 @@ public class AuthenticateWithPin {
 
     public static void request(@NotNull final FragmentActivity activity, @NotNull final OnPinRequestFinishedListener callback) {
         final PinData[] pins_data = new PinData[] { new PinData(), new PinData() };
+        final boolean auto_confirm = isAutoConfirmEnabled(activity);
         final AlertDialog.Builder dialog_builder = new AlertDialog.Builder(activity);
         final LayoutInflater inflater = activity.getLayoutInflater();
         final View dialog_view = inflater.inflate(R.layout.pin_dialog, null), button_delete = dialog_view.findViewById(R.id.button_delete);
@@ -208,6 +228,10 @@ public class AuthenticateWithPin {
                     pin_textview.setText(Strings.toHiddenString(pin_data.digits));
                     button_delete.setEnabled(pin_data.digits > 0);
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(pin_data.digits >= MIN_PIN_LENGTH);
+                    // Only the repeated entry has a known length to wait for
+                    if (auto_confirm && (pin_data == pins_data[1]) && (pin_data.digits == pins_data[0].digits)) {
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
+                    }
                 }
             });
         }
