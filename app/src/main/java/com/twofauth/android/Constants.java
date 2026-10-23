@@ -16,7 +16,7 @@ public class Constants {
     public static final String NEW_ACCOUNT_PERIOD_KEY = "new-account-period";
     public static final String SORT_ACCOUNTS_BY_LAST_USE_KEY = "sort-accounts-by-last-use";
     public static final String ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY = "accounts-list-columns-portrait";
-    public static final String ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY = "accounts-list-columns-portrait";
+    public static final String ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY = "accounts-list-columns-landscape";
     public static final String UNGROUP_OTP_CODE_KEY = "ungroup-otp-code";
     public static final String UNGROUPED_OTP_CODE_PART_SIZE_KEY = "ungrouped-otp-code-part-size";
     public static final String DISPLAY_ACCOUNT_SERVER_IDENTITY_KEY = "display-account-server-identity";

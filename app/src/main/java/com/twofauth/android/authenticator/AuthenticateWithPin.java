@@ -23,7 +23,7 @@ import java.util.List;
 
 public class AuthenticateWithPin {
     private static final int MIN_PIN_LENGTH = 4;
-    private static final int MAX_PIN_LENGTH = 8;
+    private static final int MAX_PIN_LENGTH = 9;
     private static final int MAX_ATTEMPTS = 3;
 
     public interface OnPinAuthenticationFinishedListener {

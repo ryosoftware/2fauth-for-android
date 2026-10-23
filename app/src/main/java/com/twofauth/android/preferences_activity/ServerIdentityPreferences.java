@@ -227,10 +227,9 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         label_preference.setSummary(mCurrentServerIdentity.storedData.hasLabel() ? mCurrentServerIdentity.storedData.getLabel() : getString(R.string.label_not_set));
         label_preference.setOnPreferenceClickListener(this);
         label_preference.setOnPreferenceChangeListener(this);
-        token_preference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+        label_preference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
             public void onBindEditText(@NotNull final EditText edit_text) {
-                edit_text.setText(mCurrentServerIdentity.storedData.getLabel());
-                edit_text.setSelection(edit_text.getText().length());
+                CancellableEditTextPreference.setTextAndPositionAtEnd(edit_text, mCurrentServerIdentity.storedData.getLabel());
                 CancellableEditTextPreference.disableSuggestions(edit_text);
             }
         });
@@ -240,8 +239,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
         server_location_preference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
             @Override
             public void onBindEditText(@NotNull EditText edit_text) {
-                edit_text.setText(mCurrentServerIdentity.storedData.getServer());
-                edit_text.setSelection(edit_text.getText().length());
+                CancellableEditTextPreference.setTextAndPositionAtEnd(edit_text, mCurrentServerIdentity.storedData.getServer());
                 CancellableEditTextPreference.disableSuggestions(edit_text);
             }
         });
@@ -252,6 +250,7 @@ public class ServerIdentityPreferences extends PreferenceFragmentCompat implemen
             public void onBindEditText(@NotNull final EditText edit_text) {
                 edit_text.setHint(mCurrentServerIdentity.storedData.hasToken() ? getString(R.string.token_unchanged) : "");
                 edit_text.setText(null);
+                CancellableEditTextPreference.disableSuggestions(edit_text);
             }
         });
         token_preference.setEnabled(mCurrentServerIdentity.storedData.hasServer());
