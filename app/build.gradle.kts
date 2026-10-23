@@ -19,7 +19,7 @@ fun increaseVersionCode(): Int {
             properties.store(it, null)
         }
         return new_version_code
-    } 
+    }
     else {
         throw FileNotFoundException("File 'version.properties' not found")
     }
