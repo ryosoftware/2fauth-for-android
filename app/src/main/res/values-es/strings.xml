@@ -142,7 +142,7 @@
     <string name="pin_access_summary">Configurar un código para acceder a la app o realizar algunas acciones de especial relevancia</string>
     <string name="pin_access_dialog_title">@string/pin_access</string>
     <string name="pin_access_enter_current_pin">Por favor, introduzca el código de acceso</string>
-    <string name="pin_access_enter_new_pin">Por favor, introduzca el código con el que acceder a la app.El PIN debe tener entre 4 y 8 dígitos.\n\nNo podrá acceder a la app si lo olvida</string>
+    <string name="pin_access_enter_new_pin">Por favor, introduzca el código con el que acceder a la app.El PIN debe tener entre %1$d y %2$d dígitos.\n\nNo podrá acceder a la app si lo olvida</string>
     <string name="pin_access_enter_new_pin_again">Por favor, introduzca el código de nuevo.\n\nRecuerde que no podrá acceder a la app si lo olvida</string>
     <string name="pin_is_not_valid">El código introducido no es válido</string>
     <string name="pin_and_its_repeat_does_not_match">El código y su repetición no coinciden</string>

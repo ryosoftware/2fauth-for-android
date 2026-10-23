@@ -137,7 +137,7 @@ public class AuthenticateWithPin {
         final List<View> buttons = new ArrayList<View>(Arrays.asList(new View[] { dialog_view.findViewById(R.id.button_0), dialog_view.findViewById(R.id.button_1), dialog_view.findViewById(R.id.button_2), dialog_view.findViewById(R.id.button_3), dialog_view.findViewById(R.id.button_4), dialog_view.findViewById(R.id.button_5), dialog_view.findViewById(R.id.button_6), dialog_view.findViewById(R.id.button_7), dialog_view.findViewById(R.id.button_8), dialog_view.findViewById(R.id.button_9), button_delete }));
         dialog_builder.setView(dialog_view);
         dialog_builder.setTitle(R.string.pin_access_dialog_title);
-        message_textview.setText(R.string.pin_access_enter_new_pin);
+        message_textview.setText(activity.getString(R.string.pin_access_enter_new_pin, MIN_PIN_LENGTH, MAX_PIN_LENGTH));
         dialog_builder.setPositiveButton(activity.getString(R.string.accept), (DialogInterface.OnClickListener) null);
         dialog_builder.setNegativeButton(activity.getString(R.string.cancel), (DialogInterface.OnClickListener) null);
         dialog_builder.setOnDismissListener(new DialogInterface.OnDismissListener() {

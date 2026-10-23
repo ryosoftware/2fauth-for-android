@@ -141,7 +141,7 @@
     <string name="pin_access_summary">Require a PIN code to access the app or perform some especially relevant actions</string>
     <string name="pin_access_dialog_title">@string/pin_access</string>
     <string name="pin_access_enter_current_pin">Please, enter current PIN</string>
-    <string name="pin_access_enter_new_pin">Please enter the PIN you will use to access the app.\n\nPIN length will be from 4 to 8 digits.\n\nYou will not be able to access the app if you forget it</string>
+    <string name="pin_access_enter_new_pin">Please enter the PIN you will use to access the app.\n\nPIN length will be from %1$d to %2$d digits.\n\nYou will not be able to access the app if you forget it</string>
     <string name="pin_access_enter_new_pin_again">Please, enter new PIN again.\n\nRemember that you will not be able to access the app if you forget it</string>
     <string name="pin_is_not_valid">The PIN you\'ve entered isn\'t valid</string>
     <string name="pin_and_its_repeat_does_not_match">The PIN and it\'s repeat do not match</string>
