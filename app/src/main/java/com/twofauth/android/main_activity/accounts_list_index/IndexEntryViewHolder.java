@@ -52,7 +52,7 @@ public class IndexEntryViewHolder extends RecyclerView.ViewHolder implements Vie
 
     public void draw(@NotNull final Context context, @Nullable final Character letter, final boolean is_active) {
         mLetter.setText(letter == null ? null : letter.toString().toUpperCase());
-        mLetter.setTextColor(context.getResources().getColor(is_active ? R.color.floating_action_buttons_foreground : R.color.floating_action_buttons_foreground_disabled, context.getTheme()));
+        mLetter.setTextColor(context.getResources().getColor(is_active ? R.color.index_letter_active : R.color.index_letter_inactive, context.getTheme()));
         mLetter.setTypeface(null, is_active ? Typeface.BOLD : Typeface.NORMAL);
         mLetter.setCompoundDrawablesWithIntrinsicBounds(letter == null ? getPin(context, is_active) : null, null, null, null);
         mLetter.setSelected(is_active);

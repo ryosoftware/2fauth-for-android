@@ -12,6 +12,27 @@
     <string name="how_interact_with_accounts">(Este mensaje sólo se mostrará una vez)\n\nHemos modificado la forma de interactuar con las cuentas:\n\nCuando el código 2FA de una cuenta no se está mostrando, un clic hará que se muestre mientras que un click largo le llevará a la pantalla de edición de la cuenta.\n\nPor el contrario, cuendo el código 2FA de la cuenta se está mostrando, un clic en el área de la cuenta lo ocultará mientras que un clic largo lo copiará en el portapapeles y, según sus opciones de configuración, minimizará la aplicación</string>
 
     <string name="settings">Configuración</string>
+    <string name="sync_now">Sincronizar ahora</string>
+    <string name="filter_by_server_identity">Filtrar por identidad</string>
+    <string name="add_account">Añadir cuenta</string>
+    <string name="copy_code">Copiar código</string>
+    <string name="navigate_up">Volver</string>
+    <string name="more_actions">Más acciones</string>
+    <string name="edit_or_save">Editar o guardar</string>
+    <string name="show_qr_code">Mostrar código QR</string>
+    <string name="pin_or_unpin">Fijar o desfijar</string>
+    <string name="clone">Clonar</string>
+    <string name="delete_or_restore">Eliminar o restaurar</string>
+    <string name="open_server_in_browser">Abrir el servidor en el navegador</string>
+    <string name="copy_access_token">Copiar el token de acceso</string>
+    <string name="add_identity">Añadir identidad</string>
+    <string name="rename_group">Renombrar grupo</string>
+    <string name="choose_icon">Elegir icono</string>
+    <string name="remove_icon">Quitar icono</string>
+    <string name="copy_icon">Copiar icono</string>
+    <string name="paste_icon">Pegar icono</string>
+    <string name="copy_secret">Copiar secreto</string>
+    <string name="delete_digit">Borrar el último dígito</string>
 
     <string name="sync_service_notifications_channel">Notificaciones del servicio de sincronización</string>
 
@@ -118,6 +139,8 @@
     <string name="allow_animations_summary">Muestra animaciones para ciertos botones, lo que agrega un retraso mínimo en la ejecución de algunas acciones a cambio de un mayor impacto visual</string>
 
     <string name="theme">Tema</string>
+    <string name="use_dynamic_colors">Usar los colores del fondo de pantalla</string>
+    <string name="use_dynamic_colors_summary">Toma los colores de la app de tu fondo de pantalla (Material You) en lugar de la paleta morada predeterminada</string>
     <string name="light_theme">Tema claro</string>
     <string name="dark_theme">Tema oscuro</string>
     <string name="follow_system_theme">Seguir el tema del sistema</string>

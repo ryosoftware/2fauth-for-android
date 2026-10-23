@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
+import android.widget.Checkable;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,6 +38,7 @@ public class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnC
     public void draw(@NotNull final Context context, @NotNull final TwoFactorGroup group, final boolean is_active, @NotNull final AppearanceOptions options) {
         mGroup.setText(options.getServerIdentityAndGroupNames(context, group));
         mGroup.setSelected(is_active);
+        if (mGroup instanceof Checkable) { ((Checkable) mGroup).setChecked(is_active); }
     }
 
     @Override

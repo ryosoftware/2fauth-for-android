@@ -3,9 +3,9 @@
     android:shape="rectangle">
 
     <solid
-        android:color="@color/floating_action_buttons_background" />
+        android:color="?attr/colorSurfaceContainerHigh" />
 
     <corners
-        android:radius="16dp" />
+        android:radius="28dp" />
 
 </shape>

@@ -2,9 +2,153 @@
 
 <resources>
 
-    <style name="SmallFab" parent="Widget.MaterialComponents.FloatingActionButton">
-        <item name="fabCustomSize">40dp</item>
+    <!-- Preferences: Material 3 switches, and no empty icon column since no preference has an icon -->
+
+    <style name="AppPreferenceTheme" parent="PreferenceThemeOverlay">
+        <item name="preferenceStyle">@style/AppPreference</item>
+        <item name="preferenceScreenStyle">@style/AppPreference.Screen</item>
+        <item name="preferenceCategoryStyle">@style/AppPreference.Category</item>
+        <item name="switchPreferenceCompatStyle">@style/AppPreference.Switch</item>
+        <item name="checkBoxPreferenceStyle">@style/AppPreference.CheckBox</item>
+        <item name="editTextPreferenceStyle">@style/AppPreference.EditText</item>
+        <item name="dialogPreferenceStyle">@style/AppPreference.Dialog</item>
+    </style>
+
+    <style name="AppPreference" parent="Preference.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="AppPreference.Screen" parent="Preference.PreferenceScreen.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="AppPreference.Category" parent="Preference.Category.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="AppPreference.Switch" parent="Preference.SwitchPreferenceCompat.Material">
+        <item name="iconSpaceReserved">false</item>
+        <item name="widgetLayout">@layout/preference_material_switch</item>
+    </style>
+
+    <style name="AppPreference.CheckBox" parent="Preference.CheckBoxPreference.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="AppPreference.EditText" parent="Preference.DialogPreference.EditTextPreference.Material">
+        <item name="iconSpaceReserved">false</item>
+        <item name="android:dialogLayout">@layout/preference_dialog_edittext_material</item>
+    </style>
+
+    <style name="AppPreference.Dialog" parent="Preference.DialogPreference.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <!-- Secondary entries of a FAB menu -->
+
+    <style name="SmallFab" parent="Widget.Material3.FloatingActionButton.Small.Primary">
+        <item name="backgroundTint">?attr/colorPrimaryContainer</item>
+        <item name="tint">?attr/colorOnPrimaryContainer</item>
+    </style>
+
+    <!-- Small tonal labels (new, shared, group...) shown on an account row -->
+
+    <style name="AccountLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginEnd">6dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:background">@drawable/account_label_background</item>
+        <item name="android:textAppearance">?attr/textAppearanceLabelMedium</item>
+        <item name="android:textColor">?attr/colorOnSecondaryContainer</item>
+    </style>
+
+    <style name="NewAccountBadge" parent="AccountLabel">
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
+        <item name="android:background">@drawable/new_account_badge_background</item>
+        <item name="android:textColor">?attr/colorOnTertiaryContainer</item>
+    </style>
+
+    <!-- PIN keypad keys -->
+
+    <style name="PinKey" parent="Widget.Material3.Button.TonalButton">
+        <item name="android:layout_width">64dp</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="cornerRadius">32dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceHeadlineSmall</item>
+    </style>
+
+    <!-- A text button, so it cannot inherit PinKey (a tonal button); it repeats only the key geometry -->
+    <style name="PinDeleteKey" parent="Widget.Material3.Button.TextButton">
+        <item name="android:layout_width">64dp</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="cornerRadius">32dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceHeadlineSmall</item>
+    </style>
+
+    <!-- Landscape leaves less height for the keypad -->
+    <style name="PinKey.Landscape">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="cornerRadius">25dp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="PinDeleteKey.Landscape">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="cornerRadius">25dp</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="ThemeOverlay.App.AppCompatDialog" parent="ThemeOverlay.Material3.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/dialog_background</item>
+    </style>
+
+    <!-- The keypad needs more height than the default Material 3 dialog insets leave on large display sizes -->
+
+    <style name="ThemeOverlay.App.PinDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="alertDialogStyle">@style/PinDialog</item>
+    </style>
+
+    <style name="PinDialog" parent="MaterialAlertDialog.Material3">
+        <item name="backgroundInsetTop">24dp</item>
+        <item name="backgroundInsetBottom">24dp</item>
+    </style>
+
+    <!-- Segmented choices of the account form (OTP type, digits, algorithm) -->
+
+    <style name="SegmentButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <!-- Section label above a non text field form control (spinners, segmented buttons) -->
+
+    <style name="FormLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
 </resources>
-

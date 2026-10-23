@@ -6,7 +6,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".PreferencesActivity">
 
     <ProgressBar
@@ -38,13 +37,16 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/delete_or_undelete_group_data"
+            android:contentDescription="@string/delete_or_restore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_delete" />
+            app:srcCompat="@drawable/ic_actionbar_delete"
+            style="@style/SmallFab" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/edit_group_name"
+            android:contentDescription="@string/rename_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/ic_actionbar_edit" />
