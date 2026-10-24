@@ -36,7 +36,7 @@ android {
         targetSdk = compileSdk
 
         versionCode = increaseVersionCode()
-        versionName = "3.32"
+        versionName = "3.33"
 
          buildConfigField(
                 "String",
