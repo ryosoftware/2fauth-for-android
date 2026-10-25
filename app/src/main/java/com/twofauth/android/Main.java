@@ -78,6 +78,7 @@ public class Main extends Application implements LifecycleEventObserver {
         preferences.edit().remove(LAST_APP_BACKGROUND_TIME_KEY).apply();
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
         mDatabaseHelper = new DatabaseHelper(this);
+        MainTileService.requestListeningState(this);
     }
 
     @Override
