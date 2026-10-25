@@ -139,8 +139,8 @@
 
     <string name="pin_access">Secret PIN</string>
     <string name="pin_access_summary">Require a PIN code to access the app or perform some especially relevant actions</string>
-    <string name="pin_auto_confirm">Unlock without Accept</string>
-    <string name="pin_auto_confirm_summary">Checks the PIN as soon as it has as many digits as yours. Anyone trying PINs then learns how many digits yours has</string>
+    <string name="pin_auto_confirm">Automatic Unlock</string>
+    <string name="pin_auto_confirm_summary">Check the PIN without pressing the \"accept\" button.\nBe aware that this feature reveals the length of your PIN.</string>
     <string name="pin_access_dialog_title">@string/pin_access</string>
     <string name="pin_access_enter_current_pin">Please, enter current PIN</string>
     <string name="pin_access_enter_new_pin">Please enter the PIN you will use to access the app.\n\nPIN length will be from 4 to 8 digits.\n\nYou will not be able to access the app if you forget it</string>

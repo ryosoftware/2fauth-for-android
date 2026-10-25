@@ -140,8 +140,8 @@
 
     <string name="pin_access">PIN de acceso</string>
     <string name="pin_access_summary">Configurar un código para acceder a la app o realizar algunas acciones de especial relevancia</string>
-    <string name="pin_auto_confirm">Desbloquear sin Aceptar</string>
-    <string name="pin_auto_confirm_summary">Comprueba el PIN en cuanto tiene tantos dígitos como el tuyo. Quien pruebe PINs sabrá cuántos dígitos tiene el tuyo</string>
+    <string name="pin_auto_confirm">Desbloqueo automático</string>
+    <string name="pin_auto_confirm_summary">Comprueba el PIN sin necesidad de pulsar el botón \"aceptar\".\nTen en cuenta que esta opción revela el número de dígitos de tu PIN</string>
     <string name="pin_access_dialog_title">@string/pin_access</string>
     <string name="pin_access_enter_current_pin">Por favor, introduzca el código de acceso</string>
     <string name="pin_access_enter_new_pin">Por favor, introduzca el código con el que acceder a la app.El PIN debe tener entre 4 y 8 dígitos.\n\nNo podrá acceder a la app si lo olvida</string>
