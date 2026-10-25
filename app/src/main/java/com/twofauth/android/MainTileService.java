@@ -2,8 +2,11 @@ package com.twofauth.android;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 
 public class MainTileService extends TileService {
@@ -42,5 +45,17 @@ private static final int PENDING_INTENT_REQUEST_CODE = 10001;
         else {
             showMainActivity(true);
         }
+    }
+
+    public void onStartListening() {
+        super.onStartListening();
+
+        Tile tile = getQsTile();
+        tile.setState(Tile.STATE_INACTIVE);
+        tile.updateTile();
+    }
+
+    public static void requestListeningState(final Context context) {
+        requestListeningState(context, new ComponentName(context.getPackageName(), MainTileService.class.getName()));
     }
 }

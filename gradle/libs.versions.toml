@@ -13,7 +13,7 @@ bastiaanJansenOtp = "2.2.0"
 androidxBiometric = "1.4.0-alpha07"
 androidxLifecycleProcess = "2.11.0"
 androidxLifecycleRuntime = "2.11.0"
-gson = "2.14.0"
+gson = "2.15.0"
 sqlCipher = "4.19.1"
 sqlite = "2.7.1"
 
