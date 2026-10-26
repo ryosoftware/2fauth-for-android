@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        android:padding="@dimen/fab_margin"
+        android:padding="8dp"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:gravity="center_horizontal"
@@ -27,11 +27,10 @@
             android:id="@+id/copy_to_clipboard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/fab_margin"
+            android:layout_marginBottom="@dimen/fabs_spacing"
             android:contentDescription="@string/copy_code"
             app:srcCompat="@drawable/ic_actionbar_copy"
-            android:visibility="gone"
-            style="@style/Widget.Material3.FloatingActionButton.Secondary" />
+            android:visibility="gone" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_account_data"
