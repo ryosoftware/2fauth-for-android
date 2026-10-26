@@ -13,6 +13,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 import com.twofauth.android.preferences_activity.ManageGroupsPreferences;
 import com.twofauth.android.preferences_activity.ServerIdentitiesPreferences;
+import com.twofauth.android.preferences_activity.ServerIdentityPreferences;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -40,6 +41,7 @@ public class PreferencesActivity extends BaseActivity {
 
     private int getTitleFor(@Nullable final Fragment fragment) {
         if (fragment instanceof ServerIdentitiesPreferences) { return R.string.server_identities; }
+        if (fragment instanceof ServerIdentityPreferences) { return R.string.server_identity; }
         if (fragment instanceof ManageGroupsPreferences) { return R.string.groups; }
         return R.string.settings;
     }
