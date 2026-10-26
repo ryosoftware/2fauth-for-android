@@ -7,12 +7,11 @@
     android:layout_gravity="center"
     android:orientation="vertical">
 
-    <!-- The row handles the click (and keeps the selection), so the chip itself only renders the state -->
     <com.google.android.material.chip.Chip
         android:id="@+id/group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:checkable="true"
+        android:checkable="false"
         android:clickable="false"
         android:focusable="false"
         android:maxLines="1"
