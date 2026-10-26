@@ -205,13 +205,8 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     // On Show we try to unlock the device then set the buttons state then, on first show, load data
     // On hide, we lock the app then, if activity is not being finish, we hide accounts (and header and list index)
 
-    private void loadDataOrEnterAppSettings() {
-        if (! MainService.canSyncServerData(this) && (mDataLoaderAndFilterer == null)) { openAppSettingsActivity(); }
-        loadData();
-    }
-
     @Override
-    public void onResumeFirstTime() { loadDataOrEnterAppSettings(); }
+    public void onResumeFirstTime() { loadData(); }
 
     @Override
     public void onResume() {
