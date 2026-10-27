@@ -6,55 +6,57 @@
 
     <PreferenceCategory android:title="@string/appearance">
 
-        <CheckBoxPreference android:key="sort-accounts-by-last-use" android:title="@string/sort_accounts_by_last_use" android:summary="@string/sort_accounts_by_last_use_summary" android:defaultValue="@bool/sort_accounts_by_last_use" />
+        <SwitchPreferenceCompat android:key="sort-accounts-by-last-use" android:title="@string/sort_accounts_by_last_use" android:summary="@string/sort_accounts_by_last_use_summary" android:defaultValue="@bool/sort_accounts_by_last_use" />
 
         <Preference android:key="reset-accounts-last-use-data" android:title="@string/reset_accounts_last_use_data" android:summary="@string/reset_accounts_last_use_data_summary" android:dependency="sort-accounts-by-last-use" />
 
-        <SeekBarPreference android:key="accounts-list-columns-portrait" android:title="@string/accounts_list_columns_portrait" android:max="@integer/accounts_list_max_columns" android:defaultValue="@integer/accounts_list_columns_portrait" />
+        <com.twofauth.android.preferences_activity.SliderPreference android:key="accounts-list-columns-portrait" android:title="@string/accounts_list_columns_portrait" android:max="@integer/accounts_list_max_columns" android:defaultValue="@integer/accounts_list_columns_portrait" />
 
-        <SeekBarPreference android:key="accounts-list-columns-landscape" android:title="@string/accounts_list_columns_landscape" android:max="@integer/accounts_list_max_columns" android:defaultValue="@integer/accounts_list_columns_landscape" />
+        <com.twofauth.android.preferences_activity.SliderPreference android:key="accounts-list-columns-landscape" android:title="@string/accounts_list_columns_landscape" android:max="@integer/accounts_list_max_columns" android:defaultValue="@integer/accounts_list_columns_landscape" />
 
         <Preference android:key="ungrouped-otp-code-part-size" android:title="@string/ungrouped_otp_code_part_size" />
 
-        <CheckBoxPreference android:key="display-account-server-identity" android:title="@string/display_account_server_identity" android:summary="@string/display_account_server_identity_summary" android:defaultValue="@bool/display_account_server_identity" />
+        <SwitchPreferenceCompat android:key="display-account-server-identity" android:title="@string/display_account_server_identity" android:summary="@string/display_account_server_identity_summary" android:defaultValue="@bool/display_account_server_identity" />
 
-        <CheckBoxPreference android:key="display-account-group" android:title="@string/display_account_group" android:summary="@string/display_account_group_summary" android:defaultValue="@bool/display_account_group" />
+        <SwitchPreferenceCompat android:key="display-account-group" android:title="@string/display_account_group" android:summary="@string/display_account_group_summary" android:defaultValue="@bool/display_account_group" />
 
-        <CheckBoxPreference android:key="minimize-app-after-copy-to-clipboard" android:title="@string/minimize_app_after_copy_to_clipboard" android:summary="@string/minimize_app_after_copy_to_clipboard_summary" android:defaultValue="@bool/minimize_app_after_copy_to_clipboard" />
+        <SwitchPreferenceCompat android:key="minimize-app-after-copy-to-clipboard" android:title="@string/minimize_app_after_copy_to_clipboard" android:summary="@string/minimize_app_after_copy_to_clipboard_summary" android:defaultValue="@bool/minimize_app_after_copy_to_clipboard" />
 
-        <CheckBoxPreference android:key="haptic-feedback" android:title="@string/haptic_feedback" android:summary="@string/haptic_feedback_summary" android:defaultValue="@bool/haptic_feedback" />
+        <SwitchPreferenceCompat android:key="haptic-feedback" android:title="@string/haptic_feedback" android:summary="@string/haptic_feedback_summary" android:defaultValue="@bool/haptic_feedback" />
 
-        <CheckBoxPreference android:key="allow-animations" android:title="@string/allow_animations" android:summary="@string/allow_animations_summary" android:defaultValue="@bool/allow_animations" />
+        <SwitchPreferenceCompat android:key="allow-animations" android:title="@string/allow_animations" android:summary="@string/allow_animations_summary" android:defaultValue="@bool/allow_animations" />
 
         <Preference android:key="theme" android:title="@string/theme" />
+
+        <SwitchPreferenceCompat android:key="use-dynamic-colors" android:title="@string/use_dynamic_colors" android:summary="@string/use_dynamic_colors_summary" android:defaultValue="@bool/use_dynamic_colors" />
 
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/security">
 
-        <CheckBoxPreference android:key="allow-insecure-certificates" android:title="@string/allow_insecure_certificates" android:summary="@string/allow_insecure_certificates_summary" android:defaultValue="@bool/allow_insecure_certificates" />
+        <SwitchPreferenceCompat android:key="allow-insecure-certificates" android:title="@string/allow_insecure_certificates" android:summary="@string/allow_insecure_certificates_summary" android:defaultValue="@bool/allow_insecure_certificates" />
 
-        <CheckBoxPreference android:key="disable-screenshots" android:title="@string/disable_screenshots" android:summary="@string/disable_screenshots_summary" android:defaultValue="@bool/disable_screenshots" />
+        <SwitchPreferenceCompat android:key="disable-screenshots" android:title="@string/disable_screenshots" android:summary="@string/disable_screenshots_summary" android:defaultValue="@bool/disable_screenshots" />
 
-        <CheckBoxPreference android:key="hide-otp-codes-automatically" android:title="@string/hide_otp_codes_automatically" android:summary="@string/hide_otp_codes_automatically_summary" android:defaultValue="@bool/hide_otp_codes_automatically" />
+        <SwitchPreferenceCompat android:key="hide-otp-codes-automatically" android:title="@string/hide_otp_codes_automatically" android:summary="@string/hide_otp_codes_automatically_summary" android:defaultValue="@bool/hide_otp_codes_automatically" />
 
-        <CheckBoxPreference android:key="show-next-otp-code" android:title="@string/show_next_otp_code" android:summary="@string/show_next_otp_code_summary" android:defaultValue="@bool/show_next_otp_code" />
+        <SwitchPreferenceCompat android:key="show-next-otp-code" android:title="@string/show_next_otp_code" android:summary="@string/show_next_otp_code_summary" android:defaultValue="@bool/show_next_otp_code" />
 
-        <CheckBoxPreference android:key="pin-access" android:title="@string/pin_access" android:summary="@string/pin_access_summary" android:defaultValue="false" />
+        <SwitchPreferenceCompat android:key="pin-access" android:title="@string/pin_access" android:summary="@string/pin_access_summary" android:defaultValue="false" />
 
-        <CheckBoxPreference android:key="pin-auto-confirm" android:title="@string/pin_auto_confirm" android:summary="@string/pin_auto_confirm_summary" android:defaultValue="false" />
+        <SwitchPreferenceCompat android:key="pin-auto-confirm" android:title="@string/pin_auto_confirm" android:summary="@string/pin_auto_confirm_summary" android:defaultValue="false" />
 
-        <CheckBoxPreference android:key="use-fingerprint-instead-of-pin-code" android:title="@string/use_fingerprint_instead_of_pin_code" android:summary="@string/use_fingerprint_instead_of_pin_code_summary" android:defaultValue="false" />
+        <SwitchPreferenceCompat android:key="use-fingerprint-instead-of-pin-code" android:title="@string/use_fingerprint_instead_of_pin_code" android:summary="@string/use_fingerprint_instead_of_pin_code_summary" android:defaultValue="false" />
 
-        <CheckBoxPreference android:key="allow-copy-server-access-tokens" android:title="@string/allow_copy_server_access_tokens" android:summary="@string/allow_copy_server_access_tokens_summary" android:defaultValue="@bool/allow_copy_server_access_tokens" />
+        <SwitchPreferenceCompat android:key="allow-copy-server-access-tokens" android:title="@string/allow_copy_server_access_tokens" android:summary="@string/allow_copy_server_access_tokens_summary" android:defaultValue="@bool/allow_copy_server_access_tokens" />
 
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/privacy">
 
-        <CheckBoxPreference android:key="download-icons-from-external-sources" android:title="@string/download_icons_from_external_sources" android:summary="@string/download_icons_from_external_sources_summary" android:defaultValue="@bool/download_icons_from_external_sources" />
+        <SwitchPreferenceCompat android:key="download-icons-from-external-sources" android:title="@string/download_icons_from_external_sources" android:summary="@string/download_icons_from_external_sources_summary" android:defaultValue="@bool/download_icons_from_external_sources" />
 
-        <CheckBoxPreference android:key="download-icons-from-external-sources-only-one-time" android:title="@string/download_icons_from_external_sources_only_one_time" android:summary="@string/download_icons_from_external_sources_only_one_time_summary" android:defaultValue="@bool/download_icons_from_external_sources_only_one_time" android:dependency="download-icons-from-external-sources" />
+        <SwitchPreferenceCompat android:key="download-icons-from-external-sources-only-one-time" android:title="@string/download_icons_from_external_sources_only_one_time" android:summary="@string/download_icons_from_external_sources_only_one_time_summary" android:defaultValue="@bool/download_icons_from_external_sources_only_one_time" android:dependency="download-icons-from-external-sources" />
 
     </PreferenceCategory>
 
@@ -62,11 +64,11 @@
 
         <Preference android:key="github-repo" android:title="@string/github_repo" android:summary="@string/github_repo_summary" />
 
-        <CheckBoxPreference android:key="auto-update-app" android:title="@string/auto_update_app" android:summary="@string/auto_update_app_summary" android:defaultValue="@bool/auto_update_app" />
+        <SwitchPreferenceCompat android:key="auto-update-app" android:title="@string/auto_update_app" android:summary="@string/auto_update_app_summary" android:defaultValue="@bool/auto_update_app" />
 
-        <CheckBoxPreference android:key="auto-update-app-include-prereleases" android:title="@string/auto_update_app_include_prereleases" android:summary="@string/auto_update_app_include_prereleases_summary" android:defaultValue="@bool/auto_update_app_include_prereleases" android:dependency="auto-update-app" />
+        <SwitchPreferenceCompat android:key="auto-update-app-include-prereleases" android:title="@string/auto_update_app_include_prereleases" android:summary="@string/auto_update_app_include_prereleases_summary" android:defaultValue="@bool/auto_update_app_include_prereleases" android:dependency="auto-update-app" />
 
-        <CheckBoxPreference android:key="auto-update-app-only-in-wifi" android:title="@string/auto_update_app_only_in_wifi" android:summary="@string/auto_update_app_only_in_wifi_summary" android:defaultValue="@bool/auto_update_app_only_in_wifi" android:dependency="auto-update-app" />
+        <SwitchPreferenceCompat android:key="auto-update-app-only-in-wifi" android:title="@string/auto_update_app_only_in_wifi" android:summary="@string/auto_update_app_only_in_wifi_summary" android:defaultValue="@bool/auto_update_app_only_in_wifi" android:dependency="auto-update-app" />
 
         <Preference android:key="check-for-updates" android:title="@string/search_for_updates" android:summary="@string/search_for_updates_summary" />
 

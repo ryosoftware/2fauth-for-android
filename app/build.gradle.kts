@@ -19,7 +19,7 @@ fun increaseVersionCode(): Int {
             properties.store(it, null)
         }
         return new_version_code
-    } 
+    }
     else {
         throw FileNotFoundException("File 'version.properties' not found")
     }
@@ -36,7 +36,7 @@ android {
         targetSdk = compileSdk
 
         versionCode = increaseVersionCode()
-        versionName = "3.34"
+        versionName = "3.35"
 
          buildConfigField(
                 "String",

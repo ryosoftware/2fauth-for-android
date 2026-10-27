@@ -5,19 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:background="?attr/selectableItemBackground"
+    android:background="?attr/selectableItemBackgroundBorderless"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/letter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:layout_gravity="center"
         android:maxLines="1"
-        style="@style/Base.TextAppearance.AppCompat.Body1" />
+        android:textAppearance="?attr/textAppearanceLabelMedium" />
 
 </LinearLayout>
-
-
-

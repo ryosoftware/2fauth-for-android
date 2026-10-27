@@ -15,6 +15,9 @@ import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
+import com.google.android.material.color.DynamicColors;
+import com.google.android.material.color.DynamicColorsOptions;
+
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
 import com.twofauth.android.utils.Preferences;
 import com.twofauth.android.utils.UI;
@@ -70,6 +73,7 @@ public class Main extends Application implements LifecycleEventObserver {
         super.onCreate();
         mMain = this;
         setTheme();
+        DynamicColors.applyToActivitiesIfAvailable(this, new DynamicColorsOptions.Builder().setPrecondition((activity, theme) -> MainPreferencesFragment.isDynamicColorsEnabled(activity)).build());
         mDebugRelease = ! BuildConfig.BUILD_TYPE.equals("release");
         final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(this);
         final Resources resources = getResources();

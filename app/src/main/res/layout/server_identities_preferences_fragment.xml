@@ -6,7 +6,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".PreferencesActivity">
 
     <FrameLayout
@@ -58,6 +57,7 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_identity_data"
+            android:contentDescription="@string/add_identity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
@@ -65,9 +65,11 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/sync_server_data"
+            android:contentDescription="@string/sync_now"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_actionbar_sync" />
+            app:srcCompat="@drawable/ic_actionbar_sync"
+            style="@style/SmallFab" />
 
     </LinearLayout>
 

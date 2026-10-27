@@ -5,6 +5,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
@@ -14,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.twofauth.android.preferences_activity.MainPreferencesFragment;
@@ -31,11 +34,14 @@ public abstract class BaseActivity extends AppCompatActivity implements Activity
 
     private boolean mOnResumeFirstExec = true;
 
+    private boolean mDynamicColorsEnabled;
+
     private final ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this);
 
     protected void onCreate(@Nullable final Bundle saved_instance_state) {
         super.onCreate(saved_instance_state);
         Main.getInstance().setTheme();
+        mDynamicColorsEnabled = MainPreferencesFragment.isDynamicColorsEnabled(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, new OnBackInvokedCallback() {
                 @Override
@@ -46,6 +52,29 @@ public abstract class BaseActivity extends AppCompatActivity implements Activity
         }
     }
 
+    private void setToolbarNavigation() {
+        final View toolbar = findViewById(R.id.toolbar);
+        if (toolbar instanceof Toolbar) { ((Toolbar) toolbar).setNavigationOnClickListener(view -> processOnBackPressed()); }
+    }
+
+    @Override
+    public void setContentView(final int layout_res_id) {
+        super.setContentView(layout_res_id);
+        setToolbarNavigation();
+    }
+
+    @Override
+    public void setContentView(final View view) {
+        super.setContentView(view);
+        setToolbarNavigation();
+    }
+
+    @Override
+    public void setContentView(final View view, final ViewGroup.LayoutParams params) {
+        super.setContentView(view, params);
+        setToolbarNavigation();
+    }
+
     protected void onPauseToHide() {}
 
     protected void onPause() {
@@ -54,6 +83,13 @@ public abstract class BaseActivity extends AppCompatActivity implements Activity
     }
 
     protected void onResumeFirstTime() {}
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        // Activities left in the back stack keep the palette they were created with until recreated
+        if (mDynamicColorsEnabled != MainPreferencesFragment.isDynamicColorsEnabled(this)) { recreate(); }
+    }
 
     protected void onResume() {
         super.onResume();

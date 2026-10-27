@@ -20,61 +20,111 @@
             android:id="@+id/accounts_list_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:layout_alignParentTop="true"
+            android:paddingBottom="8dp"
             android:orientation="vertical"
             android:visibility="gone">
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/search_bar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="56dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
-                <EditText
-                    android:id="@+id/filter_text"
-                    android:layout_width="0dp"
-                    android:layout_height="60dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp"
-                    android:maxLines="1"
-                    android:drawableStart="@drawable/ic_editset_search"
-                    android:drawablePadding="5dp"
-                    android:inputType="text"
-                    android:hint="@string/search"
-                    android:background="@drawable/border_frame" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="4dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <ImageButton
-                    android:id="@+id/server_identity_selector"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_marginEnd="10dp"
-                    android:src="@drawable/ic_server_identity"
-                    android:scaleType="centerInside"
-                    android:background="@drawable/border_frame_clickable" />
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_editset_search"
+                        android:scaleType="centerInside"
+                        android:importantForAccessibility="no"
+                        app:tint="?attr/colorOnSurfaceVariant" />
 
-            </LinearLayout>
+                    <EditText
+                        android:id="@+id/filter_text"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:background="@null"
+                        android:maxLines="1"
+                        android:inputType="text"
+                        android:imeOptions="actionSearch"
+                        android:hint="@string/search"
+                        android:importantForAutofill="no"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    <Button
+                        android:id="@+id/server_identity_selector"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/filter_by_server_identity"
+                        android:tooltipText="@string/filter_by_server_identity"
+                        app:icon="@drawable/ic_server_identity"
+                        android:visibility="gone"
+                        app:iconTint="?attr/colorOnSurfaceVariant"
+                        style="?attr/materialIconButtonStyle" />
+
+                    <Button
+                        android:id="@+id/sync_server_data"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/sync_now"
+                        android:tooltipText="@string/sync_now"
+                        app:icon="@drawable/ic_actionbar_sync"
+                        app:iconTint="?attr/colorOnSurfaceVariant"
+                        style="?attr/materialIconButtonStyle" />
+
+                    <Button
+                        android:id="@+id/open_app_settings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/settings"
+                        android:tooltipText="@string/settings"
+                        app:icon="@drawable/ic_actionbar_settings"
+                        app:iconTint="?attr/colorOnSurfaceVariant"
+                        style="?attr/materialIconButtonStyle" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/groups_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:clipToPadding="false"
+                android:scrollbars="none"
                 android:stateListAnimator="@null" />
 
-            <ProgressBar
+            <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/otp_time"
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:layout_marginTop="10dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
                 android:max="100"
-                style="?android:attr/progressBarStyleHorizontal"
+                app:trackThickness="4dp"
+                app:trackCornerRadius="2dp"
                 android:visibility="invisible" />
 
         </LinearLayout>
@@ -86,6 +136,10 @@
             android:layout_alignParentBottom="true"
             android:layout_below="@id/accounts_list_header"
             android:layout_alignWithParentIfMissing="true"
+            android:paddingStart="@dimen/accounts_list_padding"
+            android:paddingEnd="@dimen/accounts_list_padding"
+            android:paddingBottom="@dimen/content_padding_below_fab"
+            android:clipToPadding="false"
             android:stateListAnimator="@null"
             android:visibility="gone" />
 
@@ -97,18 +151,16 @@
             android:layout_below="@id/accounts_list_header"
             android:layout_marginEnd="@dimen/fab_margin"
             android:layout_alignWithParentIfMissing="true"
-            android:elevation="6dp"
-            android:stateListAnimator="@null"
             android:background="@drawable/floating_action_button_background"
             android:orientation="vertical"
             android:visibility="gone">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/accounts_list_index"
-                android:layout_width="56dp"
+                android:layout_width="36dp"
                 android:layout_height="wrap_content"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:scrollbars="none" />
 
         </LinearLayout>
@@ -131,14 +183,16 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:scaleType="centerInside"
+            android:importantForAccessibility="no"
             android:src="@drawable/ic_empty_list" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="@string/no_2fa_codes"
-            android:textColor="?android:textColorSecondary"
-            style="@style/Base.TextAppearance.AppCompat.Body2" />
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurfaceVariant" />
 
     </LinearLayout>
 

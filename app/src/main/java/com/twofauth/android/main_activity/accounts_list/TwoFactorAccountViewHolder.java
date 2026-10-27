@@ -142,7 +142,7 @@ public class TwoFactorAccountViewHolder extends RecyclerView.ViewHolder implemen
         mServerIdentityAndGroupNames.setVisibility(server_identity_and_group_names == null ? View.GONE : View.VISIBLE);
         final Bitmap bitmap = account.hasIcon() ? account.getIcon().getBitmap(context) : null;
         mIcon.setImageBitmap(bitmap);
-        mIcon.setVisibility(bitmap == null ? View.INVISIBLE : View.VISIBLE);
+        mIcon.setVisibility(bitmap == null ? View.GONE : View.VISIBLE);
         mOtp.setText(options.isUngroupOtpCodeEnabled() ? options.ungroupOtp(otp) : otp);
         mOtp.setTextColor(context.getResources().getColor((millis_until_next_otp < 0) ? R.color.otp_hidden_with_theme_background : millis_until_next_otp < OTP_IS_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_last_seconds_with_theme_background : millis_until_next_otp < OTP_IS_NEAR_TO_ABOUT_TO_EXPIRE_TIME ? R.color.otp_visible_near_of_last_seconds_with_theme_background : R.color.otp_visible_normal_with_theme_background, context.getTheme()));
         mOtp.setTag(millis_until_next_otp >= 0 ? otp : null);

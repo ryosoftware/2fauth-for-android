@@ -118,6 +118,7 @@ public class ServerIdentitiesPreferences extends PreferenceFragmentCompat implem
         for (int i = 0; i < mServerIdentities.size(); i ++) {
             final TwoFactorServerIdentityWithSyncData server_identity = mServerIdentities.get(i);
             final Preference preference = new Preference(context);
+            preference.setLayoutResource(R.layout.preference_card);
             preference.setTitle(server_identity.storedData.getTitle());
             preference.setSummary(getServerIdentitySyncDetails(context, server_identity));
             preference.setKey(String.valueOf(i));

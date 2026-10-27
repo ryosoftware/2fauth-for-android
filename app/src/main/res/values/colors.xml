@@ -4,43 +4,15 @@
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="gray">#FF49454F</color>
 
     <color name="text_icon_background">#FF1E1B21</color>
     <color name="text_icon_foreground">@color/white</color>
 
     <color name="ic_launcher_background">#FF530066</color>
 
-    <color name="floating_action_buttons_background">#FFEADDFF</color>
-    <color name="floating_action_buttons_foreground">#FF21005D</color>
-    <color name="floating_action_buttons_foreground_disabled">@color/gray</color>
-
-    <color name="border_frame_background">@android:color/transparent</color>
-    <color name="border_frame_border">@color/black</color>
-    <color name="border_frame_foreground">@color/border_frame_border</color>
-    <color name="border_frame_background_selected">@color/floating_action_buttons_background</color>
-    <color name="border_frame_border_selected">@color/floating_action_buttons_foreground</color>
-    <color name="border_frame_foreground_selected">@color/border_frame_border_selected</color>
-
-    <color name="otp_attribute_background">#FFEADDFF</color>
-    <color name="otp_attribute_background_disabled">#FFD7CCE9</color>
-    <color name="otp_attribute_background_selected">#FF6750A4</color>
-    <color name="otp_attribute_background_disabled_selected">#FF9E96AA</color>
-
-    <color name="otp_attribute_foreground">@color/otp_attribute_background_selected</color>
-    <color name="otp_attribute_foreground_disabled">@color/otp_attribute_background_disabled_selected</color>
-    <color name="otp_attribute_foreground_selected">@color/otp_attribute_background</color>
-    <color name="otp_attribute_foreground_disabled_selected">@color/otp_attribute_background_disabled</color>
-
-    <color name="otp_error">#FFB06769</color>
-
-    <color name="otp_hidden_with_theme_background">@color/gray</color>
-    <color name="otp_visible_normal_with_theme_background">@color/otp_attribute_background_selected</color>
     <color name="otp_visible_near_of_last_seconds_with_theme_background">#FFD35400</color>
     <color name="otp_visible_last_seconds_with_theme_background">#FFFF0000</color>
 
-    <color name="otp_hidden_with_button_background">@color/otp_attribute_foreground_selected</color>
-    <color name="otp_visible_normal_with_button_background">@color/otp_hidden_with_button_background</color>
     <color name="otp_visible_near_of_last_seconds_with_button_background">@color/otp_visible_near_of_last_seconds_with_theme_background</color>
     <color name="otp_visible_last_seconds_with_button_background">@color/otp_visible_last_seconds_with_theme_background</color>
 

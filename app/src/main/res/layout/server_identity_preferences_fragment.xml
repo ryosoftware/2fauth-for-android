@@ -6,7 +6,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".PreferencesActivity">
 
     <ProgressBar
@@ -38,48 +37,61 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/open_server_location"
+            android:contentDescription="@string/open_server_in_browser"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_open" />
+            app:srcCompat="@drawable/ic_actionbar_open"
+            style="@style/SmallFab" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/copy_token_to_clipboard"
+            android:contentDescription="@string/copy_access_token"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_copy" />
+            app:srcCompat="@drawable/ic_actionbar_copy"
+            style="@style/SmallFab" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/manage_groups"
+            android:contentDescription="@string/groups"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_group" />
+            app:srcCompat="@drawable/ic_actionbar_group"
+            style="@style/SmallFab" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/sync_server_data"
+            android:contentDescription="@string/sync_now"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_sync" />
+            app:srcCompat="@drawable/ic_actionbar_sync"
+            style="@style/SmallFab" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/delete_server_identity_data"
+            android:contentDescription="@string/delete_or_restore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_delete" />
+            app:srcCompat="@drawable/ic_actionbar_delete"
+            style="@style/SmallFab" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/toggle_submenu"
+            android:contentDescription="@string/more_actions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_actionbar_closed" />
+            app:srcCompat="@drawable/ic_actionbar_closed"
+            style="@style/Widget.Material3.FloatingActionButton.Secondary" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/edit_or_save_server_identity_data"
+            android:contentDescription="@string/edit_or_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/ic_actionbar_edit" />

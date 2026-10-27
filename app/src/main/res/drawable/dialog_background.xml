@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Material 3 dialog container for dialogs built by AppCompat (e.g. the preference library's) rather than MaterialAlertDialogBuilder -->
+<inset
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="24dp"
+    android:insetRight="24dp"
+    android:insetTop="24dp"
+    android:insetBottom="24dp">
+
+    <shape android:shape="rectangle">
+        <corners android:radius="28dp" />
+        <solid android:color="?attr/colorSurfaceContainerHigh" />
+    </shape>
+
+</inset>
