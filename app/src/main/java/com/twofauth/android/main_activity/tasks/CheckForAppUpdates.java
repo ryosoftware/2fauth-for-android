@@ -32,7 +32,7 @@ public class CheckForAppUpdates {
     private static final String LAST_DOWNLOADED_APP_VERSION_CODE_KEY = "last-downloaded-app-version-code";
     private static final String LAST_DOWNLOADED_APP_VERSION_IS_PRERELEASE_KEY = "last-downloaded-app-version-is-prerelease";
 
-    private static final String LATEST_RELEASES_URL = "https://api.github.com/repos/kslcsdalsadg/2fauth-for-android/releases?per_page=10&page=%PAGE%";
+    private static final String LATEST_RELEASES_URL = "https://api.github.com/repos/ryosoftware/2fauth-for-android/releases?per_page=10&page=%PAGE%";
 
     private static final String DRAFT_ENTRY_NAME = "draft";
     private static final String PRE_RELEASE_ENTRY_NAME = "prerelease";
