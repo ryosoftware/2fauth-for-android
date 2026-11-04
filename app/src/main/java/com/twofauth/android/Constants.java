@@ -5,6 +5,7 @@ import android.text.format.DateUtils;
 
 public class Constants {
     public static final Uri GITHUB_REPO = Uri.parse("https://github.com/ryosoftware/2fauth-for-android");
+    public static final String LATEST_RELEASES_URL = "https://api.github.com/repos/ryosoftware/2fauth-for-android/releases?per_page=10&page=%PAGE%";
 
     // APP Keystore aliases and other data
 
@@ -28,10 +29,8 @@ public class Constants {
     public static final String HAPTIC_FEEDBACK_KEY = "haptic-feedback";
     public static final String ALLOW_ANIMATIONS_KEY = "allow-animations";
     public static final String APP_THEME_KEY = "theme";
-    public static final String USE_DYNAMIC_COLORS_KEY = "use-dynamic-colors";
     public static final String PIN_CODE_KEY = "pin-code";
     public static final String USE_FINGERPRINT_INSTEAD_OF_PIN_CODE_KEY = "use-fingerprint-instead-of-pin-code";
-    public static final String PIN_AUTO_CONFIRM_KEY = "pin-auto-confirm";
     public static final String ALLOW_COPY_SERVER_ACCESS_TOKEN_KEY = "allow-copy-server-access-tokens";
 
     public static final String ALLOW_INSECURE_CERTIFICATES_KEY = "allow-insecure-certificates";

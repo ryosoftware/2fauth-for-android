@@ -32,8 +32,6 @@ public class CheckForAppUpdates {
     private static final String LAST_DOWNLOADED_APP_VERSION_CODE_KEY = "last-downloaded-app-version-code";
     private static final String LAST_DOWNLOADED_APP_VERSION_IS_PRERELEASE_KEY = "last-downloaded-app-version-is-prerelease";
 
-    private static final String LATEST_RELEASES_URL = "https://api.github.com/repos/ryosoftware/2fauth-for-android/releases?per_page=10&page=%PAGE%";
-
     private static final String DRAFT_ENTRY_NAME = "draft";
     private static final String PRE_RELEASE_ENTRY_NAME = "prerelease";
 
@@ -103,7 +101,7 @@ public class CheckForAppUpdates {
             JSONObject last_release = null;
             int page = 1;
             do {
-                final HttpURLConnection connection = HTTP.get(new URL(LATEST_RELEASES_URL.replace("%PAGE%", String.valueOf(page ++))), false);
+                final HttpURLConnection connection = HTTP.get(new URL(Constants.LATEST_RELEASES_URL.replace("%PAGE%", String.valueOf(page ++))), false);
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     final List<JSONObject> releases = JSON.toListOfJSONObjects(HTTP.getContentString(connection));
                     if (Lists.isEmptyOrNull(releases)) { break; }
