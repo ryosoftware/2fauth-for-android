@@ -106,6 +106,12 @@
     <string name="otp_generation_error">Error generating OTP code</string>
     <string name="otp_generation_error_for_counter">Error generating OTP code for counter #%1$d</string>
 
+    <string name="action_on_click">On Click action</string>
+    <string name="action_on_long_click">On Long Click action</string>
+    <string name="action_show_otp_code">Show current OTP code</string>
+    <string name="action_copy_otp_code_then_minimize">Copy current OTP code then minimize the App</string>
+    <string name="action_show_item_data">Show item data</string>
+
     <string name="sort_accounts_by_last_use">Sort accounts by usage</string>
     <string name="sort_accounts_by_last_use_summary">Sort accounts by usage (list first the last accounts for which an OTP code has been displayed) instead of just sorting by service name</string>
 

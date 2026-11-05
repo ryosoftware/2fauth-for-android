@@ -15,6 +15,10 @@ public class Constants {
     // App options
 
     public static final String NEW_ACCOUNT_PERIOD_KEY = "new-account-period";
+
+    public static final String ACTION_ON_CLICK_KEY = "action-on-click";
+    public static final String ACTION_ON_LONG_CLICK_KEY = "action-on-long-click";
+
     public static final String SORT_ACCOUNTS_BY_LAST_USE_KEY = "sort-accounts-by-last-use";
     public static final String ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY = "accounts-list-columns-portrait";
     public static final String ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY = "accounts-list-columns-landscape";
@@ -42,6 +46,12 @@ public class Constants {
     public static final String AUTO_UPDATE_APP_INCLUDE_PRERELEASES_KEY = "auto-update-app-include-prereleases";
     public static final String AUTO_UPDATE_APP_ONLY_IN_WIFI_KEY = "auto-update-app-only-in-wifi";
     public static final String LAST_CHECK_FOR_UPDATES_TIME_KEY = "last-check-for-updates-time";
+
+    // On-click and on-long-click actions
+
+    public static final String ACTION_SHOW_OTP_CODE = "show-otp-code";
+    public static final String ACTION_COPY_OTP_CODE_THEN_MINIMIZE_APP = "copy-otp-code-then-minimize-app";
+    public static final String ACTION_SHOW_ITEM_DATA = "show-item-data";
 
     // App Runtime options
 

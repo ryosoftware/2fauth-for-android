@@ -154,6 +154,14 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         final Resources resources = getResources();
         findPreference(SERVER_IDENTITIES_KEY).setOnPreferenceClickListener(this);
         findPreference(SERVER_IDENTITIES_KEY).setEnabled(!mLoadingServerIdentities);
+        final String[] actions_strings = new String[] { getString(R.string.action_show_otp_code), getString(R.string.action_copy_otp_code_then_minimize), getString(R.string.action_show_item_data) };
+        final String[] actions_values = new String[] { Constants.ACTION_SHOW_OTP_CODE, Constants.ACTION_COPY_OTP_CODE_THEN_MINIMIZE_APP, Constants.ACTION_SHOW_ITEM_DATA };
+        final String action_on_click = preferences.getString(Constants.ACTION_ON_CLICK_KEY, getString(R.string.action_on_click_default));
+        findPreference(Constants.ACTION_ON_CLICK_KEY).setSummary(actions_strings[Arrays.asList(actions_values).indexOf(action_on_click)]);
+        findPreference(Constants.ACTION_ON_CLICK_KEY).setOnPreferenceClickListener(this);
+        final String action_on_long_click = preferences.getString(Constants.ACTION_ON_LONG_CLICK_KEY, getString(R.string.action_on_long_click_default));
+        findPreference(Constants.ACTION_ON_LONG_CLICK_KEY).setSummary(actions_strings[Arrays.asList(actions_values).indexOf(action_on_long_click)]);
+        findPreference(Constants.ACTION_ON_LONG_CLICK_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY).setOnPreferenceChangeListener(this);
         findPreference(RESET_ACCOUNTS_LAST_USE_KEY).setOnPreferenceClickListener(this);
         final int min_columns = resources.getInteger(R.integer.accounts_list_min_columns), max_columns = resources.getInteger(R.integer.accounts_list_max_columns);
@@ -226,6 +234,26 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         if (SERVER_IDENTITIES_KEY.equals(preference.getKey())) {
             ((PreferencesActivity) getActivity()).setFragment(new ServerIdentitiesPreferences(mServerIdentities));
         }
+        else if (Constants.ACTION_ON_CLICK_KEY.equals(preference.getKey()) || Constants.ACTION_ON_LONG_CLICK_KEY.equals(preference.getKey())) {
+            final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(context);
+            final String[] strings = { getString(R.string.action_show_otp_code), getString(R.string.action_copy_otp_code_then_minimize), getString(R.string.action_show_item_data) };
+            final String[] values = { Constants.ACTION_SHOW_OTP_CODE, Constants.ACTION_COPY_OTP_CODE_THEN_MINIMIZE_APP, Constants.ACTION_SHOW_ITEM_DATA };
+            final String selected_element_value = preferences.getString(preference.getKey(), context.getString(Constants.ACTION_ON_CLICK_KEY.equals(preference.getKey()) ? R.string.action_on_click_default : R.string.action_on_long_click_default));
+            final String selected_element_string = strings[Arrays.asList(values).indexOf(selected_element_value)];
+            UI.showSelectItemFromListDialog(getActivity(), preference.getKey(), null, Arrays.asList(strings), selected_element_string, 0, 0, new OnSelectionDialogItemSelected() {
+                @Override
+                public void onItemSelected(int position) {
+                    if (position >= 0) {
+                        final String value = values[position];
+                        final SharedPreferences.Editor editor = preferences.edit();
+                        editor.putString(preference.getKey(), value);
+                        editor.apply();
+                        onSettingValueChanged(new String[] { preference.getKey() });
+                        if (isAdded()) { preference.setSummary(strings[position]); }
+                    }
+                }
+            }, null);
+        }
         else if (RESET_ACCOUNTS_LAST_USE_KEY.equals(preference.getKey())) {
             onSettingValueChanged(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY);
             preference.setEnabled(false);
@@ -239,7 +267,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                 public void onItemSelected(int position) {
                     if (position >= 0) {
                         final int value = values[position];
-                        SharedPreferences.Editor editor = Preferences.getDefaultSharedPreferences(context).edit();
+                        final SharedPreferences.Editor editor = Preferences.getDefaultSharedPreferences(context).edit();
                         if (value < 0) { editor.putBoolean(Constants.UNGROUP_OTP_CODE_KEY, false); }
                         else { editor.putBoolean(Constants.UNGROUP_OTP_CODE_KEY, true).putInt(Constants.UNGROUPED_OTP_CODE_PART_SIZE_KEY, value); }
                         editor.apply();

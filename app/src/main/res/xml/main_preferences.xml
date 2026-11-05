@@ -6,6 +6,10 @@
 
     <PreferenceCategory android:title="@string/appearance">
 
+        <Preference android:key="action-on-click" android:title="@string/action_on_click" />
+
+        <Preference android:key="action-on-long-click" android:title="@string/action_on_long_click" />
+
         <SwitchPreferenceCompat android:key="sort-accounts-by-last-use" android:title="@string/sort_accounts_by_last_use" android:summary="@string/sort_accounts_by_last_use_summary" android:defaultValue="@bool/sort_accounts_by_last_use" />
 
         <Preference android:key="reset-accounts-last-use-data" android:title="@string/reset_accounts_last_use_data" android:summary="@string/reset_accounts_last_use_data_summary" android:dependency="sort-accounts-by-last-use" />

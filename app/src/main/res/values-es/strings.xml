@@ -107,6 +107,12 @@
     <string name="otp_generation_error">Error generando el código OTP</string>
     <string name="otp_generation_error_for_counter">Error generando el código OTP para el contador #%1$d</string>
 
+    <string name="action_on_click">Acción al hacer clic</string>
+    <string name="action_on_long_click">Acción al hacer clic largo</string>
+    <string name="action_show_otp_code">Mostrar código OTP</string>
+    <string name="action_copy_otp_code_then_minimize">Copiar código OTP y minimizar la app</string>
+    <string name="action_show_item_data">Mostrar datos del elemento</string>
+
     <string name="sort_accounts_by_last_use">Ordenar cuentas según uso</string>
     <string name="sort_accounts_by_last_use_summary">Ordenar las cuentas según el uso (primero las últimas cuentas para las que se ha mostrado un código OTP) en lugar de ordenarlas simplemente por el nombre de servicio</string>
 

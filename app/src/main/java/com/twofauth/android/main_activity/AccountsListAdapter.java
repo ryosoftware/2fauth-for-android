@@ -2,6 +2,7 @@ package com.twofauth.android.main_activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.twofauth.android.Constants;
 import com.twofauth.android.utils.Lists;
 import com.twofauth.android.R;
+import com.twofauth.android.utils.Preferences;
 import com.twofauth.android.utils.RecyclerViews;
 import com.twofauth.android.RepeatingEvents;
 import com.twofauth.android.RepeatingEvents.OnTickListener;
@@ -271,8 +273,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    @Override
-    public synchronized void onClick(final int position) {
+    private void onShowOtpCodeActionRequested(final int position) {
         final int older_active_account_position = mActiveAccountPosition;
         onOtpCodeHidden();
         mActiveAccountPosition = (older_active_account_position == position) ? RecyclerView.NO_POSITION : position;
@@ -280,21 +281,54 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         else { RecyclerViews.notifyDataSetChanged(this, mRecyclerView); }
         if (mActiveAccountPosition != RecyclerView.NO_POSITION) {
             final TwoFactorAccount account = getItem(position);
-            final String otp_type = account.getOtpType();
-            account.setLastUse(System.currentTimeMillis());
-            if (Constants.OTP_TYPE_HOTP.equals(otp_type)) {
-                account.setCounter(account.getCounter() + 1);
-                onAccountNeedsToBeSynchronized(account);
+            if (account != null) {
+                final String otp_type = account.getOtpType();
+                account.setLastUse(System.currentTimeMillis());
+                if (Constants.OTP_TYPE_HOTP.equals(otp_type)) {
+                    account.setCounter(account.getCounter() + 1);
+                    onAccountNeedsToBeSynchronized(account);
+                }
+                RecyclerViews.notifyItemChanged(this, mRecyclerView, mActiveAccountPosition);
+                onOtpCodeAnimated(true, account);
+                if (Constants.OTP_TYPE_TOTP.equals(otp_type) || Constants.OTP_TYPE_STEAM.equals(otp_type)) {
+                    RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, account.getMillisUntilNextOtpCompleteCycle(), account);
+                }
             }
-            RecyclerViews.notifyItemChanged(this, mRecyclerView, mActiveAccountPosition);
-            onOtpCodeAnimated(true, account);
-            if (Constants.OTP_TYPE_TOTP.equals(otp_type) || Constants.OTP_TYPE_STEAM.equals(otp_type)) { RepeatingEvents.start(mRepeatingEventsIdentifier, this, DateUtils.SECOND_IN_MILLIS, account.getMillisUntilNextOtpCompleteCycle(), account); }
         }
+    }
+
+    private void onCopyOtpCodeToClipboardThenMinimizeAppActionRequested(final int position) {
+        if (position != RecyclerView.NO_POSITION) {
+            final TwoFactorAccount account = getItem(position);
+            final Context context = mRecyclerView.getContext();
+            if ((account != null) && (context instanceof Activity)) {
+                account.setLastUse(System.currentTimeMillis());
+                TwoFactorAccountViewHolder.copyToClipboard((Activity) context, account);
+                ((Activity) context).finish();
+            }
+        }
+    }
+
+    private void onShowItemDataActionRequested(final int position) {
+        mOnOtpAccountClickListener.onOtpAccountClick(getItem(position));
+    }
+
+    private void onActionWillBeExecuted(final int position, final @NotNull String key, final @NotNull String default_value) {
+        final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(mRecyclerView.getContext());
+        final String action = preferences.getString(key, default_value);
+        if (Constants.ACTION_SHOW_OTP_CODE.equals(action)) onShowOtpCodeActionRequested(position);
+        else if (Constants.ACTION_COPY_OTP_CODE_THEN_MINIMIZE_APP.equals(action)) onCopyOtpCodeToClipboardThenMinimizeAppActionRequested(position);
+        else onShowItemDataActionRequested(position);
+    }
+
+    @Override
+    public synchronized void onClick(final int position) {
+        onActionWillBeExecuted(position, Constants.ACTION_ON_CLICK_KEY, mRecyclerView.getContext().getString(R.string.action_on_click_default));
     }
 
     @Override
     public void onLongClick(final int position) {
-        mOnOtpAccountClickListener.onOtpAccountClick(getItem(position));
+        onActionWillBeExecuted(position, Constants.ACTION_ON_LONG_CLICK_KEY, mRecyclerView.getContext().getString(R.string.action_on_long_click_default));
     }
 
     @Override
@@ -305,13 +339,13 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 onOtpCodeAnimated(false, (TwoFactorAccount) object);
             }
             else {
-                onClick(RecyclerView.NO_POSITION);
+                onShowOtpCodeActionRequested(RecyclerView.NO_POSITION);
             }
         }
     }
 
     public synchronized void onPause() {
-        if (mActiveAccountPosition != RecyclerView.NO_POSITION) { onClick(-1); }
+        if (mActiveAccountPosition != RecyclerView.NO_POSITION) { onShowOtpCodeActionRequested(-1); }
         mResumed = false;
         updateViewsVisibility();
     }

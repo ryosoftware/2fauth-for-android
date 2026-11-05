@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<resources>
+<resources translatable="false">
 
     <integer name="new_account_period_in_minutes">2880</integer>
 
     <bool name="sync_on_startup">false</bool>
     <bool name="sync_immediately">true</bool>
+
+    <string name="action_on_click_default">show-otp-code</string>
+    <string name="action_on_long_click_default">show-item-data</string>
 
     <bool name="sort_accounts_by_last_use">false</bool>
 
