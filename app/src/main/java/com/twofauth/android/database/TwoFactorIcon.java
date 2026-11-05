@@ -66,6 +66,12 @@ public class TwoFactorIcon extends TableRow {
         mSourceId = null;
     }
 
+    public boolean equals(@Nullable final TwoFactorIcon icon) {
+        if (icon == null) return false;
+        if (! Strings.equals(mSource, icon.getSource())) return false;
+        if (! Strings.equals(mSourceId, icon.getSourceId())) return false;
+        return true;
+    }
     public boolean isReferenced(@NotNull final SQLiteDatabase database) {
         try (final Cursor cursor = database.query(true, TwoFactorAccountsHelper.TABLE_NAME, new String[] { "COUNT(*)" }, String.format("%s=?", TwoFactorAccount.ICON), new String[] { String.valueOf(_id) }, null, null, null, null, null)) {
             if ((cursor != null) && (cursor.getCount() == 1) && cursor.moveToFirst()) {

@@ -430,6 +430,30 @@ public class TwoFactorAccount extends SynceableTableRow {
         }
     }
 
+    public boolean equals(@Nullable final TwoFactorAccount account) {
+        if (account == null) return false;
+        if ((mServerIdentity == null) && (account.getServerIdentity() != null)) return false;
+        if ((mServerIdentity != null) && (! mServerIdentity.equals(account.getServerIdentity()))) return false;
+        if (! Strings.equals(mService, account.getService())) return false;
+        if (! Strings.equals(mAccount, account.getAccount())) return false;
+        if ((mGroup == null) && (account.getGroup() != null)) return false;
+        if ((mGroup != null) && (! mGroup.equals(account.getGroup()))) return false;
+        if ((mIcon == null) && (account.getIcon() != null)) return false;
+        if ((mIcon != null) && (! mIcon.equals(account.getIcon()))) return false;
+        if (! Strings.equals(mOtpType, account.getOtpType())) return false;
+        if (! Strings.equals(mSecret, account.getSecret())) return false;
+        if (mOtpLength != account.getOtpLength()) return false;
+        if (! Strings.equals(mAlgorithm, account.getAlgorithm())) return false;
+        if (mPeriod != account.getPeriod()) return false;
+        if (mCounter != account.getCounter()) return false;
+        if ((mPinTime == 0) && (account.getPinTime() != 0)) return false;
+        if ((mPinTime != 0) && (account.getPinTime() == 0)) return false;
+        if (mIsShared ^ account.isShared()) return false;
+        if (mIsSharedWithAll ^ account.isSharedWithAll()) return false;
+        if (mIsBorrowed ^ account.isBorrowed()) return false;
+        if (! Strings.equals(mSharedBy, account.getSharedBy())) return false;
+        return true;
+    }
     public long getAddTime() { return mAddTime; }
 
     private void setAddTime(long add_time) {

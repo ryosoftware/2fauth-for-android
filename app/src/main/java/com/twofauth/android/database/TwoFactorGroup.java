@@ -74,6 +74,13 @@ public class TwoFactorGroup extends SynceableTableRow {
         }
     }
 
+    public boolean equals(@Nullable final TwoFactorGroup group) {
+        if (group == null) return false;
+        if ((mServerIdentity == null) && (group.getServerIdentity() != null)) return false;
+        if ((mServerIdentity != null) && (! mServerIdentity.equals(group.getServerIdentity()))) return false;
+        if (! Strings.equals(mName, group.getName())) return false;
+        return true;
+    }
     public boolean hasServerIdentity() {
         return ((mServerIdentity != null) && (mServerIdentity.getRemoteId() != 0));
     }

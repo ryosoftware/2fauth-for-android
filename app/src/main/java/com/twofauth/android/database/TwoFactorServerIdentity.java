@@ -109,6 +109,14 @@ public class TwoFactorServerIdentity extends TableRow {
         setDirty(server_identity.isDirty());
     }
 
+    public boolean equals(@Nullable final TwoFactorServerIdentity identity) {
+        if (identity == null) return false;
+        if (! Strings.equals(mServer, identity.getServer())) return false;
+        if (! Strings.equals(mToken, identity.getToken())) return false;
+        if (mRemoteId != identity.getRemoteId()) return false;
+        return true;
+    }
+
     public @Nullable String getTitle() { return hasLabel() ? getLabel() : Strings.isEmptyOrNull(mName) ? getServer() : getName(); }
 
     public boolean hasLabel() { return ! Strings.isEmptyOrNull(getLabel()); }

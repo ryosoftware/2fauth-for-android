@@ -173,11 +173,14 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     public synchronized void setItems(final List<TwoFactorAccount> items) {
+        final int active_account_position = mActiveAccountPosition;
+        final @Nullable TwoFactorAccount active_account = (active_account_position != RecyclerView.NO_POSITION) ? mItems.get(active_account_position) : null;
         onOtpCodeHidden();
         Lists.setItems(mItems, items);
         setIndexItems(mItems);
         updateViewsVisibility();
         RecyclerViews.notifyDataSetChanged(this, mRecyclerView);
+        if ((active_account != null) && (active_account_position < mItems.size()) && (active_account.equals(mItems.get(active_account_position)))) onShowOtpCodeActionRequested(active_account_position);
     }
 
     public synchronized void notifyItemChanged(TwoFactorAccount account) {
