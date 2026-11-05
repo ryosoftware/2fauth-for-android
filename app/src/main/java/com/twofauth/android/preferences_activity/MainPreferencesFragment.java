@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentResultListener;
+import androidx.preference.SwitchPreferenceCompat;
 import androidx.preference.TwoStatePreference;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceClickListener;
@@ -55,6 +56,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainPreferencesFragment extends PreferenceFragmentCompat implements OnServerIdentitiesLoadedListener, OnCheckForUpdatesListener,  OnAccountsLastUsageDoneListener, OnAuthenticatorFinishListener, OnPinRequestFinishedListener, OnBiometricAuthenticationFinishedListener, OnPreferenceClickListener, OnPreferenceChangeListener, FragmentResultListener {
+    private static final String ALLOW_SCREENSHOTS_KEY = "allow-screenshots";
     public static enum Theme { LIGHT, DARK };
 
     public static final String SERVER_IDENTITIES_CHANGED = "server-identities-changed";
@@ -174,7 +176,8 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.USE_DYNAMIC_COLORS_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.USE_DYNAMIC_COLORS_KEY).setVisible(DynamicColors.isDynamicColorAvailable());
         findPreference(Constants.ALLOW_INSECURE_CERTIFICATES_KEY).setOnPreferenceChangeListener(this);
-        findPreference(Constants.DISABLE_SCREENSHOTS_KEY).setOnPreferenceChangeListener(this);
+        ((SwitchPreferenceCompat) findPreference(ALLOW_SCREENSHOTS_KEY)).setChecked(! preferences.getBoolean(Constants.DISABLE_SCREENSHOTS_KEY, context.getResources().getBoolean(R.bool.disable_screenshots)));
+        findPreference(ALLOW_SCREENSHOTS_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.HIDE_OTP_AUTOMATICALLY_KEY).setOnPreferenceChangeListener(this);
         findPreference(Constants.SHOW_NEXT_OTP_CODE_KEY).setOnPreferenceChangeListener(this);
         findPreference(PIN_ACCESS_ENABLED_KEY).setOnPreferenceChangeListener(this);
@@ -312,7 +315,8 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
             // The new value is persisted after this listener returns, so recreate once it is stored
             getListView().post(() -> { if (isAdded()) { getActivity().recreate(); } });
         }
-        else if (Constants.DISABLE_SCREENSHOTS_KEY.equals(preference.getKey())) {
+        else if (ALLOW_SCREENSHOTS_KEY.equals(preference.getKey())) {
+            Preferences.getDefaultSharedPreferences(getContext()).edit().putBoolean(Constants.DISABLE_SCREENSHOTS_KEY, ! (Boolean) new_value).apply();
             UI.showMessageDialog(getActivity(), R.string.change_will_be_applied_next_time_you_start_the_app);
         }
         else if (PIN_ACCESS_ENABLED_KEY.equals(preference.getKey())) {
