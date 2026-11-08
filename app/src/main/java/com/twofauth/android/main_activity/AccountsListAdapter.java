@@ -302,12 +302,13 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private void onCopyOtpCodeToClipboardThenMinimizeAppActionRequested(final int position) {
         if (position != RecyclerView.NO_POSITION) {
-            final TwoFactorAccount account = getItem(position);
             final Context context = mRecyclerView.getContext();
+            final TwoFactorAccount account = getItem(position);
             if ((account != null) && (context instanceof Activity)) {
+                final Activity activity = context
                 account.setLastUse(System.currentTimeMillis());
-                TwoFactorAccountViewHolder.copyToClipboard((Activity) context, account);
-                ((Activity) context).finish();
+                TwoFactorAccountViewHolder.copyToClipboard(activity, account);
+                if (!activity.isFinishing()) activity.finish();
             }
         }
     }
