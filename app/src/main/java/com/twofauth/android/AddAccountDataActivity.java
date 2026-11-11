@@ -16,16 +16,13 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 
 import androidx.activity.result.ActivityResult;
-import androidx.core.content.FileProvider;
 
-import com.twofauth.android.database.TwoFactorAccount;
 import com.twofauth.android.api_tasks.DecodeQR;
 import com.twofauth.android.api_tasks.DecodeQR.OnQRDecodedListener;
 import com.twofauth.android.api_tasks.LoadServerIdentities;
 import com.twofauth.android.api_tasks.LoadServerIdentities.OnServerIdentitiesLoadedListener;
 import com.twofauth.android.database.TwoFactorServerIdentity;
 import com.twofauth.android.utils.Bitmaps;
-import com.twofauth.android.utils.Files;
 import com.twofauth.android.utils.JSON;
 import com.twofauth.android.utils.Lists;
 import com.twofauth.android.utils.Threads;
@@ -145,6 +142,10 @@ public class AddAccountDataActivity extends BaseActivity implements OnServerIden
         if (! isFinishedOrFinishing()) {
             if (object == null) {
                 UI.showToast(this, R.string.cannot_decode_selected_image);
+                findViewById(R.id.qr_layout).setVisibility(View.GONE);
+            }
+            else if (object.has(Constants.ERROR_KEY)) {
+                UI.showMessageDialog(this, object.optString(Constants.ERROR_KEY));
                 findViewById(R.id.qr_layout).setVisibility(View.GONE);
             }
             else {

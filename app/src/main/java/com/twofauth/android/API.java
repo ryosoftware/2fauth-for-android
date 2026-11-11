@@ -492,6 +492,11 @@ public class API {
                 }
                 return object;
             }
+            else if (Strings.equals(uri.getScheme(), "otpauth-migration")) {
+                final JSONObject object = new JSONObject();
+                object.put(Constants.ERROR_KEY, context.getString(R.string.otpauth_migration_qr_isnt_supported));
+                return object;
+            }
         }
         return null;
     }

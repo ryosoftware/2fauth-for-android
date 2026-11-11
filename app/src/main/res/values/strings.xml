@@ -235,6 +235,7 @@
     <string name="select_a_image">Select an image</string>
     <string name="cannot_load_selected_image">Cannot load selected image</string>
     <string name="cannot_decode_selected_image">Cannot decode selected image</string>
+    <string name="otpauth_migration_qr_isnt_supported">The QR code you have entered represents a migration and includes more than one account.\n\nUnfortunately, this app is not designed to add codes other than one at a time.</string>
 
     <string name="server_identity">Server identity</string>
     <string name="service">Service</string>

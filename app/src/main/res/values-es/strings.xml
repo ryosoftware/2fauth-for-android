@@ -236,6 +236,7 @@
     <string name="select_a_image">Seleccione una imagen</string>
     <string name="cannot_load_selected_image">No se ha podido cargar la imagen</string>
     <string name="cannot_decode_selected_image">No se ha podido decodificar la imagen</string>
+    <string name="otpauth_migration_qr_isnt_supported">El código QR que ha introducido representa una migración de múltiples cuentas.\n\nLo lamentamos, pero esta app no está preparada para añadir los códigos más que uno por uno.</string>
 
     <string name="server_identity">Identidad</string>
     <string name="service">Servicio</string>

@@ -7,6 +7,7 @@ public class Constants {
     public static final Uri GITHUB_REPO = Uri.parse("https://github.com/ryosoftware/2fauth-for-android");
     public static final String LATEST_RELEASES_URL = "https://api.github.com/repos/ryosoftware/2fauth-for-android/releases?per_page=10&page=%PAGE%";
 
+    public static final String ERROR_KEY = "error";
     // APP Keystore aliases and other data
 
     public static final String APP_DATA_ENCRYPTION_KEYSTORE_ENTRY_NAME = "encryption-key";
