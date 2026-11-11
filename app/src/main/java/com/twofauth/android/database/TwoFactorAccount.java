@@ -519,6 +519,7 @@ public class TwoFactorAccount extends SynceableTableRow {
         if (! isDeleted()) {
             mGroup = group;
             setDirty(GROUP, true);
+            setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
         }
     }
 
@@ -534,6 +535,7 @@ public class TwoFactorAccount extends SynceableTableRow {
         if (! isDeleted()) {
             mIcon = icon;
             setDirty(ICON, true);
+            setDirty(STATUS, mStatus = STATUS_NOT_SYNCED);
         }
     }
 

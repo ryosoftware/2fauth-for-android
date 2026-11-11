@@ -739,7 +739,6 @@ public class EditAccountDataActivity extends BaseActivityWithTextController impl
                         group.setName(name);
                         mGroups.computeIfAbsent(current_server_identity.getRowId(), k -> new ArrayList<TwoFactorGroup>()).add(group);
                         mCurrentAccountData.setGroup(group);
-                        mCurrentAccountData.setStatus(TwoFactorAccount.STATUS_NOT_SYNCED);
                         mGroupSpinner.setSelection(mGroups.get(current_server_identity.getRowId()).size() - 1 + 2);
                         setSelectableGroups();
                     }
