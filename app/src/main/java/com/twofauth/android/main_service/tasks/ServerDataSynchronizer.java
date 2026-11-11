@@ -224,6 +224,26 @@ public class ServerDataSynchronizer
             }
         }
 
+        private void reuseLocalGroups(@NotNull final SQLiteDatabase database, @NotNull final TwoFactorServerIdentity server_identity, @Nullable final List<TwoFactorGroup> server_loaded_groups) throws Exception {
+            if (server_loaded_groups != null) {
+                final List<TwoFactorGroup> local_groups = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database, server_identity);
+                if (local_groups != null) {
+                    final Map<Integer, TwoFactorGroup> local_groups_map = new HashMap<Integer, TwoFactorGroup>();
+                    for (final TwoFactorGroup local_group : local_groups) {
+                        if (local_group.getRemoteId() > 0) { local_groups_map.put(local_group.getRemoteId(), local_group); }
+                    }
+                    for (int i = 0; i < server_loaded_groups.size(); i ++) {
+                        final TwoFactorGroup server_group = server_loaded_groups.get(i), local_group = local_groups_map.get(server_group.getRemoteId());
+                        if (local_group != null) {
+                            local_group.setName(server_group.getName());
+                            local_group.setStatus(SynceableTableRow.STATUS_DEFAULT);
+                            server_loaded_groups.set(i, local_group);
+                        }
+                    }
+                }
+            }
+        }
+
         private void removeNotReferencedData(@NotNull final SQLiteDatabase database) throws Exception {
             final List<TwoFactorGroup> groups = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(database);
             if (groups != null) {
@@ -271,6 +291,7 @@ public class ServerDataSynchronizer
                                     // Gets server data (we raise an exception if we can't access data)
                                     final List<JSONObject> server_loaded_accounts_raw = API.getAccounts(server_identity, mService, true);
                                     final List<TwoFactorGroup> server_loaded_groups = API.getGroups(server_identity, mService, true);
+                                    reuseLocalGroups(database, server_identity, server_loaded_groups);
                                     setAccountGroup(server_loaded_accounts_raw, server_loaded_groups);
                                     // Icons are less relevant than other data (we do not raise an exception on network error)
                                     API.getIcons(database, mService, server_identity, server_loaded_accounts_raw, false);
