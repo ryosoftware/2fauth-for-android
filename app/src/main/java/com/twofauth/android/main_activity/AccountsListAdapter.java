@@ -305,7 +305,7 @@ public class AccountsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final Context context = mRecyclerView.getContext();
             final TwoFactorAccount account = getItem(position);
             if ((account != null) && (context instanceof Activity)) {
-                final Activity activity = context
+                final Activity activity = (Activity) context;
                 account.setLastUse(System.currentTimeMillis());
                 TwoFactorAccountViewHolder.copyToClipboard(activity, account);
                 if (!activity.isFinishing()) activity.finish();
