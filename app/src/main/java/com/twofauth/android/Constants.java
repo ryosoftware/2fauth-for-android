@@ -20,6 +20,8 @@ public class Constants {
     public static final String ACTION_ON_LONG_CLICK_KEY = "action-on-long-click";
 
     public static final String SORT_ACCOUNTS_BY_LAST_USE_KEY = "sort-accounts-by-last-use";
+
+    public static final String REMEMBER_LAST_ACTIVE_IDENTITY_AND_GROUP = "remember-last-active-identity-and-group";
     public static final String ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY = "accounts-list-columns-portrait";
     public static final String ACCOUNTS_LIST_COLUMNS_IN_LANDSCAPE_MODE_KEY = "accounts-list-columns-landscape";
     public static final String UNGROUP_OTP_CODE_KEY = "ungroup-otp-code";
@@ -57,6 +59,8 @@ public class Constants {
 
     public static final String FILTERING_BY_SERVER_IDENTITY_KEY = "filtering-by-server-identity";
     public static final String FILTERING_BY_GROUP_KEY = "filtering-by-group";
+    public static final String ACTIVE_SERVER_IDENTITY_ID_KEY = "active-server-identity-id";
+    public static final String ACTIVE_GROUP_ID_KEY = "active-group-id";
     public static final String SERVER_IDENTITIES_COUNT_KEY = "server-identities-count";
 
     // Relevant fields from a 2FA account

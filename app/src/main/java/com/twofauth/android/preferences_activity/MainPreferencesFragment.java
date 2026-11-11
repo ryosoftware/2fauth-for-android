@@ -163,6 +163,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         findPreference(Constants.ACTION_ON_LONG_CLICK_KEY).setSummary(actions_strings[Arrays.asList(actions_values).indexOf(action_on_long_click)]);
         findPreference(Constants.ACTION_ON_LONG_CLICK_KEY).setOnPreferenceClickListener(this);
         findPreference(Constants.SORT_ACCOUNTS_BY_LAST_USE_KEY).setOnPreferenceChangeListener(this);
+        findPreference(Constants.REMEMBER_LAST_ACTIVE_IDENTITY_AND_GROUP).setOnPreferenceChangeListener(this);
         findPreference(RESET_ACCOUNTS_LAST_USE_KEY).setOnPreferenceClickListener(this);
         final int min_columns = resources.getInteger(R.integer.accounts_list_min_columns), max_columns = resources.getInteger(R.integer.accounts_list_max_columns);
         ((SliderPreference) findPreference(Constants.ACCOUNTS_LIST_COLUMNS_IN_PORTRAIT_MODE_KEY)).setMin(min_columns);
@@ -342,6 +343,9 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
         else if (Constants.USE_DYNAMIC_COLORS_KEY.equals(preference.getKey())) {
             // The new value is persisted after this listener returns, so recreate once it is stored
             getListView().post(() -> { if (isAdded()) { getActivity().recreate(); } });
+        }
+        else if (Constants.REMEMBER_LAST_ACTIVE_IDENTITY_AND_GROUP.equals(preference.getKey())) {
+            Preferences.getDefaultSharedPreferences(getContext()).edit().putBoolean(Constants.REMEMBER_LAST_ACTIVE_IDENTITY_AND_GROUP, (Boolean) new_value).apply();
         }
         else if (ALLOW_SCREENSHOTS_KEY.equals(preference.getKey())) {
             Preferences.getDefaultSharedPreferences(getContext()).edit().putBoolean(Constants.DISABLE_SCREENSHOTS_KEY, ! (Boolean) new_value).apply();

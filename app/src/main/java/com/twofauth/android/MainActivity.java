@@ -19,6 +19,7 @@ import androidx.activity.result.ActivityResultCallback;
 
 import android.text.Editable;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -178,10 +179,49 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         mFilterTextEditText.addTextChangedListener(this);
         mServerIdentitySelector = findViewById(R.id.server_identity_selector);
         mServerIdentitySelector.setOnClickListener(this);
-        preferences.edit().remove(Constants.FILTERING_BY_SERVER_IDENTITY_KEY).remove(Constants.FILTERING_BY_GROUP_KEY).apply();
+        restoreActiveFilters();
         MainService.startService(this, true);
         if (preferences.getLong(Constants.LAST_CHECK_FOR_UPDATES_TIME_KEY, 0) + AUTO_CHECK_FOR_UPDATES_MIN_INTERVAL < System.currentTimeMillis()) { checkForAppUpdates(); }
         Vibrator.vibrate(this, Constants.EXTRA_SHORT_HAPTIC_FEEDBACK);
+    }
+
+    private boolean isRememberingActiveFilters() {
+        return Preferences.getDefaultSharedPreferences(this).getBoolean(Constants.REMEMBER_LAST_ACTIVE_IDENTITY_AND_GROUP, getResources().getBoolean(R.bool.remember_last_active_identity_and_group));
+    }
+
+    private void restoreActiveFilters() {
+        final SharedPreferences preferences = Preferences.getDefaultSharedPreferences(this);
+        if (isRememberingActiveFilters()) {
+            final long server_identity_id = preferences.getLong(Constants.ACTIVE_SERVER_IDENTITY_ID_KEY, -1);
+            final long group_id = preferences.getLong(Constants.ACTIVE_GROUP_ID_KEY, -1);
+            try {
+                if (server_identity_id >= 0) { mActiveServerIdentity = Main.getInstance().getDatabaseHelper().getTwoFactorServerIdentitiesHelper().get(server_identity_id); }
+                if (group_id >= 0) { mActiveGroup = Main.getInstance().getDatabaseHelper().getTwoFactorGroupsHelper().get(group_id); }
+            }
+            catch (Exception e) {
+                Log.e(BuildConfig.TAG, "Exception while trying to restore active filters", e);
+            }
+            if ((mActiveServerIdentity != null) && (mActiveGroup != null) && (mActiveGroup.getServerIdentity() != null) && (mActiveGroup.getServerIdentity().getRowId() != mActiveServerIdentity.getRowId())) { mActiveGroup = null; }
+        }
+        saveActiveFilters();
+    }
+
+    private void saveActiveFilters() {
+        final SharedPreferences.Editor editor = Preferences.getDefaultSharedPreferences(this).edit();
+        if (isRememberingActiveFilters()) {
+            if (mActiveServerIdentity == null) { editor.remove(Constants.ACTIVE_SERVER_IDENTITY_ID_KEY); }
+            else { editor.putLong(Constants.ACTIVE_SERVER_IDENTITY_ID_KEY, mActiveServerIdentity.getRowId()); }
+            if (mActiveGroup == null) { editor.remove(Constants.ACTIVE_GROUP_ID_KEY); }
+            else { editor.putLong(Constants.ACTIVE_GROUP_ID_KEY, mActiveGroup.getRowId()); }
+        }
+        else { editor.remove(Constants.ACTIVE_SERVER_IDENTITY_ID_KEY).remove(Constants.ACTIVE_GROUP_ID_KEY); }
+        editor.putBoolean(Constants.FILTERING_BY_SERVER_IDENTITY_KEY, mActiveServerIdentity != null).putBoolean(Constants.FILTERING_BY_GROUP_KEY, mActiveGroup != null).apply();
+    }
+
+    private void clearActiveFilters() {
+        mActiveServerIdentity = null;
+        mActiveGroup = null;
+        Preferences.getDefaultSharedPreferences(this).edit().remove(Constants.ACTIVE_SERVER_IDENTITY_ID_KEY).remove(Constants.ACTIVE_GROUP_ID_KEY).remove(Constants.FILTERING_BY_SERVER_IDENTITY_KEY).remove(Constants.FILTERING_BY_GROUP_KEY).apply();
     }
 
     @Override
@@ -433,6 +473,14 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
             mGroups = groups;
             mAccounts = accounts;
             mAlphaSortedAccounts = alpha_sorted_accounts;
+            if ((mActiveServerIdentity != null) && (mServerIdentities != null)) {
+                for (final TwoFactorServerIdentity server_identity : mServerIdentities) {
+                    if (server_identity.getRowId() == mActiveServerIdentity.getRowId()) {
+                        mActiveServerIdentity = server_identity;
+                        break;
+                    }
+                }
+            }
             mServerIdentitySelector.setVisibility(Lists.isSizeGreaterOrEqualsTo(mServerIdentities, 2) ? View.VISIBLE : View.GONE);
             mAccountsListHeader.setVisibility(mUnlocked ? View.VISIBLE : View.GONE);
             setFilterTextAvailability();
@@ -453,6 +501,14 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
             mAccountsListAdapter.setItems(mFilteredAccounts = accounts);
             mAccountsListAdapter.setViews(mAccountsListRecyclerView, any_filter_applied ? mAccountsListRecyclerView : mEmptyView);
             final List<TwoFactorGroup> groups = (mActiveServerIdentity == null) ? (mGroups == null) ? null : mGroups.get(-1L) : mGroups.get(mActiveServerIdentity.getRowId());
+            if ((mActiveGroup != null) && (groups != null)) {
+                for (final TwoFactorGroup group : groups) {
+                    if (group.getRowId() == mActiveGroup.getRowId()) {
+                        mActiveGroup = group;
+                        break;
+                    }
+                }
+            }
             mGroupsListAdapter.setItems(groups, mActiveGroup);
             mGroupsListRecyclerView.setVisibility(Lists.isEmptyOrNull(groups) ? View.GONE : View.VISIBLE);
             if (any_filter_applied) { mEmptyView.setVisibility(View.GONE); }
@@ -470,9 +526,11 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
             @Override
             public void onItemSelected(final int position) {
                 final TwoFactorServerIdentity active_server_identity = ((position <= 0) || (position > mServerIdentities.size())) ? null : mServerIdentities.get(position - 1);
-                if (mActiveServerIdentity != active_server_identity) {
+                final long active_server_identity_id = (active_server_identity == null) ? -1 : active_server_identity.getRowId(), previous_active_server_identity_id = (mActiveServerIdentity == null) ? -1 : mActiveServerIdentity.getRowId();
+                if (active_server_identity_id != previous_active_server_identity_id) {
+                    if ((active_server_identity != null) && (mActiveGroup != null) && (mActiveGroup.getServerIdentity() != null) && (mActiveGroup.getServerIdentity().getRowId() != active_server_identity.getRowId())) { mActiveGroup = null; }
                     mActiveServerIdentity = active_server_identity;
-                    Preferences.getDefaultSharedPreferences(getBaseContext()).edit().putBoolean(Constants.FILTERING_BY_SERVER_IDENTITY_KEY, mActiveServerIdentity != null).apply();
+                    saveActiveFilters();
                     onAppearanceOptionsChanged();
                     filterData();
                 }
@@ -484,7 +542,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
         final long active_group_id = (active_group == null) ? -1 : active_group.getRowId(), previous_active_group_id = (mActiveGroup == null) ? -1 : mActiveGroup.getRowId();
         if (active_group_id != previous_active_group_id)  {
             mActiveGroup = active_group;
-            Preferences.getDefaultSharedPreferences(this).edit().putBoolean(Constants.FILTERING_BY_GROUP_KEY, mActiveGroup != null).apply();
+            saveActiveFilters();
             onAppearanceOptionsChanged();
             filterData();
         }
@@ -557,9 +615,7 @@ public class MainActivity extends BaseActivityWithTextController implements OnMa
     protected void processOnBackPressed() {
         if ((mActiveServerIdentity != null) || (mActiveGroup != null) || (! mFilterTextEditText.getText().toString().isEmpty())) {
             mFilterTextEditText.setText(null);
-            mActiveServerIdentity = null;
-            mActiveGroup = null;
-            Preferences.getDefaultSharedPreferences(this).edit().remove(Constants.FILTERING_BY_SERVER_IDENTITY_KEY).remove(Constants.FILTERING_BY_GROUP_KEY).apply();
+            clearActiveFilters();
             onAppearanceOptionsChanged();
             filterData();
         }

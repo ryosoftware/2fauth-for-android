@@ -121,6 +121,9 @@
     <string name="data_usage_has_been_deleted">Se han eliminado los datos de uso</string>
     <string name="data_usage_has_not_been_deleted">UHa habido un error al borrar los datos de uso</string>
 
+    <string name="remember_last_active_identity_and_group">Recordar selección de identidad/grupo</string>
+    <string name="remember_last_active_identity_and_group_summary">Al entrar en la app se preseleccionará la última identidad/grupo que hubiera seleccionado, si fuera el caso</string>
+
     <string name="accounts_list_columns_portrait">Columnas en modo vertical</string>
     <string name="accounts_list_columns_landscape">Columnas en modo apaisado</string>
 

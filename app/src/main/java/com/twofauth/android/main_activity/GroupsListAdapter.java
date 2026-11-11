@@ -76,7 +76,15 @@ public class GroupsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public synchronized void setItems(@Nullable final List<TwoFactorGroup> items, @Nullable final TwoFactorGroup selected_group) {
         Lists.setItems(mItems, items);
-        final int index = mItems.indexOf(selected_group);
+        int index = -1;
+        if (selected_group != null) {
+            for (int i = 0; i < mItems.size(); i ++) {
+                if (mItems.get(i).getRowId() == selected_group.getRowId()) {
+                    index = i;
+                    break;
+                }
+            }
+        }
         mActiveGroupPosition = index < 0 ? RecyclerView.NO_POSITION : index;
         RecyclerViews.notifyDataSetChanged(this, mRecyclerView);
     }

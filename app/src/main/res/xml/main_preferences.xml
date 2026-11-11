@@ -14,6 +14,8 @@
 
         <Preference android:key="reset-accounts-last-use-data" android:title="@string/reset_accounts_last_use_data" android:summary="@string/reset_accounts_last_use_data_summary" android:dependency="sort-accounts-by-last-use" />
 
+        <SwitchPreferenceCompat android:key="remember-last-active-identity-and-group" android:title="@string/remember_last_active_identity_and_group" android:summary="@string/remember_last_active_identity_and_group_summary" android:defaultValue="@bool/remember_last_active_identity_and_group" />
+
         <com.twofauth.android.preferences_activity.SliderPreference android:key="accounts-list-columns-portrait" android:title="@string/accounts_list_columns_portrait" android:max="@integer/accounts_list_max_columns" android:defaultValue="@integer/accounts_list_columns_portrait" />
 
         <com.twofauth.android.preferences_activity.SliderPreference android:key="accounts-list-columns-landscape" android:title="@string/accounts_list_columns_landscape" android:max="@integer/accounts_list_max_columns" android:defaultValue="@integer/accounts_list_columns_landscape" />

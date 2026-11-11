@@ -120,6 +120,9 @@
     <string name="data_usage_has_been_deleted">Usage data has been deleted</string>
     <string name="data_usage_has_not_been_deleted">Usage data hasn\'t been deleted</string>
 
+    <string name="remember_last_active_identity_and_group">Remember identity/group selection</string>
+    <string name="remember_last_active_identity_and_group_summary">When entering the app, the last selected identity/group will be preselected, if any</string>
+
     <string name="accounts_list_columns_portrait">Columns in portrait mode</string>
     <string name="accounts_list_columns_landscape">Columns in landscape mode</string>
 

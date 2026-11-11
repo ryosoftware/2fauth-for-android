@@ -12,6 +12,8 @@
 
     <bool name="sort_accounts_by_last_use">false</bool>
 
+    <bool name="remember_last_active_identity_and_group">false</bool>
+
     <integer name="accounts_list_min_columns">1</integer>
     <integer name="accounts_list_max_columns">3</integer>
     <integer name="accounts_list_columns_portrait">1</integer>
